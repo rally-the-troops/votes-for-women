@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!-- vim:set nowrap: -->
+<html>
+<head>
+<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, interactive-widget=resizes-content, viewport-fit=cover">
+<meta name="theme-color" content="#444">
+<meta charset="UTF-8">
+<title>VOTES FOR WOMEN</title>
+<link rel="icon" href="Flag_of_Tripoli_18th_century.svg">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/common/client.css">
+<script defer src="/common/client.js"></script>
+<script defer src="play.js"></script>
+<style>
+
+main {
+	background-color: slategray;
+}
+
+#mapwrap {
+	width: 2200px;
+	height: 1700px;
+	box-shadow: 0 1px 8px #0008;
+}
+
+#map {
+	width: 2200px;
+	height: 1700px;
+	background-color: #f0e7d0;
+	background-image: url(map.webp);
+}
+
+#map-texture {
+	position: absolute;
+	width: 2200px;
+	height: 1700px;
+	background-image: url(map-texture.jpg);
+	mix-blend-mode: multiply;
+}
+
+</style>
+</head>
+<body>
+
+<div id="tooltip" class="card"></div>
+
+<menu id="popup">
+	<li class="title">TITLE
+	<li class="separator">
+	<li data-action="card_event"> &#x1f3b4; &nbsp; Event
+</menu>
+
+<header>
+	<div id="toolbar">
+		<details>
+			<summary><img src="/images/cog.svg"></summary>
+			<menu>
+				<li><a href="info/rules.html" target="_blank">Rules</a>
+				<li><a href="info/history.html" target="_blank">History</a>
+				<li><a href="info/cards.html" target="_blank">Cards</a>
+				<li class="resign separator">
+				<li class="resign" onclick="confirm_resign()">Resign
+			</menu>
+		</details>
+	</div>
+</header>
+
+<aside>
+	<div id="roles">
+		<div class="role" id="role_Suffragist">
+			<div class="role_name">
+				Suffragist
+				<div class="role_user">-</div>
+			</div>
+		</div>
+		<div class="role" id="role_Opposition">
+			<div class="role_name">
+				Opposition
+				<div class="role_user">-</div>
+			</div>
+		</div>
+		<div class="card_info"></div></div>
+	</div>
+	<div id="log"></div>
+</aside>
+
+<main data-min-zoom="0.75" data-max-zoom="1.5" onclick="hide_popup_menu()">
+
+	<div id="map">
+
+		<svg id="svgmap" width="2200px" height="1700px" viewBox="0 0 2200 1700">
+		</svg>
+
+		<div id="pieces">
+		</div>
+
+	</div>
+
+	<div id="hand" class="hand">
+	</div>
+
+	<br><br><br>
+	<br><br><br>
+
+</main>
+
+<footer id="status"></footer>
+
+</body>
