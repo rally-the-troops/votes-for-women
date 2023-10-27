@@ -1,3 +1,4 @@
-HIRES
-cards100/*.png
-cards200/*.png
+node_modules/
+.vscode/
+
+.DS_Store
