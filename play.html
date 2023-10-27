@@ -18,25 +18,76 @@ main {
 }
 
 #mapwrap {
-	width: 2200px;
-	height: 1700px;
+	width: 1100px;
+	height: 850px;
 	box-shadow: 0 1px 8px #0008;
 }
 
 #map {
-	width: 2200px;
-	height: 1700px;
+	width: 1100px;
+	height: 850px;
 	background-color: #f0e7d0;
 	background-image: url(map.webp);
+	background-size: 1100px 850px;
 }
 
 #map-texture {
 	position: absolute;
-	width: 2200px;
-	height: 1700px;
+	width: 1100px;
+	height: 850px;
 	background-image: url(map-texture.jpg);
+	background-size: 1100px 850px;
 	mix-blend-mode: multiply;
 }
+
+svg {
+	position: absolute;
+}
+
+.piece {
+	position: absolute;
+	background-repeat: no-repeat;
+	background-size: contain;
+	filter: drop-shadow(0px 1px 2px #0004);
+}
+
+.piece.action {
+	filter:
+		drop-shadow(2px 0px 0px white)
+		drop-shadow(0px 2px 0px white)
+		drop-shadow(-2px 0px 0px white)
+		drop-shadow(0px -2px 0px white);
+}
+
+.piece.cube {
+	width: 14px;
+	height: 14px;
+	border: 1px solid black;
+}
+
+.piece.turn {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	border: 1px solid black;
+	background-color: #666;
+}
+
+.piece.purple.cube { background-color: #6d5798; }
+.piece.yellow.cube { background-color: #fec36d; }
+.piece.red.cube { background-color: #e06136; }
+
+.piece.congress { width: 32px; height: 32px; background-image: url(pieces/cog.svg); }
+.piece.no { width: 42px; height: 32px; background-image: url(pieces/no.svg); }
+.piece.yes { width: 42px; height: 32px; background-image: url(pieces/yes.svg); }
+.piece.turn3d { width: 33px; height: 36px; background-image: url(pieces/turn.svg); }
+.piece.purple1 { width: 36px; height: 50px; background-image: url(pieces/purple1.svg); }
+.piece.purple2 { width: 36px; height: 50px; background-image: url(pieces/purple2.svg); }
+.piece.yellow1 { width: 36px; height: 50px; background-image: url(pieces/yellow1.svg); }
+.piece.yellow2 { width: 36px; height: 50px; background-image: url(pieces/yellow2.svg); }
+.piece.red1 { width: 36px; height: 50px; background-image: url(pieces/red1.svg); }
+.piece.red2 { width: 36px; height: 50px; background-image: url(pieces/red2.svg); }
+.piece.red3 { width: 36px; height: 50px; background-image: url(pieces/red3.svg); }
 
 </style>
 </head>
@@ -86,14 +137,38 @@ main {
 
 <main data-min-zoom="0.75" data-max-zoom="1.5" onclick="hide_popup_menu()">
 
+	<div id="mapwrap">
 	<div id="map">
 
-		<svg id="svgmap" width="2200px" height="1700px" viewBox="0 0 2200 1700">
+		<svg id="svgmap" width="1100px" height="850px" viewBox="0 0 2200 1700">
 		</svg>
 
-		<div id="pieces">
-		</div>
+		<div id="turn" class="piece turn" style="left:800px;top:765px;"></div>
+		<div class="piece congress" style="left:500px;top:765px;"></div>
+		<div class="piece red1" style="left:350px;top:100px;"></div>
+		<div class="piece red2 action" style="left:450px;top:175px;"></div>
+		<div class="piece red3" style="left:550px;top:150px;"></div>
+		<div class="piece purple1" style="left:250px;top:100px;"></div>
+		<div class="piece purple2" style="left:250px;top:200px;"></div>
+		<div class="piece yellow1" style="left:300px;top:100px;"></div>
+		<div class="piece yellow2" style="left:300px;top:200px;"></div>
 
+		<div class="piece yes" style="left:500px;top:400px;"></div>
+		<div class="piece no" style="left:350px;top:400px;"></div>
+
+		<div class="piece cube red" style="left:100px;top:150px;"></div>
+		<div class="piece cube red" style="left:120px;top:150px;"></div>
+		<div class="piece cube red" style="left:140px;top:150px;"></div>
+		<div class="piece cube red" style="left:160px;top:150px;"></div>
+		<div class="piece cube yellow" style="left:100px;top:170px;"></div>
+		<div class="piece cube yellow" style="left:120px;top:170px;"></div>
+		<div class="piece cube yellow" style="left:140px;top:170px;"></div>
+		<div class="piece cube purple" style="left:100px;top:190px;"></div>
+		<div class="piece cube purple" style="left:120px;top:190px;"></div>
+		<div class="piece cube purple" style="left:140px;top:190px;"></div>
+		<div class="piece cube purple" style="left:160px;top:190px;"></div>
+
+	</div>
 	</div>
 
 	<div id="hand" class="hand">
