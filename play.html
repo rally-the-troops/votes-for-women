@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#444">
 <meta charset="UTF-8">
 <title>VOTES FOR WOMEN</title>
-<link rel="icon" href="Flag_of_Tripoli_18th_century.svg">
+<link rel="icon" href="favicon.svg">
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/common/client.css">
 <script defer src="/common/client.js"></script>
@@ -123,6 +123,169 @@ div.region:hover {
 .piece.red2 { width: 36px; height: 50px; background-image: url(pieces/red2.svg); }
 .piece.red3 { width: 36px; height: 50px; background-image: url(pieces/red3.svg); }
 
+
+.card {
+	background-size: cover;
+	background-repeat: no-repeat;
+	width: 250px;
+	height: 350px;
+	border-radius: 16px;
+	box-shadow: 1px 2px 4px #0004;
+}
+
+#tooltip {
+	position: fixed;
+	pointer-events: none;
+	z-index: 600;
+	right: 240px;
+	top: 60px;
+}
+
+@media (max-width: 800px) {
+	#tooltip {
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		margin: auto;
+	}
+}
+
+/* CARD IMAGES */
+.card_support_back{background-image:url(cards100/support_01.jpg)}
+.card_oppisition_back{background-image:url(cards100/opposition_01.jpg)}
+
+.card_1{background-image:url(cards100/support_02.jpg)}
+.card_2{background-image:url(cards100/support_03.jpg)}
+.card_3{background-image:url(cards100/support_04.jpg)}
+.card_4{background-image:url(cards100/support_05.jpg)}
+.card_5{background-image:url(cards100/support_06.jpg)}
+.card_6{background-image:url(cards100/support_07.jpg)}
+.card_7{background-image:url(cards100/support_08.jpg)}
+.card_8{background-image:url(cards100/support_09.jpg)}
+.card_9{background-image:url(cards100/support_10.jpg)}
+.card_10{background-image:url(cards100/support_11.jpg)}
+.card_11{background-image:url(cards100/support_12.jpg)}
+.card_12{background-image:url(cards100/support_13.jpg)}
+.card_13{background-image:url(cards100/support_14.jpg)}
+.card_14{background-image:url(cards100/support_15.jpg)}
+.card_15{background-image:url(cards100/support_16.jpg)}
+.card_16{background-image:url(cards100/support_17.jpg)}
+.card_17{background-image:url(cards100/support_18.jpg)}
+.card_18{background-image:url(cards100/support_19.jpg)}
+.card_19{background-image:url(cards100/support_20.jpg)}
+.card_20{background-image:url(cards100/support_21.jpg)}
+.card_21{background-image:url(cards100/support_22.jpg)}
+.card_22{background-image:url(cards100/support_23.jpg)}
+.card_23{background-image:url(cards100/support_24.jpg)}
+.card_24{background-image:url(cards100/support_25.jpg)}
+.card_25{background-image:url(cards100/support_26.jpg)}
+.card_26{background-image:url(cards100/support_27.jpg)}
+.card_27{background-image:url(cards100/support_28.jpg)}
+.card_28{background-image:url(cards100/support_29.jpg)}
+.card_29{background-image:url(cards100/support_30.jpg)}
+.card_30{background-image:url(cards100/support_31.jpg)}
+.card_31{background-image:url(cards100/support_32.jpg)}
+.card_32{background-image:url(cards100/support_33.jpg)}
+.card_33{background-image:url(cards100/support_34.jpg)}
+.card_34{background-image:url(cards100/support_35.jpg)}
+.card_35{background-image:url(cards100/support_36.jpg)}
+.card_36{background-image:url(cards100/support_37.jpg)}
+.card_37{background-image:url(cards100/support_38.jpg)}
+.card_38{background-image:url(cards100/support_39.jpg)}
+.card_39{background-image:url(cards100/support_40.jpg)}
+.card_40{background-image:url(cards100/support_41.jpg)}
+.card_41{background-image:url(cards100/support_42.jpg)}
+.card_42{background-image:url(cards100/support_43.jpg)}
+.card_43{background-image:url(cards100/support_44.jpg)}
+.card_44{background-image:url(cards100/support_45.jpg)}
+.card_45{background-image:url(cards100/support_46.jpg)}
+.card_46{background-image:url(cards100/support_47.jpg)}
+.card_47{background-image:url(cards100/support_48.jpg)}
+.card_48{background-image:url(cards100/support_49.jpg)}
+.card_49{background-image:url(cards100/support_50.jpg)}
+.card_50{background-image:url(cards100/support_51.jpg)}
+.card_51{background-image:url(cards100/support_52.jpg)}
+.card_52{background-image:url(cards100/support_53.jpg)}
+
+.card_53{background-image:url(cards100/opposition_02.jpg)}
+.card_54{background-image:url(cards100/opposition_03.jpg)}
+.card_55{background-image:url(cards100/opposition_04.jpg)}
+.card_56{background-image:url(cards100/opposition_05.jpg)}
+.card_56{background-image:url(cards100/opposition_06.jpg)}
+.card_58{background-image:url(cards100/opposition_07.jpg)}
+.card_59{background-image:url(cards100/opposition_08.jpg)}
+.card_60{background-image:url(cards100/opposition_09.jpg)}
+.card_61{background-image:url(cards100/opposition_10.jpg)}
+.card_62{background-image:url(cards100/opposition_11.jpg)}
+.card_63{background-image:url(cards100/opposition_12.jpg)}
+.card_64{background-image:url(cards100/opposition_13.jpg)}
+.card_65{background-image:url(cards100/opposition_14.jpg)}
+.card_66{background-image:url(cards100/opposition_15.jpg)}
+.card_67{background-image:url(cards100/opposition_16.jpg)}
+.card_68{background-image:url(cards100/opposition_17.jpg)}
+.card_69{background-image:url(cards100/opposition_18.jpg)}
+.card_70{background-image:url(cards100/opposition_19.jpg)}
+.card_71{background-image:url(cards100/opposition_20.jpg)}
+.card_72{background-image:url(cards100/opposition_21.jpg)}
+.card_73{background-image:url(cards100/opposition_22.jpg)}
+.card_74{background-image:url(cards100/opposition_23.jpg)}
+.card_75{background-image:url(cards100/opposition_24.jpg)}
+.card_76{background-image:url(cards100/opposition_25.jpg)}
+.card_77{background-image:url(cards100/opposition_26.jpg)}
+.card_78{background-image:url(cards100/opposition_27.jpg)}
+.card_79{background-image:url(cards100/opposition_28.jpg)}
+.card_80{background-image:url(cards100/opposition_29.jpg)}
+.card_81{background-image:url(cards100/opposition_30.jpg)}
+.card_82{background-image:url(cards100/opposition_31.jpg)}
+.card_83{background-image:url(cards100/opposition_32.jpg)}
+.card_84{background-image:url(cards100/opposition_33.jpg)}
+.card_85{background-image:url(cards100/opposition_34.jpg)}
+.card_86{background-image:url(cards100/opposition_35.jpg)}
+.card_87{background-image:url(cards100/opposition_36.jpg)}
+.card_88{background-image:url(cards100/opposition_37.jpg)}
+.card_89{background-image:url(cards100/opposition_38.jpg)}
+.card_90{background-image:url(cards100/opposition_39.jpg)}
+.card_91{background-image:url(cards100/opposition_40.jpg)}
+.card_92{background-image:url(cards100/opposition_41.jpg)}
+.card_93{background-image:url(cards100/opposition_42.jpg)}
+.card_94{background-image:url(cards100/opposition_43.jpg)}
+.card_95{background-image:url(cards100/opposition_44.jpg)}
+.card_96{background-image:url(cards100/opposition_45.jpg)}
+.card_97{background-image:url(cards100/opposition_46.jpg)}
+.card_98{background-image:url(cards100/opposition_47.jpg)}
+.card_99{background-image:url(cards100/opposition_48.jpg)}
+.card_100{background-image:url(cards100/opposition_49.jpg)}
+.card_101{background-image:url(cards100/opposition_50.jpg)}
+.card_102{background-image:url(cards100/opposition_51.jpg)}
+.card_103{background-image:url(cards100/opposition_52.jpg)}
+.card_104{background-image:url(cards100/opposition_53.jpg)}
+
+.card_105{background-image:url(cards100/strategy_02.jpg)}
+.card_106{background-image:url(cards100/strategy_03.jpg)}
+.card_107{background-image:url(cards100/strategy_04.jpg)}
+.card_108{background-image:url(cards100/strategy_05.jpg)}
+.card_109{background-image:url(cards100/strategy_06.jpg)}
+.card_110{background-image:url(cards100/strategy_07.jpg)}
+.card_111{background-image:url(cards100/strategy_08.jpg)}
+.card_112{background-image:url(cards100/strategy_09.jpg)}
+.card_113{background-image:url(cards100/strategy_10.jpg)}
+.card_114{background-image:url(cards100/strategy_11.jpg)}
+.card_115{background-image:url(cards100/strategy_12.jpg)}
+.card_116{background-image:url(cards100/strategy_13.jpg)}
+
+.card_117{background-image:url(cards100/states_02.jpg)}
+.card_118{background-image:url(cards100/states_03.jpg)}
+.card_119{background-image:url(cards100/states_04.jpg)}
+.card_120{background-image:url(cards100/states_05.jpg)}
+.card_121{background-image:url(cards100/states_06.jpg)}
+.card_122{background-image:url(cards100/states_07.jpg)}
+.card_123{background-image:url(cards100/states_08.jpg)}
+.card_124{background-image:url(cards100/states_09.jpg)}
+.card_125{background-image:url(cards100/states_10.jpg)}
+.card_126{background-image:url(cards100/states_11.jpg)}
+.card_127{background-image:url(cards100/states_12.jpg)}
+.card_128{background-image:url(cards100/states_13.jpg)}
 </style>
 </head>
 <body>
