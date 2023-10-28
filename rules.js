@@ -122,9 +122,9 @@ states.planning_phase = {
 	inactive: "to do Planning Phase",
 	prompt() {
 		view.prompt = "Planning Phase: TODO"
-		gen_action("next")
+		gen_action("done")
 	},
-	next() {
+	done() {
 		end_planning_phase()
 	}
 }
@@ -146,9 +146,9 @@ states.strategy_phase = {
 	inactive: "to do Strategy Phase",
 	prompt() {
 		view.prompt = "Strategy Phase: TODO"
-		gen_action("next")
+		gen_action("done")
 	},
-	next() {
+	done() {
 		goto_operations_phase()
 	}
 }
@@ -162,9 +162,9 @@ states.operations_phase = {
 	inactive: "to do Operations Phase",
 	prompt() {
 		view.prompt = "Operations Phase: TODO"
-		gen_action("next")
+		gen_action("done")
 	},
-	next() {
+	done() {
 		goto_cleanup_phase()
 	}
 }
@@ -178,9 +178,9 @@ states.cleanup_phase = {
 	inactive: "to do Cleanup Phase",
 	prompt() {
 		view.prompt = "Cleanup Phase: TODO"
-		gen_action("next")
+		gen_action("done")
 	},
-	next() {
+	done() {
 		end_cleanup_phase()
 	}
 }
