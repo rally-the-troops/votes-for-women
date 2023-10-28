@@ -1,55 +1,397 @@
 "use strict"
 
-var game
-var view
-var states
+var states = {}
+var game = null
+var view = null
 
 const SUF = "Suffragist"
 const OPP = "Opposition"
 
+const region_count = 6
+const us_states_count = region_count * 8
+
 exports.scenarios = [ "Standard" ]
 exports.roles = [ SUF, OPP ]
 
-exports.setup = function (seed, scenario, options) {
+exports.setup = function (seed, _scenario, _options) {
 	game = {
 		seed: seed,
 		log: [],
 		undo: [],
 		active: null,
 		state: null,
+
+		round: 0,
+		congress: 0,
+		us_states: new Array(us_states_count).fill(0),
+
+		strategy_deck: [],
+		states_draw: [],
+		strategy_draw: [],
+
+		persisted_turn: [],
+		persisted_game: [],
+		persisted_ballot: [],
+
+		support_deck: [],
+		support_discard: [],
+		support_hand: [],
+		support_claimed: [],
+		purple_campaigner: [0, 0],
+		yellow_campaigner: [0, 0],
+		support_buttons: 0,
+
+		opposition_deck: [],
+		opposition_discard: [],
+		opposition_hand: [],
+		opposition_claimed: [],
+		opposition_campaigner: [0, 0],
+		opposition_buttons: 0,
+	}
+
+	log_h1("Votes for Women")
+
+	// init card decks
+	// shuffle
+	// deal start cards
+
+	start_turn()
+	return game
+}
+
+function start_turn() {
+	game.turn += 1
+	log_h1("Turn " + game.turn)
+
+	goto_planning_phase()
+}
+
+function goto_planning_phase() {
+	log_h2("Planning Phase")
+	/*
+	Each player draws six cards from their Draw deck.
+	When added to either their Start card (on
+	Turn 1) or their card held from the previous turn
+	(on Turns 2-6), their hand should begin with
+	seven cards.
+	*/
+	game.state = "planning_phase"
+}
+
+states.planning_phase = {
+	inactive: "to do Planning Phase",
+	prompt() {
+		view.prompt = "Planning Phase: TODO"
+		gen_action("next")
+	},
+	next() {
+		end_planning_phase()
+	}
+}
+
+function end_planning_phase() {
+	game.active = SUF
+	if (game.turn === 1) {
+		goto_operations_phase()
+	} else {
+		goto_strategy_phase()
+	}
+}
+
+function goto_strategy_phase() {
+	log_h2("Strategy Phase")
+	game.state = "strategy_phase"
+}
+
+states.strategy_phase = {
+	inactive: "to do Strategy Phase",
+	prompt() {
+		view.prompt = "Strategy Phase: TODO"
+		gen_action("next")
+	},
+	next() {
+		goto_operations_phase()
+	}
+}
+
+function goto_operations_phase() {
+	log_h2("Operations Phase")
+	game.state = "operations_phase"
+}
+
+states.operations_phase = {
+	inactive: "to do Operations Phase",
+	prompt() {
+		view.prompt = "Operations Phase: TODO"
+		gen_action("next")
+	},
+	next() {
+		goto_cleanup_phase()
+	}
+}
+
+function goto_cleanup_phase() {
+	log_h2("Cleanup Phase")
+	game.state = "cleanup_phase"
+}
+
+states.cleanup_phase = {
+	inactive: "to do Cleanup Phase",
+	prompt() {
+		view.prompt = "Cleanup Phase: TODO"
+		gen_action("next")
+	},
+	next() {
+		end_cleanup_phase()
+	}
+}
+
+function end_cleanup_phase() {
+	if (game.turn < 6) {
+		start_turn()
+	} else {
+		goto_game_over(OPP, "Opposition wins.")
+	}
+}
+
+// public functions
+
+function gen_action(action, argument) {
+	if (!(action in view.actions))
+		view.actions[action] = []
+	view.actions[action].push(argument)
+}
+
+exports.action = function (state, player, action, arg) {
+	game = state
+	if (states[game.state] && action in states[game.state]) {
+		states[game.state][action](arg, player)
+	} else {
+		if (action === "undo" && game.undo && game.undo.length > 0)
+			pop_undo()
+		else
+			throw new Error("Invalid action: " + action)
 	}
 	return game
 }
 
-exports.action = function (state, current, action, arg) {
-	game = state
-	let S = states[game.state]
-	if (action in S)
-		S[action](arg, current)
-	else
-		throw new Error("Invalid action: " + action)
-	return game
-}
-
-exports.resign = function (state, current) {
+exports.resign = function (state, player) {
 	game = state
 	if (game.state !== "game_over") {
-		if (current === SUF)
+		if (player === SUF)
 			goto_game_over(OPP, "Suffragist resigned.")
-		if (current === OPP)
+		if (player === OPP)
 			goto_game_over(SUF, "Opposition resigned.")
 	}
 	return game
 }
 
-exports.view = function(state, current) {
+function goto_game_over(result, victory) {
+	game.state = "game_over"
+	game.active = "None"
+	game.result = result
+	game.victory = victory
+	log_br()
+	log(game.victory)
+}
+
+// === VIEW ===
+
+exports.view = function(state, player) {
 	game = state
 
 	let view = {
 		log: game.log,
 		prompt: null,
 		actions: null,
+
+		round: game.round,
+		congress: game.congress,
+		states: game.states,
+
+		strategy_deck: game.strategy_deck.length,
+		states_draw: game.states_draw,
+		strategy_draw: game.strategy_draw,
+
+		persisted_turn: game.persisted_turn,
+		persisted_game: game.persisted_game,
+		persisted_ballot: game.persisted_ballot,
+
+		support_deck: game.support_deck.length,
+		support_discard: game.support_discard, // top_discard?
+		support_hand: game.support_hand.length,
+		support_claimed: game.support_claimed,
+		purple_campaigner: game.purple_campaigner,
+		yellow_campaigner: game.yellow_campaigner,
+		support_buttons: game.support_buttons,
+
+		opposition_deck: game.opposition_deck.length,
+		opposition_discard: game.opposition_discard,  // top_discard?
+		opposition_hand: game.opposition_hand.length,
+		opposition_claimed: game.opposition_claimed,
+		opposition_campaigner: game.opposition_campaigner,
+		opposition_buttons: game.opposition_buttons,
+
+		hand: 0,
+	}
+
+	if (player === SUF) {
+		view.hand = game.support_hand
+	} else if (player === OPP) {
+		view.hand = game.opposition_hand
+	}
+
+	if (game.state === "game_over") {
+		view.prompt = game.victory
+	} else if (player === "Observer" || (game.active !== player && game.active !== "Both")) {
+		if (states[game.state]) {
+			let inactive = states[game.state].inactive
+			view.prompt = `Waiting for ${game.active} to ${inactive}...`
+		} else {
+			view.prompt = "Unknown state: " + game.state
+		}
+	} else {
+		view.actions = {}
+		if (states[game.state])
+			states[game.state].prompt(player)
+		else
+			view.prompt = "Unknown state: " + game.state
+		if (view.actions.undo === undefined) {
+			if (game.undo && game.undo.length > 0)
+				view.actions.undo = 1
+			else
+				view.actions.undo = 0
+		}
 	}
 
 	return view
 }
+
+
+// === LOGGING ===
+
+function log(msg) {
+	game.log.push(msg)
+}
+
+function log_br() {
+	if (game.log.length > 0 && game.log[game.log.length - 1] !== "")
+		game.log.push("")
+}
+
+function logi(msg) {
+	game.log.push(">" + msg)
+}
+
+function log_h1(msg) {
+	log_br()
+	log(".h1 " + msg)
+	log_br()
+}
+
+function log_h2(msg) {
+	log_br()
+	log(".h2 " + msg)
+	log_br()
+}
+
+function log_h3(msg) {
+	log_br()
+	log(".h3 " + msg)
+}
+
+function log_sep() {
+	log(".hr")
+}
+
+// === COMMON LIBRARY ===
+
+function clear_undo() {
+	if (game.undo.length > 0)
+		game.undo = []
+}
+
+function push_undo() {
+	let copy = {}
+	for (let k in game) {
+		let v = game[k]
+		if (k === "undo")
+			continue
+		else if (k === "log")
+			v = v.length
+		else if (typeof v === "object" && v !== null)
+			v = object_copy(v)
+		copy[k] = v
+	}
+	game.undo.push(copy)
+}
+
+function pop_undo() {
+	let save_log = game.log
+	let save_undo = game.undo
+	game = save_undo.pop()
+	save_log.length = game.log
+	game.log = save_log
+	game.undo = save_undo
+}
+
+function random(range) {
+	// An MLCG using integer arithmetic with doubles.
+	// https://www.ams.org/journals/mcom/1999-68-225/S0025-5718-99-00996-5/S0025-5718-99-00996-5.pdf
+	// m = 2**35 − 31
+	return (game.seed = game.seed * 200105 % 34359738337) % range
+}
+
+function shuffle(list) {
+	// Fisher-Yates shuffle
+	for (let i = list.length - 1; i > 0; --i) {
+		let j = random(i + 1)
+		let tmp = list[j]
+		list[j] = list[i]
+		list[i] = tmp
+	}
+}
+
+// Fast deep copy for objects without cycles
+function object_copy(original) {
+	if (Array.isArray(original)) {
+		let n = original.length
+		let copy = new Array(n)
+		for (let i = 0; i < n; ++i) {
+			let v = original[i]
+			if (typeof v === "object" && v !== null)
+				copy[i] = object_copy(v)
+			else
+				copy[i] = v
+		}
+		return copy
+	} else {
+		let copy = {}
+		for (let i in original) {
+			let v = original[i]
+			if (typeof v === "object" && v !== null)
+				copy[i] = object_copy(v)
+			else
+				copy[i] = v
+		}
+		return copy
+	}
+}
+
+// Array remove and insert (faster than splice)
+
+function array_remove_item(array, item) {
+	let n = array.length
+	for (let i = 0; i < n; ++i)
+		if (array[i] === item)
+			return array_remove(array, i)
+}
+
+function array_remove(array, index) {
+	let n = array.length
+	for (let i = index + 1; i < n; ++i)
+		array[i - 1] = array[i]
+	array.length = n - 1
+}
+
+// === GENERATED EVENT CODE ===
