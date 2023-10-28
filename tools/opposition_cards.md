@@ -7,6 +7,7 @@ Add 1 :red_campaigner in the South region. Receive 4 :badge. Add 1 :red_cube in 
 
 ## The Civil War
 Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions.
+<!-- persistent: rest_of_turn -->
 
 ## 15th Divides Suffragists
 Playable if *Fifteenth Amendment* is in effect. Remove all :purple_cube in up to 4 states. The Suffragist player loses 2 :badge.
@@ -49,6 +50,7 @@ Place 1 :red_cube in each of Virginia, North Carolina, South Carolina, Georgia a
 
 ## Beer Brewers
 Playable if Eighteenth Amendment is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
+<!-- persistent: rest_of_turn -->
 
 ## Southern Resentment
 Playable if *Fifteenth Amendment* is in effect. Add 1 :red_cube in each of Texas, Louisiana, Arkansas, Mississippi and Alabama.
@@ -84,12 +86,14 @@ Remove all :yellow_cube and :purple_cube from California. The Suffragist player 
 
 ## A Threat to the Ideal of Womanhood
 For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
+<!-- persistent: rest_of_turn -->
 
 ## “Unwarranted, Unnecessary & Dangerous Interference”
 Add 1 :red_cube in one state of each region.
 
 ## Conservative Opposition
 For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
+<!-- persistent: rest_of_turn -->
 
 ## The SSWSC
 Playable if *Southern Strategy* is in effect. Receive 2 :badge and add 6 :red_cube in the South region, no more than 2 per state.
@@ -113,9 +117,11 @@ Remove 1 :congressional_marker from Congress and add 2 :red_cube in South Caroli
 
 ## War in Europe
 Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to take a Campaigning action.
+<!-- persistent: rest_of_turn -->
 
 ## 1918 Pandemic
 Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
+<!-- persistent: rest_of_turn -->
 
 ## The Business of Being a Woman
 Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
@@ -125,6 +131,7 @@ Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its
 
 ## Big Liquor’s Big Money
 Playable if *Eighteenth Amendment* is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
+<!-- persistent: rest_of_turn -->
 
 ## Red Scare
 Remove all :purple_cube in up to 2 states.
@@ -143,6 +150,7 @@ Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
 
 ## Voter Suppression
 The Opposition player rolls :d8 instead of :d6 during Final Voting.
+<!-- persistent: ballot_box -->
 
 ## Anti-Suffrage Riots
 The Suffragist player must discard 2 cards from their hand at random and then draw 2 cards from the Suffragist Draw Deck.

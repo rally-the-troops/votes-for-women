@@ -7,6 +7,7 @@ Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region. Recei
 
 ## Property Rights for Women
 For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
+<!-- persistent: rest_of_turn -->
 
 ## Frances Willard
 Add 1 :congressional_marker in Congress and receive 2 :badge.
@@ -19,6 +20,7 @@ Playable if *The Civil War* is in effect. Roll :d6. On a roll of 3-6, receive tw
 
 ## Fifteenth Amendment
 Playable if *The Civil War* is not in effect. Roll :d6. On a roll of 3-6, add 2 :congressional_marker in Congress and add 8 :purple_or_yellow_cube anywhere, no more than 2 per state.
+<!-- persistent: rest_of_game -->
 
 ## Reconstruction
 Playable if *The Civil War* is not in effect and the *Fifteenth Amendment* is in effect. Add 1 :purple_or_yellow_cube in each of Virginia, North Carolina, South Carolina, Georgia, Florida, Alabama, Mississippi, Tennessee, Arkansas, Louisiana and Texas.
@@ -102,12 +104,14 @@ Recieve 2 :badge. Add 2 :purple_or_yellow_cube in each of California, Nevada and
 
 ## Marie Louise Bottineau Baldwin
 For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
+<!-- persistent: rest_of_turn -->
 
 ## The West’s Awakening
 Add 2 :purple_or_yellow_cube in each state in the West region.
 
 ## Southern Strategy
 Receive 2 :badge. Add 2 :purple_or_yellow_cube in each state in the South region. Select and place in front of you 1 available Strategy card.
+<!-- persistent: rest_of_game -->
 
 # Late
 
@@ -128,12 +132,15 @@ Add 2 :congressional_marker in Congress.
 
 ## Voter Registration
 The Suffragist player rolls :d8 instead of :d6 during Final Voting.
+<!-- persistent: ballot_box -->
 
 ## Processions for Suffrage
 For the remainder of the turn, roll :d8 instead of :d6 when taking a Lobbying action. For each 6, 7 or 8 rolled, add 1 :congressional_marker in Congress.
+<!-- persistent: rest_of_turn -->
 
 ## Prison Tour Special
 For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
+<!-- persistent: rest_of_turn -->
 
 ## Victory Map
 Add 1 :purple_or_yellow_cube in each state in the West and Plains regions. Add 1 :purple_or_yellow_cube in each of Texas, Arkansas, Illinois, Michigan, New York and Vermont.
@@ -143,6 +150,7 @@ Playable if *War in Europe* is in effect. Add 10 :purple_or_yellow_cube anywhere
 
 ## Eighteenth Amendment
 Roll :d6. On a roll of 3-6, add 1 congressional_marker in Congress and receive 2 :badge.
+<!-- persistent: rest_of_game -->
 
 ## Mary McLeod Bethune
 Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
@@ -161,3 +169,4 @@ Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 pe
 
 ## Miss Febb Wins the Last Vote
 The Suffragist player wins all ties during Final Voting.
+<!-- persistent: ballot_box -->
