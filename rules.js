@@ -1,14 +1,22 @@
 "use strict"
 
-var states = {}
-var game = null
-var view = null
+var game, view, states = {}
 
 const SUF = "Suffragist"
 const OPP = "Opposition"
 
 const region_count = 6
 const us_states_count = region_count * 8
+
+const era_cards_count = 17
+const first_support_card = 1
+const last_support_card = 52
+const first_opposition_card = 53
+const last_opposition_card = 104
+const first_strategy_card = 105
+const last_strategy_card = 116
+const first_states_card = 117
+const last_states_card = 128
 
 exports.scenarios = [ "Standard" ]
 exports.roles = [ SUF, OPP ]
@@ -21,13 +29,14 @@ exports.setup = function (seed, _scenario, _options) {
 		active: null,
 		state: null,
 
+		turn: 0,
 		round: 0,
 		congress: 0,
 		us_states: new Array(us_states_count).fill(0),
 
 		strategy_deck: [],
-		states_draw: [],
 		strategy_draw: [],
+		states_draw: [],
 
 		persisted_turn: [],
 		persisted_game: [],
@@ -51,12 +60,43 @@ exports.setup = function (seed, _scenario, _options) {
 
 	log_h1("Votes for Women")
 
-	// init card decks
-	// shuffle
-	// deal start cards
+	// init card decks & shuffle
+	game.support_deck = init_player_cards(first_support_card)
+	game.support_hand.push(first_support_card)
+	game.opposition_deck = init_player_cards(first_opposition_card)
+	game.opposition_hand.push(first_opposition_card)
 
+	for (let c = first_strategy_card; c <= last_strategy_card; ++c)
+		game.strategy_deck.push(c)
+	for (let c = first_states_card; c <= last_states_card; ++c)
+		game.states_draw.push(c)
+
+	shuffle(game.states_draw)
+	shuffle(game.strategy_deck)
+
+	game.states_draw.splice(-3) // 3 states card aren't used
+	game.strategy_draw = game.strategy_deck.splice(-3) // draw 3 strategy cards
+
+	game.active = SUF
 	start_turn()
 	return game
+}
+
+function init_player_cards(first_card) {
+	let c = first_card
+	let early = []
+	let middle = []
+	let late = []
+	for (let n = 0; n < era_cards_count; ++n)
+		early.push(++c)
+	for (let n = 0; n < era_cards_count; ++n)
+		middle.push(++c)
+	for (let n = 0; n < era_cards_count; ++n)
+		late.push(++c)
+	shuffle(early)
+	shuffle(middle)
+	shuffle(late)
+	return [].concat(late, middle, early)
 }
 
 function start_turn() {
@@ -90,7 +130,6 @@ states.planning_phase = {
 }
 
 function end_planning_phase() {
-	game.active = SUF
 	if (game.turn === 1) {
 		goto_operations_phase()
 	} else {
@@ -200,18 +239,19 @@ function goto_game_over(result, victory) {
 exports.view = function(state, player) {
 	game = state
 
-	let view = {
+	view = {
 		log: game.log,
 		prompt: null,
 		actions: null,
 
+		turn: game.turn,
 		round: game.round,
 		congress: game.congress,
 		states: game.states,
 
 		strategy_deck: game.strategy_deck.length,
-		states_draw: game.states_draw,
 		strategy_draw: game.strategy_draw,
+		states_draw: game.states_draw,
 
 		persisted_turn: game.persisted_turn,
 		persisted_game: game.persisted_game,
