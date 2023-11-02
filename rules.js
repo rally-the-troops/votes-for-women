@@ -136,10 +136,8 @@ states.planning_phase = {
 	},
 	draw() {
 		/*
-		Each player draws six cards from their Draw deck.
-		When added to either their Start card (on
-		Turn 1) or their card held from the previous turn
-		(on Turns 2-6), their hand should begin with
+		Each player draws six cards from their Draw deck. When added to either their Start card (on
+		Turn 1) or their card held from the previous turn (on Turns 2-6), their hand should begin with
 		seven cards.
 		*/
 
@@ -187,17 +185,39 @@ states.strategy_phase = {
 function goto_operations_phase() {
 	log_h2("Operations Phase")
 	game.state = "operations_phase"
+	game.active = SUF
+	game.round = 1
+	begin_player_round()
 }
 
 states.operations_phase = {
 	inactive: "to do Operations Phase",
 	prompt() {
-		view.prompt = "Operations Phase: TODO"
+		view.prompt = "Operations Phase: Play a Card"
 		gen_action("done")
 	},
 	done() {
-		goto_cleanup_phase()
+		end_player_round()
 	}
+}
+
+function begin_player_round() {
+	log_h3(`${game.active} Round ${game.round}`)
+}
+
+function end_player_round() {
+	if (game.active === SUF) {
+		game.active = OPP
+	} else {
+		if (game.round < 6) {
+			game.active = SUF
+			game.round += 1
+		} else {
+			goto_cleanup_phase()
+			return
+		}
+	}
+	begin_player_round()
 }
 
 function goto_cleanup_phase() {
@@ -217,6 +237,31 @@ states.cleanup_phase = {
 }
 
 function end_cleanup_phase() {
+	// TODO
+	// 	At the end of Turns 1-5, any cards in the “Cards
+	// in Effect for the Rest of the Turn box” are placed
+	// in the appropriate discard pile. Each player should
+	// have one card in their hand to carry over to the next
+	// Turn. The Turn marker is advanced and the
+	// next Turn begins.
+
+	// TODO
+	// At the end of Turn 6, if the Nineteenth
+	// Amendment has not been sent to the states for
+	// ratification, the game ends in an Opposition victory.
+	// If the Nineteenth Amendment has been sent to the
+	// states for ratification but neither player has won
+	// the necessary number of states for victory, the game
+	// advances to Final Voting. Any cards in the “Cards
+	// in Effect for the Rest of the Turn box” and “Cards in
+	// Effect for the Rest of the Game box” are placed in
+	// the appropriate discard pile.
+
+	if (game.support_hand.length !== 1)
+		throw Error("ASSERT game.support_hand.length === 1")
+	if (game.opposition_hand.length !== 7)
+		throw Error("ASSERT game.opposition_hand.length === 1")
+
 	if (game.turn < 6) {
 		start_turn()
 	} else {
