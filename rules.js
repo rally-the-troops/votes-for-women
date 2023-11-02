@@ -109,6 +109,12 @@ function init_player_cards(first_card) {
 	return [].concat(late, middle, early)
 }
 
+function draw_card(deck) {
+	if (deck.length === 0)
+		throw Error("can't draw from empty deck")
+	return deck.splice(-1)
+}
+
 function start_turn() {
 	game.turn += 1
 	log_h1("Turn " + game.turn)
@@ -119,28 +125,42 @@ function start_turn() {
 
 function goto_planning_phase() {
 	log_h2("Planning Phase")
-	/*
-	Each player draws six cards from their Draw deck.
-	When added to either their Start card (on
-	Turn 1) or their card held from the previous turn
-	(on Turns 2-6), their hand should begin with
-	seven cards.
-	*/
 	game.state = "planning_phase"
 }
 
 states.planning_phase = {
 	inactive: "to do Planning Phase",
 	prompt() {
-		view.prompt = "Planning Phase: TODO"
-		gen_action("done")
+		view.prompt = "Planning Phase."
+		gen_action("draw")
 	},
-	done() {
+	draw() {
+		/*
+		Each player draws six cards from their Draw deck.
+		When added to either their Start card (on
+		Turn 1) or their card held from the previous turn
+		(on Turns 2-6), their hand should begin with
+		seven cards.
+		*/
+
+		for (let n = 0; n < 6; ++n) {
+			game.support_hand.push(draw_card(game.support_deck))
+			game.opposition_hand.push(draw_card(game.opposition_deck))
+		}
+
+		log("Suffragist drew 7 cards.")
+		log("Opposition drew 7 cards.")
+
 		end_planning_phase()
 	}
 }
 
 function end_planning_phase() {
+	if (game.support_hand.length !== 7)
+		throw Error("ASSERT game.support_hand.length === 7")
+	if (game.opposition_hand.length !== 7)
+		throw Error("ASSERT game.opposition_hand.length === 7")
+
 	if (game.turn === 1) {
 		goto_operations_phase()
 	} else {
