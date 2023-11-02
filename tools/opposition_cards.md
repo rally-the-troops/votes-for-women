@@ -55,7 +55,7 @@ Playable if Eighteenth Amendment is not in effect. For the remainder of the turn
 ## Southern Resentment
 Playable if *Fifteenth Amendment* is in effect. Add 1 :red_cube in each of Texas, Louisiana, Arkansas, Mississippi and Alabama.
 
-# Old Dixie
+## Old Dixie
 Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida.
 
 # Middle

@@ -28,7 +28,7 @@ Playable if it is Turn 5 or Turn 6. Look through your Draw Deck and select 1 car
 ## Transportation
 Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :badge and then take a Campaigning action.
 
-# Counter Strat
+## Counter Strat
 Remove one card that is “in effect for the remainder of the turn” and place it in the appropriate discard pile.
 
 ## National Focus
