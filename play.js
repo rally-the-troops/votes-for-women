@@ -77,6 +77,82 @@ const LAYOUT = {
 	"WA": [158, 97],
 }
 
+// CARD MENU
+
+var card_action_menu = Array.from(document.getElementById("popup").querySelectorAll("li[data-action]")).map(e => e.dataset.action)
+
+function is_popup_menu_action(menu_id, target_id) {
+	let menu = document.getElementById(menu_id)
+	for (let item of menu.querySelectorAll("li")) {
+		let action = item.dataset.action
+		if (action)
+			return true
+	}
+	return false
+}
+
+function show_popup_menu(evt, menu_id, target_id, title) {
+	let menu = document.getElementById(menu_id)
+
+	let show = false
+	for (let item of menu.querySelectorAll("li")) {
+		let action = item.dataset.action
+		if (action) {
+			if (is_card_action(action, target_id)) {
+				show = true
+				item.classList.add("action")
+				item.classList.remove("disabled")
+				item.onclick = function () {
+					send_action(action, target_id)
+					hide_popup_menu()
+					evt.stopPropagation()
+				}
+			} else {
+				item.classList.remove("action")
+				item.classList.add("disabled")
+				item.onclick = null
+			}
+		}
+	}
+
+	if (show) {
+		menu.onmouseleave = hide_popup_menu
+		menu.style.display = "block"
+		if (title) {
+			let item = menu.querySelector("li.title")
+			if (item) {
+				item.onclick = hide_popup_menu
+				item.textContent = title
+			}
+		}
+
+		let w = menu.clientWidth
+		let h = menu.clientHeight
+		let x = Math.max(5, Math.min(evt.clientX - w / 2, window.innerWidth - w - 5))
+		let y = Math.max(5, Math.min(evt.clientY - 12, window.innerHeight - h - 40))
+		menu.style.left = x + "px"
+		menu.style.top = y + "px"
+
+		evt.stopPropagation()
+	} else {
+		menu.style.display = "none"
+	}
+}
+
+function hide_popup_menu() {
+	document.getElementById("popup").style.display = "none"
+}
+
+function is_card_enabled(card) {
+	if (view.actions) {
+		if (card_action_menu.some(a => view.actions[a] && view.actions[a].includes(card)))
+			return true
+		if (view.actions.card && view.actions.card.includes(card))
+			return true
+	}
+	return false
+}
+
 function is_action(action) {
 	if (view.actions && view.actions[action])
 		return true
@@ -114,10 +190,20 @@ function on_focus_piece(evt) {
 		document.getElementById("status").textContent = evt.target.my_name
 }
 
+// function on_click_card(evt) {
+// 	if (evt.button === 0) {
+// 		if (send_action('card', evt.target.my_card))
+// 			evt.stopPropagation()
+// 	}
+// }
+
 function on_click_card(evt) {
-	if (evt.button === 0) {
-		if (send_action('card', evt.target.my_card))
-			evt.stopPropagation()
+	let card = evt.target.my_card
+	console.log("CLICK", card)
+	if (is_action('card', card)) {
+		send_action('card', card)
+	} else {
+		show_popup_menu(evt, "popup", card, CARDS[card].title)
 	}
 }
 
@@ -126,6 +212,7 @@ function on_click_space(evt) {
 		if (send_action('space', evt.target.my_space))
 			evt.stopPropagation()
 	}
+	hide_popup_menu()
 }
 
 function on_click_cube(evt) {
@@ -133,6 +220,7 @@ function on_click_cube(evt) {
 		if (send_action('piece', evt.target.my_cube))
 			evt.stopPropagation()
 	}
+	hide_popup_menu()
 }
 
 function create(t, p, ...c) {

@@ -112,7 +112,7 @@ function init_player_cards(first_card) {
 function draw_card(deck) {
 	if (deck.length === 0)
 		throw Error("can't draw from empty deck")
-	return deck.splice(-1)
+	return deck.pop()
 }
 
 function start_turn() {
@@ -190,11 +190,40 @@ function goto_operations_phase() {
 	begin_player_round()
 }
 
+function current_player_hand() {
+	if (game.active === SUF) {
+		return game.support_hand
+	} else if (game.active === OPP) {
+		return game.opposition_hand
+	}
+	return []
+}
+
 states.operations_phase = {
 	inactive: "to do Operations Phase",
 	prompt() {
 		view.prompt = "Operations Phase: Play a Card"
+
+		for (let c of current_player_hand()) {
+			gen_action("card_event", c)
+			gen_action("card_campaigning", c)
+			gen_action("card_organizing", c)
+			gen_action("card_lobbying", c)
+		}
+
 		gen_action("done")
+	},
+	card_event(c) {
+		log(`Playing C${c} as Event`)
+	},
+	card_campaigning(c) {
+		log(`Playing C${c} for Campaigning Action`)
+	},
+	card_organizing(c) {
+		log(`Playing C${c} for Organizing Action`)
+	},
+	card_lobbying(c) {
+		log(`Playing C${c} for Lobbying Action`)
 	},
 	done() {
 		end_player_round()
@@ -272,9 +301,13 @@ function end_cleanup_phase() {
 // public functions
 
 function gen_action(action, argument) {
-	if (!(action in view.actions))
-		view.actions[action] = []
-	view.actions[action].push(argument)
+	if (argument === undefined) {
+		view.actions[action] = 1
+	} else {
+		if (!(action in view.actions))
+			view.actions[action] = []
+		view.actions[action].push(argument)
+	}
 }
 
 exports.action = function (state, player, action, arg) {
