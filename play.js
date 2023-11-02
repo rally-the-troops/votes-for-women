@@ -1,5 +1,7 @@
 "use strict"
 
+/* global action_button, send_action, view */
+
 const SUF = 0
 const OPP = 1
 const SUF_NAME = "Suffragist"
@@ -99,7 +101,7 @@ function is_space_action(i) {
 	return false
 }
 
-function on_blur(evt) {
+function on_blur(_evt) {
 	document.getElementById("status").textContent = ""
 }
 
@@ -153,21 +155,21 @@ function build_user_interface() {
 
 }
 
-function on_focus_card_tip(card_number) {
+function on_focus_card_tip(card_number) { // eslint-disable-line no-unused-vars
 	document.getElementById("tooltip").className = "card card_" + card_number
 }
 
-function on_blur_card_tip() {
+function on_blur_card_tip() { // eslint-disable-line no-unused-vars
 	document.getElementById("tooltip").classList = "card hide"
 }
 
-function sub_card_name(match, p1, offset, string) {
+function sub_card_name(_match, p1, _offset, _string) {
 	let c = p1 | 0
 	let n = CARDS[c].title
 	return `<span class="tip" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${n}</span>`
 }
 
-function on_log(text) {
+function on_log(text) { // eslint-disable-line no-unused-vars
 	let p = document.createElement("div")
 
 	if (text.match(/^>/)) {
@@ -211,7 +213,7 @@ function opposition_info() {
 	return view.opposition_hand + " cards in hand";
 }
 
-function on_update() {
+function on_update() { // eslint-disable-line no-unused-vars
     console.log("VIEW", view)
 
 	ui.player[SUF].classList.toggle("active", view.active === SUF_NAME)
