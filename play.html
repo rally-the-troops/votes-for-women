@@ -17,6 +17,71 @@ main {
 	background-color: slategray;
 }
 
+#role_Suffragist .role_name { background-color: hsl(273 39% 85%); }
+#role_Opposition .role_name { background-color: hsl(16 85% 85%); }
+.role.active span { text-decoration: underline; }
+
+body.Suffragist header.your_turn { background-color: hsl(273 39% 75%); }
+body.Opposition header.your_turn { background-color: hsl(16 85% 75%);; }
+.role_info {
+	padding: 3px 18px;
+	background-color: gainsboro;
+	white-space: pre-wrap;
+}
+
+#log { background-color: whitesmoke; }
+#log .h1, #log .h2 {
+	font-weight: bold;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	text-align: center;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+}
+#log .h1 { background-color: silver; }
+#log .h2 { background-color: gainsboro; }
+
+#log > .p { padding-left: 20px; text-align: right; font-style: italic; opacity: 75%; }
+#log > .i { padding-left: 20px; }
+
+/* PANELS */
+
+.panel_grid {
+	display: flex;
+	justify-content: center;
+	min-width: 1500px;
+	max-width: 1500px;
+	margin: 20px auto;
+	gap: 20px;
+}
+
+#hand, #discard, #states_draw, #strategy_draw, #set_aside { min-height: 350px; }
+#hand_panel, #states_draw { min-width: 1100px; }
+#strategy_draw, #set_aside_panel { min-width: 830px; }
+#discard_panel { min-width: 290px; }
+
+.panel {
+	background-color: #555;
+}
+
+.panel_header {
+	background-color: #444;
+	color: hsl(40, 60%, 90%);
+	font-weight: bold;
+	text-align: center;
+	padding: 3px 1em;
+}
+
+.panel_body {
+	display: flex;
+	justify-content: start;
+	flex-wrap: wrap;
+	padding: 20px;
+	gap: 20px;
+}
+
+/* MAP */
+
 #mapwrap {
 	width: 1100px;
 	height: 850px;
@@ -123,7 +188,6 @@ div.region:hover {
 .piece.no { width: 42px; height: 32px; background-size: 42px 32px; background-image: url(pieces/no.svg); }
 .piece.congress { width: 32px; height: 32px; background-size: 32px 32px; background-image: url(pieces/cog.svg); }
 
-
 .card {
 	background-size: cover;
 	background-repeat: no-repeat;
@@ -153,7 +217,7 @@ div.region:hover {
 
 /* CARD IMAGES */
 .card_support_back{background-image:url(cards100/support_01.jpg)}
-.card_oppisition_back{background-image:url(cards100/opposition_01.jpg)}
+.card_opposition_back{background-image:url(cards100/opposition_01.jpg)}
 
 .card_1{background-image:url(cards100/support_02.jpg)}
 .card_2{background-image:url(cards100/support_03.jpg)}
@@ -290,7 +354,7 @@ div.region:hover {
 </head>
 <body>
 
-<div id="tooltip" class="card"></div>
+<div id="tooltip" class="card hide"></div>
 
 <menu id="popup">
 	<li class="title">TITLE
@@ -306,6 +370,9 @@ div.region:hover {
 				<li><a href="info/rules.html" target="_blank">Rules</a>
 				<li><a href="info/history.html" target="_blank">History</a>
 				<li><a href="info/cards.html" target="_blank">Cards</a>
+				<li class="debug separator">
+				<li class="debug" onclick="send_save()">&#x1F41E; Save
+				<li class="debug" onclick="send_restore()">&#x1F41E; Restore
 				<li class="resign separator">
 				<li class="resign" onclick="confirm_resign()">Resign
 			</menu>
@@ -317,15 +384,17 @@ div.region:hover {
 	<div id="roles">
 		<div class="role" id="role_Suffragist">
 			<div class="role_name">
-				Suffragist
+				<span>Suffragist</span>
 				<div class="role_user">-</div>
 			</div>
+			<div class="role_info" id="support_info">0 cards in hand</div>
 		</div>
 		<div class="role" id="role_Opposition">
 			<div class="role_name">
-				Opposition
+				<span>Opposition</span>
 				<div class="role_user">-</div>
 			</div>
+			<div class="role_info" id="opposition_info">0 cards in hand</div>
 		</div>
 		<div class="card_info"></div></div>
 	</div>
@@ -813,7 +882,46 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 	</div>
 	</div>
 
-	<div id="hand" class="hand">
+	<div class="panel_grid">
+
+		<div id="hand_panel" class="panel hide">
+		<div id="hand_header" class="panel_header">Hand</div>
+		<div id="hand" class="panel_body"></div>
+		</div>
+
+		<div id="discard_panel" class="panel">
+		<div id="discard_header" class="panel_header">Discard</div>
+		<div id="discard" class="panel_body"></div>
+		</div>
+
+	</div>
+
+	<div class="panel_grid">
+
+		<div id="strategy_draw_panel" class="panel">
+		<div id="strategy_draw_header" class="panel_header">Strategy cards</div>
+		<div id="strategy_draw" class="panel_body"></div>
+		</div>
+
+	</div>
+
+	<div class="panel_grid">
+
+		<div id="states_draw_panel" class="panel">
+		<div id="states_draw_header" class="panel_header">States cards</div>
+		<div id="states_draw" class="panel_body"></div>
+		</div>
+
+	</div>
+
+
+	<div class="panel_grid">
+
+		<div id="set_aside_panel" class="panel hide">
+		<div id="set_aside_header" class="panel_header">Set-aside cards</div>
+		<div id="set_aside" class="panel_body"></div>
+		</div>
+
 	</div>
 
 	<br><br><br>

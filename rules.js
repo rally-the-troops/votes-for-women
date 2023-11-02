@@ -59,15 +59,22 @@ exports.setup = function (seed, _scenario, _options) {
 	}
 
 	log_h1("Votes for Women")
+	setup_game()
+	start_turn()
+	return game
+}
 
+function setup_game() {
 	// init card decks & shuffle
 	game.support_deck = init_player_cards(first_support_card)
 	game.support_hand.push(first_support_card)
 	game.opposition_deck = init_player_cards(first_opposition_card)
 	game.opposition_hand.push(first_opposition_card)
 
-	for (let c = first_strategy_card; c <= last_strategy_card; ++c)
+	for (let c = first_strategy_card; c <= last_strategy_card; ++c) {
+		console.log("PUSH", c)
 		game.strategy_deck.push(c)
+	}
 	for (let c = first_states_card; c <= last_states_card; ++c)
 		game.states_draw.push(c)
 
@@ -75,11 +82,14 @@ exports.setup = function (seed, _scenario, _options) {
 	shuffle(game.strategy_deck)
 
 	game.states_draw.splice(-3) // 3 states card aren't used
-	game.strategy_draw = game.strategy_deck.splice(-3) // draw 3 strategy cards
+	log_h2("States Cards")
+	for (let c of game.states_draw)
+		log(`C${c}`)
 
-	game.active = SUF
-	start_turn()
-	return game
+	game.strategy_draw = game.strategy_deck.splice(-3) // draw 3 strategy cards
+	log_h2("Strategy Cards")
+	for (let c of game.strategy_draw)
+		log(`C${c}`)
 }
 
 function init_player_cards(first_card) {
@@ -103,6 +113,7 @@ function start_turn() {
 	game.turn += 1
 	log_h1("Turn " + game.turn)
 
+	game.active = SUF
 	goto_planning_phase()
 }
 
@@ -241,6 +252,7 @@ exports.view = function(state, player) {
 
 	view = {
 		log: game.log,
+		active: game.active,
 		prompt: null,
 		actions: null,
 
