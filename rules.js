@@ -124,14 +124,14 @@ function start_turn() {
 }
 
 function goto_planning_phase() {
-	log_h2("Planning Phase")
+	log_h2("Planning")
 	game.state = "planning_phase"
 }
 
 states.planning_phase = {
-	inactive: "to do Planning Phase",
+	inactive: "to do Planning.",
 	prompt() {
-		view.prompt = "Planning Phase."
+		view.prompt = "Planning."
 		gen_action("draw")
 	},
 	draw() {
@@ -172,9 +172,9 @@ function goto_strategy_phase() {
 }
 
 states.strategy_phase = {
-	inactive: "to do Strategy Phase",
+	inactive: "to do Strategy.",
 	prompt() {
-		view.prompt = "Strategy Phase: TODO"
+		view.prompt = "Strategy: TODO"
 		gen_action("done")
 	},
 	done() {
@@ -190,7 +190,7 @@ function goto_operations_phase() {
 	begin_player_round()
 }
 
-function current_player_hand() {
+function player_hand() {
 	if (game.active === SUF) {
 		return game.support_hand
 	} else if (game.active === OPP) {
@@ -199,31 +199,103 @@ function current_player_hand() {
 	return []
 }
 
+function player_claimed() {
+	if (game.active === SUF) {
+		return game.support_claimed
+	} else {
+		return game.opposition_claimed
+	}
+}
+
+function player_discard() {
+	if (game.active === SUF) {
+		return game.support_discard
+	} else {
+		return game.opposition_discard
+	}
+}
+
+function is_player_claimed_card(c) {
+	return player_claimed().includes(c)
+}
+
+function count_player_active_campaigners() {
+	if (game.active === SUF) {
+		return game.purple_campaigner.filter(value => value !== 0).length + game.yellow_campaigner.filter(value => value !== 0).length
+	} else {
+		return game.opposition_campaigner.filter(value => value !== 0).length
+	}
+}
+
+function has_player_active_campaigners() {
+	if (game.active === SUF) {
+		return game.purple_campaigner.some(value => value !== 0) || game.yellow_campaigner.some(value => value !== 0)
+	} else {
+		return game.opposition_campaigner.some(value => value !== 0)
+	}
+}
+
+function after_play_card(c) {
+	if (is_player_claimed_card(c)) {
+		game.has_played_claimed = 1
+		// remove from game
+		array_remove_item(player_claimed(), c)
+	} else {
+		game.has_played_hand = 1
+		// move to discard
+		array_remove_item(player_hand(), c)
+		player_discard().push(c)
+	}
+}
+
+function gen_card_actions(c) {
+	gen_action("card_event", c)
+	if (has_player_active_campaigners()) {
+		gen_action("card_campaigning", c)
+		gen_action("card_organizing", c)
+		gen_action("card_lobbying", c)
+	}
+}
+
 states.operations_phase = {
 	inactive: "to do Operations Phase",
 	prompt() {
-		view.prompt = "Operations Phase: Play a Card"
+		view.prompt = "Operations: Play a Card"
 
-		for (let c of current_player_hand()) {
-			gen_action("card_event", c)
-			gen_action("card_campaigning", c)
-			gen_action("card_organizing", c)
-			gen_action("card_lobbying", c)
+		if (!game.has_played_hand) {
+			for (let c of player_hand()) {
+				gen_card_actions(c)
+			}
 		}
 
-		gen_action("done")
+		if (!game.has_played_claimed) {
+			// only one claimed can be played per turn
+			for (let c of player_claimed()) {
+				gen_card_actions(c)
+			}
+		}
+		if (game.has_played_hand)
+			gen_action("done")
 	},
 	card_event(c) {
+		push_undo()
 		log(`Playing C${c} as Event`)
+		after_play_card(c)
 	},
 	card_campaigning(c) {
+		push_undo()
 		log(`Playing C${c} for Campaigning Action`)
+		after_play_card(c)
 	},
 	card_organizing(c) {
+		push_undo()
 		log(`Playing C${c} for Organizing Action`)
+		after_play_card(c)
 	},
 	card_lobbying(c) {
+		push_undo()
 		log(`Playing C${c} for Lobbying Action`)
+		after_play_card(c)
 	},
 	done() {
 		end_player_round()
@@ -235,6 +307,10 @@ function begin_player_round() {
 }
 
 function end_player_round() {
+	clear_undo()
+	delete game.has_played_claimed
+	delete game.has_played_hand
+
 	if (game.active === SUF) {
 		game.active = OPP
 	} else {
@@ -255,9 +331,9 @@ function goto_cleanup_phase() {
 }
 
 states.cleanup_phase = {
-	inactive: "to do Cleanup Phase",
+	inactive: "to do Cleanup.",
 	prompt() {
-		view.prompt = "Cleanup Phase: TODO"
+		view.prompt = "Cleanup: TODO"
 		gen_action("done")
 	},
 	done() {
@@ -288,7 +364,7 @@ function end_cleanup_phase() {
 
 	if (game.support_hand.length !== 1)
 		throw Error("ASSERT game.support_hand.length === 1")
-	if (game.opposition_hand.length !== 7)
+	if (game.opposition_hand.length !== 1)
 		throw Error("ASSERT game.opposition_hand.length === 1")
 
 	if (game.turn < 6) {
