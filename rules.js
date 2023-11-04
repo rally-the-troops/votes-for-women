@@ -18,6 +18,10 @@ const last_strategy_card = 116
 const first_states_card = 117
 const last_states_card = 128
 
+const {
+	CARDS
+} = require("./cards.js")
+
 // #region CARD & HAND FUNCTIONS
 
 function is_support_card(c) {
@@ -447,18 +451,26 @@ function has_player_active_campaigners() {
 	}
 }
 
-function after_play_card(c) {
+function remove_claimed_card(c) {
+	array_remove_item(player_claimed(), c)
+	game.out_of_play.push(c)
+}
+
+function discard_card_from_hand(c) {
+	array_remove_item(player_hand(), c)
+	player_discard().push(c)
+}
+
+function end_play_card(c) {
+	clear_undo()
 	if (is_player_claimed_card(c)) {
 		game.has_played_claimed = 1
-		// remove from game
-		array_remove_item(player_claimed(), c)
-		game.out_of_play.push(c)
+		remove_claimed_card(c)
 	} else {
 		game.has_played_hand = 1
-		// move to discard
-		array_remove_item(player_hand(), c)
-		player_discard().push(c)
+		discard_card_from_hand(c)
 	}
+	game.state = "operations_phase"
 }
 
 states.operations_phase = {
@@ -490,25 +502,22 @@ states.operations_phase = {
 	card_event(c) {
 		push_undo()
 		log(`Played C${c} as Event`)
-		after_play_card(c)
-
-		// XXX auto-done to speed-up testing
-		end_player_round()
+		goto_play_event(c)
 	},
 	card_campaigning(c) {
 		push_undo()
 		log(`Played C${c} for Campaigning Action`)
-		after_play_card(c)
+		end_play_card(c)
 	},
 	card_organizing(c) {
 		push_undo()
 		log(`Played C${c} for Organizing Action`)
-		after_play_card(c)
+		end_play_card(c)
 	},
 	card_lobbying(c) {
 		push_undo()
 		log(`Played C${c} for Lobbying Action`)
-		after_play_card(c)
+		end_play_card(c)
 	},
 	done() {
 		end_player_round()
@@ -594,6 +603,700 @@ function end_cleanup_phase() {
 	// the appropriate discard pile.
 
 	goto_game_over(OPP, "Opposition wins.")
+}
+
+// #endregion
+
+// #region EVENTS
+
+function goto_play_event(c) {
+	// update_presence_and_control()
+	goto_vm(c)
+}
+
+function end_event() {
+	let c = game.vm.fp
+	console.log('end_event', c)
+	game.vm = null
+	end_play_card(c)
+}
+
+function end_crisis_breach_objective() {
+	goto_objective_card_play()
+}
+
+function goto_vm(proc) {
+	game.state = "vm"
+	game.vm = {
+		prompt: 0,
+		fp: proc,
+		ip: 0,
+	}
+	vm_exec()
+}
+
+function event_prompt(str) {
+	if (typeof str === "undefined")
+		str = CODE[game.vm.fp][game.vm.prompt][1]
+	if (typeof str === "function")
+		str = str()
+	view.prompt = CARDS[game.vm.fp].title + ": " + str
+}
+
+function vm_inst(a) {
+	return CODE[game.vm.fp][game.vm.ip][a]
+}
+
+function vm_operand(a) {
+	let x = CODE[game.vm.fp][game.vm.ip][a]
+	if (a > 0 && typeof x === "function")
+		return x()
+	return x
+}
+
+function vm_exec() {
+	vm_inst(0)()
+}
+
+function vm_next() {
+	game.vm.ip ++
+	vm_exec()
+}
+
+function vm_asm() {
+	vm_operand(1)
+	vm_next()
+}
+
+function vm_prompt() {
+	game.vm.prompt = game.vm.ip
+	vm_next()
+}
+
+function vm_goto() {
+	game.state = vm_operand(1)
+}
+
+function vm_return() {
+	game.state = "vm_return"
+}
+
+states.vm_return = {
+	inactive: "finish playing the event",
+	prompt() {
+		event_prompt("Done.")
+		view.actions.end_event = 1
+	},
+	end_event() {
+		end_event()
+	},
+	done() {
+		end_event()
+	},
+}
+
+function vm_if() {
+	if (!vm_operand(1)) {
+		let balance = 1
+		while (balance > 0) {
+			++game.vm.ip
+			switch (vm_operand(0)) {
+				case vm_if:
+					++balance
+					break
+				case vm_endif:
+					--balance
+					break
+				case vm_else:
+					if (balance === 1)
+						--balance
+					break
+			}
+			if (game.vm.ip < 0 || game.vm.ip > CODE[game.vm.fp].length)
+				throw "ERROR"
+		}
+	}
+	vm_next()
+}
+
+function vm_else() {
+	vm_jump(vm_endif, vm_if, 1, 1)
+}
+
+function vm_jump(op, nop, dir, step) {
+	let balance = 1
+	while (balance > 0) {
+		game.vm.ip += dir
+		if (vm_inst(0) === op)
+			--balance
+		if (vm_inst(0) === nop)
+			++balance
+		if (game.vm.ip < 0 || game.vm.ip > CODE[game.vm.fp].length)
+			throw "ERROR"
+	}
+	game.vm.ip += step
+	vm_exec()
+}
+
+function vm_endif() {
+	vm_next()
+}
+
+function vm_endswitch() {
+	vm_next()
+}
+
+function vm_switch() {
+	game.vm.choice = null
+	game.state = "vm_switch"
+}
+
+function vm_case() {
+	if (game.vm.choice === vm_operand(1)) {
+		vm_next()
+	} else {
+		do
+			++game.vm.ip
+		while (vm_inst(0) !== vm_case && vm_inst(0) !== vm_endswitch)
+		vm_exec()
+	}
+}
+
+function vm_ops() {
+	goto_operations(vm_operand(1), vm_operand_spaces(2))
+}
+
+function vm_increase_revolutionary_momentum() {
+	if (game.red_momentum < 3)
+		game.state = "vm_increase_revolutionary_momentum"
+	else
+		vm_next()
+}
+
+function vm_increase_prussian_collaboration() {
+	if (game.blue_momentum < 3)
+		game.state = "vm_increase_prussian_collaboration"
+	else
+		vm_next()
+}
+
+function vm_may_increase_revolutionary_momentum() {
+	if (game.red_momentum < 3)
+		game.state = "vm_may_increase_revolutionary_momentum"
+	else
+		vm_next()
+}
+
+function vm_may_increase_prussian_collaboration() {
+	if (game.blue_momentum < 3)
+		game.state = "vm_may_increase_prussian_collaboration"
+	else
+		vm_next()
+}
+
+function vm_decrease_revolutionary_momentum() {
+	if (game.red_momentum > 0)
+		game.state = "vm_decrease_revolutionary_momentum"
+	else
+		vm_next()
+}
+
+function vm_decrease_prussian_collaboration() {
+	if (game.blue_momentum > 0)
+		game.state = "vm_decrease_prussian_collaboration"
+	else
+		vm_next()
+}
+
+function vm_operand_spaces(x) {
+	let s = vm_operand(x)
+	if (typeof s === "number")
+		return [ s ]
+	return s
+}
+
+function vm_remove_up_to() {
+	game.vm.upto = 1
+	game.vm.count = vm_operand(1)
+	game.vm.spaces = vm_operand_spaces(2)
+	goto_vm_remove()
+}
+
+function vm_remove() {
+	game.vm.count = vm_operand(1)
+	game.vm.spaces = vm_operand_spaces(2)
+	goto_vm_remove()
+}
+
+function vm_remove_own() {
+	game.vm.spaces = vm_operand_spaces(1)
+	game.state = "vm_remove_own"
+}
+
+function vm_replace_up_to() {
+	game.vm.upto = 1
+	game.vm.count = vm_operand(1)
+	game.vm.spaces = vm_operand_spaces(2)
+	game.state = "vm_replace"
+	goto_vm_replace()
+}
+
+function vm_replace_different() {
+	game.vm.count = vm_operand(1)
+	game.vm.spaces = vm_operand_spaces(2).slice() // make a copy for safe mutation
+	game.state = "vm_replace_different"
+}
+
+function vm_replace() {
+	game.vm.count = vm_operand(1)
+	game.vm.spaces = vm_operand_spaces(2)
+	goto_vm_replace()
+}
+
+function vm_place_removed_up_to() {
+	game.vm.removed = 1
+	game.vm.upto = 1
+	game.vm.count = vm_operand(1)
+	game.vm.spaces = vm_operand_spaces(2)
+	goto_vm_place()
+}
+
+function vm_place_up_to() {
+	game.vm.upto = 1
+	game.vm.count = vm_operand(1)
+	game.vm.spaces = vm_operand_spaces(2)
+	goto_vm_place()
+}
+
+function vm_place() {
+	game.vm.count = vm_operand(1)
+	game.vm.spaces = vm_operand_spaces(2)
+	goto_vm_place()
+}
+
+function vm_may_place_disc() {
+	game.vm.upto = 1
+	game.vm.count = 1
+	game.vm.spaces = vm_operand_spaces(1)
+	game.state = "vm_place_disc"
+	goto_vm_place_disc()
+}
+
+function vm_place_disc() {
+	game.vm.count = 1
+	game.vm.spaces = vm_operand_spaces(1)
+	goto_vm_place_disc()
+}
+
+function vm_move_up_to() {
+	game.vm.count = vm_operand(1)
+	game.vm.a = vm_operand_spaces(2)
+	game.vm.b = vm_operand_spaces(3)
+	goto_vm_move()
+}
+
+// #endregion
+
+// #region EVENT STATES
+
+states.vm_switch = {
+	inactive: "choose an event option",
+	prompt() {
+		event_prompt()
+		for (let choice of vm_operand(1))
+			view.actions[choice] = 1
+	},
+	place() {
+		push_undo()
+		game.vm.choice = "place"
+		vm_next()
+	},
+	replace() {
+		push_undo()
+		game.vm.choice = "replace"
+		vm_next()
+	},
+	remove() {
+		push_undo()
+		game.vm.choice = "remove"
+		vm_next()
+	},
+	momentum() {
+		push_undo()
+		game.vm.choice = "momentum"
+		vm_next()
+	},
+	ops() {
+		push_undo()
+		game.vm.choice = "ops"
+		vm_next()
+	},
+	political() {
+		push_undo()
+		game.vm.choice = "political"
+		vm_next()
+	},
+	military() {
+		push_undo()
+		game.vm.choice = "military"
+		vm_next()
+	},
+	public_opinion() {
+		push_undo()
+		game.vm.choice = "public_opinion"
+		vm_next()
+	},
+	paris() {
+		push_undo()
+		game.vm.choice = "paris"
+		vm_next()
+	},
+}
+
+states.vm_increase_revolutionary_momentum = {
+	inactive: "increase Revolutionary Momentum",
+	prompt() {
+		event_prompt("Increase Revolutionary Momentum.")
+		view.actions.red_momentum = 1
+	},
+	red_momentum() {
+		push_undo()
+		increase_revolutionary_momentum()
+	},
+}
+
+states.vm_may_increase_revolutionary_momentum = {
+	inactive: "increase Revolutionary Momentum",
+	prompt() {
+		event_prompt("Increase Revolutionary Momentum.")
+		view.actions.red_momentum = 1
+		view.actions.pass = 1
+	},
+	red_momentum() {
+		push_undo()
+		increase_revolutionary_momentum()
+	},
+	pass() {
+		push_undo()
+		vm_next()
+	},
+}
+
+states.vm_increase_prussian_collaboration = {
+	inactive: "increase Prussian Collaboration",
+	prompt() {
+		event_prompt("Increase Prussian Collaboration.")
+		view.actions.blue_momentum = 1
+	},
+	blue_momentum() {
+		push_undo()
+		increase_prussian_collaboration()
+	},
+}
+
+states.vm_may_increase_prussian_collaboration = {
+	inactive: "increase Prussian Collaboration",
+	prompt() {
+		event_prompt("Increase Prussian Collaboration.")
+		view.actions.blue_momentum = 1
+		view.actions.pass = 1
+	},
+	blue_momentum() {
+		push_undo()
+		increase_prussian_collaboration()
+	},
+	pass() {
+		push_undo()
+		vm_next()
+	},
+}
+
+states.vm_decrease_revolutionary_momentum = {
+	inactive: "decrease Revolutionary Momentum",
+	prompt() {
+		event_prompt("Decrease Revolutionary Momentum.")
+		view.actions.red_momentum = 1
+	},
+	red_momentum() {
+		push_undo()
+		decrease_revolutionary_momentum()
+	},
+}
+
+states.vm_decrease_prussian_collaboration = {
+	inactive: "decrease Prussian Collaboration",
+	prompt() {
+		event_prompt("Decrease Prussian Collaboration.")
+		view.actions.blue_momentum = 1
+	},
+	blue_momentum() {
+		push_undo()
+		decrease_prussian_collaboration()
+	},
+}
+
+function can_vm_place() {
+	for (let s of game.vm.spaces)
+		if (can_place_cube(s, game.vm.removed))
+			return true
+	return false
+}
+
+function goto_vm_place() {
+	if (can_vm_place(game.vm.removed))
+		game.state = "vm_place"
+	else
+		vm_next()
+}
+
+states.vm_place = {
+	inactive: "place a cube",
+	prompt() {
+		event_prompt()
+		if (game.vm.upto)
+			view.actions.skip = 1
+		for (let s of game.vm.spaces)
+			if (can_place_cube(s, game.vm.removed))
+				gen_action_space(s)
+	},
+	space(s) {
+		push_undo()
+		place_cube(s, game.vm.removed)
+		if (game.active === COMMUNE)
+			log("Placed RC in S" + s + ".")
+		else
+			log("Placed BC in S" + s + ".")
+		if (--game.vm.count === 0 || !can_vm_place(game.vm.removed))
+			vm_next()
+	},
+	skip() {
+		push_undo()
+		vm_next()
+	},
+}
+
+function can_vm_place_disc() {
+	for (let s of game.vm.spaces)
+		if (can_place_disc(s))
+			return true
+	return false
+}
+
+function goto_vm_place_disc() {
+	if (can_vm_place_disc()) {
+		if (find_available_disc() < 0)
+			game.state = "vm_move_disc"
+		else
+			game.state = "vm_place_disc"
+	} else {
+		vm_next()
+	}
+}
+
+states.vm_move_disc = {
+	inactive: "place a disc",
+	prompt() {
+		event_prompt("Remove a disc to place it elsewhere.")
+		if (game.vm.upto)
+			view.actions.skip = 1
+		if (game.active === COMMUNE)
+			for (let p = first_commune_disc; p <= last_commune_disc; ++p)
+				gen_action_piece(p)
+		else
+			for (let p = first_versailles_disc; p <= last_versailles_disc; ++p)
+				gen_action_piece(p)
+	},
+	piece(p) {
+		push_undo()
+		let s = game.pieces[p]
+		if (game.active === COMMUNE)
+			log("Moved RD from S" + s + ".")
+		else
+			log("Moved BD from S" + s + ".")
+		remove_piece(p)
+		game.state = "vm_place_disc"
+	},
+	skip() {
+		push_undo()
+		vm_next()
+	},
+}
+
+states.vm_place_disc = {
+	inactive: "place a disc",
+	prompt() {
+		event_prompt()
+		if (game.vm.upto)
+			view.actions.skip = 1
+		for (let s of game.vm.spaces)
+			if (can_place_disc(s))
+				gen_action_space(s)
+	},
+	space(s) {
+		push_undo()
+		if (game.active === COMMUNE)
+			log("Placed RD in S" + s + ".")
+		else
+			log("Placed BD in S" + s + ".")
+		place_disc(s)
+		vm_next()
+	},
+	skip() {
+		push_undo()
+		vm_next()
+	},
+}
+
+function can_vm_replace() {
+	for (let s of game.vm.spaces)
+		if (can_replace_cube(s))
+			return true
+	return false
+}
+
+function goto_vm_replace() {
+	if (can_vm_replace())
+		game.state = "vm_replace"
+	else
+		vm_next()
+}
+
+states.vm_replace = {
+	inactive: "replace a cube",
+	prompt() {
+		event_prompt()
+		if (game.vm.upto)
+			view.actions.skip = 1
+		for (let s of game.vm.spaces)
+			if (can_replace_cube(s))
+				for_each_enemy_cube(s, gen_action_piece)
+	},
+	piece(p) {
+		push_undo()
+		let s = game.pieces[p]
+		replace_cube(p)
+		log("Replaced " + piece_abbr(p) + " in S" + s + ".")
+		if (--game.vm.count === 0 || !can_vm_replace())
+			vm_next()
+	},
+	skip() {
+		push_undo()
+		vm_next()
+	},
+}
+
+function can_vm_remove() {
+	for (let s of game.vm.spaces)
+		if (can_remove_cube(s))
+			return true
+	return false
+}
+
+function goto_vm_remove() {
+	if (can_vm_remove())
+		game.state = "vm_remove"
+	else
+		vm_next()
+}
+
+states.vm_remove = {
+	inactive: "remove a cube",
+	prompt() {
+		event_prompt()
+		if (game.vm.upto)
+			view.actions.skip = 1
+		for (let s of game.vm.spaces)
+			if (can_remove_cube(s))
+				for_each_enemy_cube(s, gen_action_piece)
+	},
+	piece(p) {
+		push_undo()
+		let s = game.pieces[p]
+		if (game.active === COMMUNE)
+			log("Removed BC from S" + s + ".")
+		else
+			log("Removed RC from S" + s + ".")
+		remove_piece(p)
+		if (--game.vm.count === 0 || !can_vm_remove())
+			vm_next()
+	},
+	skip() {
+		push_undo()
+		vm_next()
+	},
+}
+
+states.vm_remove_own = {
+	inactive: "remove a cube",
+	prompt() {
+		event_prompt()
+		for (let s of game.vm.spaces)
+			for_each_friendly_cube(s, gen_action_piece)
+	},
+	piece(p) {
+		push_undo()
+		let s = game.pieces[p]
+		if (game.active === COMMUNE)
+			log("Removed RC from S" + s + ".")
+		else
+			log("Removed BC from S" + s + ".")
+		remove_piece(p)
+		vm_next()
+	},
+}
+
+function can_vm_move() {
+	let from = false
+	let to = false
+	for (let s of game.vm.a)
+		if (!game.vm.b.includes(s) && has_friendly_cube(s))
+			from = true
+	for (let s of game.vm.b)
+		if (count_friendly_cubes(s) < 4)
+			to = true
+	return from && to
+}
+
+function goto_vm_move() {
+	game.who = -1
+	if (can_vm_move())
+		game.state = "vm_move"
+	else
+		vm_next()
+}
+
+states.vm_move = {
+	inactive: "move a cube",
+	prompt() {
+		event_prompt()
+		view.actions.skip = 1
+		if (game.who < 0) {
+			for (let s of game.vm.a)
+				if (!game.vm.b.includes(s))
+					for_each_friendly_cube(s, gen_action_piece)
+		} else {
+			game.selected_cube = game.who
+			for (let s of game.vm.b)
+				if (count_friendly_cubes(s) < 4)
+					gen_action_space(s)
+		}
+	},
+	piece(p) {
+		push_undo()
+		game.who = p
+	},
+	space(s) {
+		let from = game.pieces[game.who]
+		move_piece(game.who, s)
+		log("Moved " + piece_abbr(game.who) + " from S" + from + " to S" + s + ".")
+		game.who = -1
+		if (--game.vm.count === 0 || !can_vm_move())
+			vm_next()
+	},
+	skip() {
+		push_undo()
+		vm_next()
+	},
 }
 
 // #endregion
@@ -738,5 +1441,517 @@ function array_remove(array, index) {
 // #endregion
 
 // #region GENERATED EVENT CODE
+const CODE = []
 
+CODE[1] = [ // Seneca Falls Convention
+	[ vm_return ],
+]
+
+CODE[2] = [ // Property Rights for Women
+	[ vm_return ],
+]
+
+CODE[3] = [ // Frances Willard
+	[ vm_return ],
+]
+
+CODE[4] = [ // A Vindication of the Rights of Woman
+	[ vm_return ],
+]
+
+CODE[5] = [ // Union Victory
+	[ vm_return ],
+]
+
+CODE[6] = [ // Fifteenth Amendment
+	[ vm_return ],
+]
+
+CODE[7] = [ // Reconstruction
+	[ vm_return ],
+]
+
+CODE[8] = [ // Petition to Congress
+	[ vm_return ],
+]
+
+CODE[9] = [ // Lucy Stone
+	[ vm_return ],
+]
+
+CODE[10] = [ // Susan B. Anthony Indicted
+	[ vm_return ],
+]
+
+CODE[11] = [ // Anna Dickinson
+	[ vm_return ],
+]
+
+CODE[12] = [ // Frederick Douglass
+	[ vm_return ],
+]
+
+CODE[13] = [ // Frances Harper
+	[ vm_return ],
+]
+
+CODE[14] = [ // The Union Signal
+	[ vm_return ],
+]
+
+CODE[15] = [ // Sojourner Truth
+	[ vm_return ],
+]
+
+CODE[16] = [ // Pioneer Women
+	[ vm_return ],
+]
+
+CODE[17] = [ // Women to the Polls
+	[ vm_return ],
+]
+
+CODE[18] = [ // National Woman’s Rights Convention
+	[ vm_return ],
+]
+
+CODE[19] = [ // National American Woman Suffrage Association
+	[ vm_return ],
+]
+
+CODE[20] = [ // Jeannette Rankin
+	[ vm_return ],
+]
+
+CODE[21] = [ // Ida B. Wells-Barnett
+	[ vm_return ],
+]
+
+CODE[22] = [ // The Club Movement
+	[ vm_return ],
+]
+
+CODE[23] = [ // Equality League of Self-Supporting Women
+	[ vm_return ],
+]
+
+CODE[24] = [ // Emmeline Pankhurst
+	[ vm_return ],
+]
+
+CODE[25] = [ // “Debate Us, You Cowards!”
+	[ vm_return ],
+]
+
+CODE[26] = [ // Carrie Chapman Catt
+	[ vm_return ],
+]
+
+CODE[27] = [ // Alice Paul & Lucy Burns
+	[ vm_return ],
+]
+
+CODE[28] = [ // Inez Milholland
+	[ vm_return ],
+]
+
+CODE[29] = [ // Farmers for Suffrage
+	[ vm_return ],
+]
+
+CODE[30] = [ // Zitkala-Ša
+	[ vm_return ],
+]
+
+CODE[31] = [ // Helen Keller
+	[ vm_return ],
+]
+
+CODE[32] = [ // Maria de Lopez
+	[ vm_return ],
+]
+
+CODE[33] = [ // Marie Louise Bottineau Baldwin
+	[ vm_return ],
+]
+
+CODE[34] = [ // The West’s Awakening
+	[ vm_return ],
+]
+
+CODE[35] = [ // Southern Strategy
+	[ vm_return ],
+]
+
+CODE[36] = [ // Women’s Trade Union League
+	[ vm_return ],
+]
+
+CODE[37] = [ // The Young Woman Citizen
+	[ vm_return ],
+]
+
+CODE[38] = [ // 1918 Midterm Elections
+	[ vm_return ],
+]
+
+CODE[39] = [ // Woodrow Wilson
+	[ vm_return ],
+]
+
+CODE[40] = [ // Maud Wood Park
+	[ vm_return ],
+]
+
+CODE[41] = [ // Voter Registration
+	[ vm_return ],
+]
+
+CODE[42] = [ // Processions for Suffrage
+	[ vm_return ],
+]
+
+CODE[43] = [ // Prison Tour Special
+	[ vm_return ],
+]
+
+CODE[44] = [ // Victory Map
+	[ vm_return ],
+]
+
+CODE[45] = [ // Women and World War I
+	[ vm_return ],
+]
+
+CODE[46] = [ // Eighteenth Amendment
+	[ vm_return ],
+]
+
+CODE[47] = [ // Mary McLeod Bethune
+	[ vm_return ],
+]
+
+CODE[48] = [ // Make a Home Run for Suffrage
+	[ vm_return ],
+]
+
+CODE[49] = [ // Mary Church Terrell
+	[ vm_return ],
+]
+
+CODE[50] = [ // Tea Parties for Suffrage
+	[ vm_return ],
+]
+
+CODE[51] = [ // Dr. Mabel Ping-Hua Lee
+	[ vm_return ],
+]
+
+CODE[52] = [ // Miss Febb Wins the Last Vote
+	[ vm_return ],
+]
+
+CODE[53] = [ // The Patriarchy
+	[ vm_return ],
+]
+
+CODE[54] = [ // The Civil War
+	[ vm_return ],
+]
+
+CODE[55] = [ // 15th Divides Suffragists
+	[ vm_return ],
+]
+
+CODE[56] = [ // Senator Joseph Brown
+	[ vm_return ],
+]
+
+CODE[57] = [ // Minor v. Happersett
+	[ vm_return ],
+]
+
+CODE[58] = [ // Senate Rejects Suffrage Amendment
+	[ vm_return ],
+]
+
+CODE[59] = [ // South Dakota Rejects Suffrage
+	[ vm_return ],
+]
+
+CODE[60] = [ // Gerrymandering
+	[ vm_return ],
+]
+
+CODE[61] = [ // Border States
+	[ vm_return ],
+]
+
+CODE[62] = [ // Horace Greeley
+	[ vm_return ],
+]
+
+CODE[63] = [ // New York Newspapers
+	[ vm_return ],
+]
+
+CODE[64] = [ // Senator George Vest
+	[ vm_return ],
+]
+
+CODE[65] = [ // Catharine Beecher
+	[ vm_return ],
+]
+
+CODE[66] = [ // Progress, Not Politics
+	[ vm_return ],
+]
+
+CODE[67] = [ // Southern “Hospitality”
+	[ vm_return ],
+]
+
+CODE[68] = [ // Beer Brewers
+	[ vm_return ],
+]
+
+CODE[69] = [ // Southern Resentment
+	[ vm_return ],
+]
+
+CODE[70] = [ // Old Dixie
+	[ vm_return ],
+]
+
+CODE[71] = [ // NAOWS Forms
+	[ vm_return ],
+]
+
+CODE[72] = [ // Woman and the Republic
+	[ vm_return ],
+]
+
+CODE[73] = [ // The Ladies’ Battle
+	[ vm_return ],
+]
+
+CODE[74] = [ // Backlash to the Movement
+	[ vm_return ],
+]
+
+CODE[75] = [ // Xenophobia
+	[ vm_return ],
+]
+
+CODE[76] = [ // “O Save Us Senators, From Ourselves”
+	[ vm_return ],
+]
+
+CODE[77] = [ // Emma Goldman
+	[ vm_return ],
+]
+
+CODE[78] = [ // The Great 1906 San Francisco Earthquake
+	[ vm_return ],
+]
+
+CODE[79] = [ // A Threat to the Ideal of Womanhood
+	[ vm_return ],
+]
+
+CODE[80] = [ // “Unwarranted, Unnecessary & Dangerous Interference”
+	[ vm_return ],
+]
+
+CODE[81] = [ // Conservative Opposition
+	[ vm_return ],
+]
+
+CODE[82] = [ // The SSWSC
+	[ vm_return ],
+]
+
+CODE[83] = [ // Western Saloons Push Suffrage Veto
+	[ vm_return ],
+]
+
+CODE[84] = [ // Transcontinental Railroad
+	[ vm_return ],
+]
+
+CODE[85] = [ // White Supremacy and the Suffrage Movement
+	[ vm_return ],
+]
+
+CODE[86] = [ // Senator John Weeks
+	[ vm_return ],
+]
+
+CODE[87] = [ // Senator “Cotton Ed” Smith
+	[ vm_return ],
+]
+
+CODE[88] = [ // War in Europe
+	[ vm_return ],
+]
+
+CODE[89] = [ // 1918 Pandemic
+	[ vm_return ],
+]
+
+CODE[90] = [ // The Business of Being a Woman
+	[ vm_return ],
+]
+
+CODE[91] = [ // The Eden Sphinx
+	[ vm_return ],
+]
+
+CODE[92] = [ // Big Liquor’s Big Money
+	[ vm_return ],
+]
+
+CODE[93] = [ // Red Scare
+	[ vm_return ],
+]
+
+CODE[94] = [ // Southern Women’s Rejection League
+	[ vm_return ],
+]
+
+CODE[95] = [ // United Daughters of the Confederacy
+	[ vm_return ],
+]
+
+CODE[96] = [ // Cheers to “No on Suffrage”
+	[ vm_return ],
+]
+
+CODE[97] = [ // The Unnecessary Privilege
+	[ vm_return ],
+]
+
+CODE[98] = [ // Voter Suppression
+	[ vm_return ],
+]
+
+CODE[99] = [ // Anti-Suffrage Riots
+	[ vm_return ],
+]
+
+CODE[100] = [ // American Constitutional League
+	[ vm_return ],
+]
+
+CODE[101] = [ // The Woman Patriot
+	[ vm_return ],
+]
+
+CODE[102] = [ // Governor Clement’s Veto
+	[ vm_return ],
+]
+
+CODE[103] = [ // Senator Henry Cabot Lodge
+	[ vm_return ],
+]
+
+CODE[104] = [ // Senator William Borah
+	[ vm_return ],
+]
+
+CODE[105] = [ // Efficient Organizing
+	[ vm_return ],
+]
+
+CODE[106] = [ // Reconsideration
+	[ vm_return ],
+]
+
+CODE[107] = [ // Opposition Research
+	[ vm_return ],
+]
+
+CODE[108] = [ // Change In Plans
+	[ vm_return ],
+]
+
+CODE[109] = [ // Bellwether State
+	[ vm_return ],
+]
+
+CODE[110] = [ // Superior Lobbying
+	[ vm_return ],
+]
+
+CODE[111] = [ // The Winning Plan
+	[ vm_return ],
+]
+
+CODE[112] = [ // Regional Focus
+	[ vm_return ],
+]
+
+CODE[113] = [ // Eye on the Future
+	[ vm_return ],
+]
+
+CODE[114] = [ // Transportation
+	[ vm_return ],
+]
+
+CODE[115] = [ // Counter Strat
+	[ vm_return ],
+]
+
+CODE[116] = [ // National Focus
+	[ vm_return ],
+]
+
+CODE[117] = [ // California
+	[ vm_return ],
+]
+
+CODE[118] = [ // Utah
+	[ vm_return ],
+]
+
+CODE[119] = [ // Montana
+	[ vm_return ],
+]
+
+CODE[120] = [ // Kansas
+	[ vm_return ],
+]
+
+CODE[121] = [ // Texas
+	[ vm_return ],
+]
+
+CODE[122] = [ // Georgia
+	[ vm_return ],
+]
+
+CODE[123] = [ // Illinois
+	[ vm_return ],
+]
+
+CODE[124] = [ // Ohio
+	[ vm_return ],
+]
+
+CODE[125] = [ // Pennsylvania
+	[ vm_return ],
+]
+
+CODE[126] = [ // Virginia
+	[ vm_return ],
+]
+
+CODE[127] = [ // New York
+	[ vm_return ],
+]
+
+CODE[128] = [ // New Jersey
+	[ vm_return ],
+]
 // #endregion
