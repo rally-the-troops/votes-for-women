@@ -119,6 +119,9 @@ function goto_game_over(result, victory) {
 	log(game.victory)
 }
 
+const pluralize = (count, noun, suffix = 's') =>
+  `${count} ${noun}${count !== 1 ? suffix : ''}`;
+
 // #endregion
 
 // #region SETUP
@@ -349,17 +352,74 @@ function end_planning_phase() {
 function goto_strategy_phase() {
 	log_h2("Strategy")
 	game.state = "strategy_phase"
+	game.active = SUF
+	game.support_committed = 0
 }
 
 states.strategy_phase = {
 	inactive: "do Strategy.",
 	prompt() {
-		view.prompt = "Strategy: TODO"
-		gen_action("done")
+		if (game.active ===  SUF) {
+			view.prompt = `Strategy: ${pluralize(game.support_committed, 'button')} committed.`
+			if (game.support_buttons > 0) {
+				gen_action("commit_1_button")
+			}
+			gen_action("done")
+		} else {
+			view.prompt = `Strategy: Suffragist committed ${pluralize(game.support_committed, 'button')}.`
+			gen_action("defer")
+			view.actions.match = game.opposition_buttons >= game.support_committed
+			view.actions.supersede = game.opposition_buttons > game.support_committed
+		}
+	},
+	commit_1_button() {
+		push_undo()
+		game.support_buttons -= 1
+		game.support_committed += 1
+
 	},
 	done() {
-		goto_operations_phase()
+		log(`Suffragist committed ${pluralize(game.support_committed, 'button')}.`)
+		game.active = OPP
+	},
+	defer() {
+		log(`Opposition deferred.`)
+		game.active = SUF
+		game.state = 'strategy_phase_select_strategy_card'
+	},
+	match () {
+		log(`Opposition matched.`)
+		game.opposition_buttons -= game.support_committed
+		end_strategy_phase()
+	},
+	supersede() {
+		log(`Opposition superseded.`)
+		game.opposition_buttons -= (game.support_committed + 1)
+		game.state = 'strategy_phase_select_strategy_card'
 	}
+}
+
+states.strategy_phase_select_strategy_card = {
+	inactive: "select Strategy card.",
+	prompt() {
+		view.prompt = `Select Strategy card.`
+		for (let c of game.strategy_draw)
+			gen_action("card", c)
+	},
+	card(c) {
+		log(`${game.active} selected C${c}.`)
+
+		array_remove_item(game.strategy_draw, c)
+		player_claimed().push(c)
+		game.strategy_draw.push(draw_card(game.strategy_deck))
+
+		end_strategy_phase()
+	}
+}
+
+function end_strategy_phase() {
+	delete game.support_committed
+	goto_operations_phase()
 }
 
 function goto_operations_phase() {
