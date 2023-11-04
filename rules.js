@@ -18,176 +18,28 @@ const last_strategy_card = 116
 const first_states_card = 117
 const last_states_card = 128
 
-exports.scenarios = [ "Standard" ]
-exports.roles = [ SUF, OPP ]
+// #region CARD & HAND FUNCTIONS
 
-exports.setup = function (seed, _scenario, _options) {
-	game = {
-		seed: seed,
-		log: [],
-		undo: [],
-		active: null,
-		state: null,
-
-		turn: 0,
-		round: 0,
-		congress: 0,
-		us_states: new Array(us_states_count).fill(0),
-
-		strategy_deck: [],
-		strategy_draw: [],
-		states_draw: [],
-
-		persisted_turn: [],
-		persisted_game: [],
-		persisted_ballot: [],
-
-		support_deck: [],
-		support_discard: [],
-		support_hand: [],
-		support_claimed: [],
-		purple_campaigner: [0, 0],
-		yellow_campaigner: [0, 0],
-		support_buttons: 0,
-
-		opposition_deck: [],
-		opposition_discard: [],
-		opposition_hand: [],
-		opposition_claimed: [],
-		opposition_campaigner: [0, 0],
-		opposition_buttons: 0,
-	}
-
-	log_h1("Votes for Women")
-	setup_game()
-	start_turn()
-	return game
+function is_support_card(c) {
+	return c >= first_support_card && c <= last_support_card
 }
 
-function setup_game() {
-	// init card decks & shuffle
-	game.support_deck = init_player_cards(first_support_card)
-	game.support_hand.push(first_support_card)
-	game.opposition_deck = init_player_cards(first_opposition_card)
-	game.opposition_hand.push(first_opposition_card)
-
-	for (let c = first_strategy_card; c <= last_strategy_card; ++c) {
-		console.log("PUSH", c)
-		game.strategy_deck.push(c)
-	}
-	for (let c = first_states_card; c <= last_states_card; ++c)
-		game.states_draw.push(c)
-
-	shuffle(game.states_draw)
-	shuffle(game.strategy_deck)
-
-	game.states_draw.splice(-3) // 3 states card aren't used
-	log_h2("States Cards")
-	for (let c of game.states_draw)
-		log(`C${c}`)
-
-	game.strategy_draw = game.strategy_deck.splice(-3) // draw 3 strategy cards
-	log_h2("Strategy Cards")
-	for (let c of game.strategy_draw)
-		log(`C${c}`)
+function is_opposition_card(c) {
+	return c >= first_opposition_card && c <= last_opposition_card
 }
 
-function init_player_cards(first_card) {
-	let c = first_card
-	let early = []
-	let middle = []
-	let late = []
-	for (let n = 0; n < era_cards_count; ++n)
-		early.push(++c)
-	for (let n = 0; n < era_cards_count; ++n)
-		middle.push(++c)
-	for (let n = 0; n < era_cards_count; ++n)
-		late.push(++c)
-	shuffle(early)
-	shuffle(middle)
-	shuffle(late)
-	return [].concat(late, middle, early)
+function is_strategy_card(c) {
+	return c >= first_strategy_card && c <= last_strategy_card
+}
+
+function is_states_card(c) {
+	return c >= first_states_card && c <= last_states_card
 }
 
 function draw_card(deck) {
 	if (deck.length === 0)
 		throw Error("can't draw from empty deck")
 	return deck.pop()
-}
-
-function start_turn() {
-	game.turn += 1
-	log_h1("Turn " + game.turn)
-
-	game.active = SUF
-	goto_planning_phase()
-}
-
-function goto_planning_phase() {
-	log_h2("Planning")
-	game.state = "planning_phase"
-}
-
-states.planning_phase = {
-	inactive: "to do Planning.",
-	prompt() {
-		view.prompt = "Planning."
-		gen_action("draw")
-	},
-	draw() {
-		/*
-		Each player draws six cards from their Draw deck. When added to either their Start card (on
-		Turn 1) or their card held from the previous turn (on Turns 2-6), their hand should begin with
-		seven cards.
-		*/
-
-		for (let n = 0; n < 6; ++n) {
-			game.support_hand.push(draw_card(game.support_deck))
-			game.opposition_hand.push(draw_card(game.opposition_deck))
-		}
-
-		log("Suffragist drew 7 cards.")
-		log("Opposition drew 7 cards.")
-
-		end_planning_phase()
-	}
-}
-
-function end_planning_phase() {
-	if (game.support_hand.length !== 7)
-		throw Error("ASSERT game.support_hand.length === 7")
-	if (game.opposition_hand.length !== 7)
-		throw Error("ASSERT game.opposition_hand.length === 7")
-
-	if (game.turn === 1) {
-		goto_operations_phase()
-	} else {
-		goto_strategy_phase()
-	}
-}
-
-function goto_strategy_phase() {
-	log_h2("Strategy Phase")
-	game.state = "strategy_phase"
-}
-
-states.strategy_phase = {
-	inactive: "to do Strategy.",
-	prompt() {
-		view.prompt = "Strategy: TODO"
-		gen_action("done")
-	},
-	done() {
-		goto_operations_phase()
-	}
-}
-
-function goto_operations_phase() {
-	log_h2("Operations Phase")
-	game.state = "operations_phase"
-	game.active = SUF
-	game.round = 1
-	begin_player_round()
 }
 
 function player_hand() {
@@ -219,162 +71,10 @@ function is_player_claimed_card(c) {
 	return player_claimed().includes(c)
 }
 
-function count_player_active_campaigners() {
-	if (game.active === SUF) {
-		return game.purple_campaigner.filter(value => value !== 0).length + game.yellow_campaigner.filter(value => value !== 0).length
-	} else {
-		return game.opposition_campaigner.filter(value => value !== 0).length
-	}
-}
+// #region PUBLIC FUNCTIONS
 
-function has_player_active_campaigners() {
-	if (game.active === SUF) {
-		return game.purple_campaigner.some(value => value !== 0) || game.yellow_campaigner.some(value => value !== 0)
-	} else {
-		return game.opposition_campaigner.some(value => value !== 0)
-	}
-}
-
-function after_play_card(c) {
-	if (is_player_claimed_card(c)) {
-		game.has_played_claimed = 1
-		// remove from game
-		array_remove_item(player_claimed(), c)
-	} else {
-		game.has_played_hand = 1
-		// move to discard
-		array_remove_item(player_hand(), c)
-		player_discard().push(c)
-	}
-}
-
-function gen_card_actions(c) {
-	gen_action("card_event", c)
-	if (has_player_active_campaigners()) {
-		gen_action("card_campaigning", c)
-		gen_action("card_organizing", c)
-		gen_action("card_lobbying", c)
-	}
-}
-
-states.operations_phase = {
-	inactive: "to do Operations Phase",
-	prompt() {
-		view.prompt = "Operations: Play a Card"
-
-		if (!game.has_played_hand) {
-			for (let c of player_hand()) {
-				gen_card_actions(c)
-			}
-		}
-
-		if (!game.has_played_claimed) {
-			// only one claimed can be played per turn
-			for (let c of player_claimed()) {
-				gen_card_actions(c)
-			}
-		}
-		if (game.has_played_hand)
-			gen_action("done")
-	},
-	card_event(c) {
-		push_undo()
-		log(`Playing C${c} as Event`)
-		after_play_card(c)
-	},
-	card_campaigning(c) {
-		push_undo()
-		log(`Playing C${c} for Campaigning Action`)
-		after_play_card(c)
-	},
-	card_organizing(c) {
-		push_undo()
-		log(`Playing C${c} for Organizing Action`)
-		after_play_card(c)
-	},
-	card_lobbying(c) {
-		push_undo()
-		log(`Playing C${c} for Lobbying Action`)
-		after_play_card(c)
-	},
-	done() {
-		end_player_round()
-	}
-}
-
-function begin_player_round() {
-	log_h3(`${game.active} Round ${game.round}`)
-}
-
-function end_player_round() {
-	clear_undo()
-	delete game.has_played_claimed
-	delete game.has_played_hand
-
-	if (game.active === SUF) {
-		game.active = OPP
-	} else {
-		if (game.round < 6) {
-			game.active = SUF
-			game.round += 1
-		} else {
-			goto_cleanup_phase()
-			return
-		}
-	}
-	begin_player_round()
-}
-
-function goto_cleanup_phase() {
-	log_h2("Cleanup Phase")
-	game.state = "cleanup_phase"
-}
-
-states.cleanup_phase = {
-	inactive: "to do Cleanup.",
-	prompt() {
-		view.prompt = "Cleanup: TODO"
-		gen_action("done")
-	},
-	done() {
-		end_cleanup_phase()
-	}
-}
-
-function end_cleanup_phase() {
-	// TODO
-	// 	At the end of Turns 1-5, any cards in the “Cards
-	// in Effect for the Rest of the Turn box” are placed
-	// in the appropriate discard pile. Each player should
-	// have one card in their hand to carry over to the next
-	// Turn. The Turn marker is advanced and the
-	// next Turn begins.
-
-	// TODO
-	// At the end of Turn 6, if the Nineteenth
-	// Amendment has not been sent to the states for
-	// ratification, the game ends in an Opposition victory.
-	// If the Nineteenth Amendment has been sent to the
-	// states for ratification but neither player has won
-	// the necessary number of states for victory, the game
-	// advances to Final Voting. Any cards in the “Cards
-	// in Effect for the Rest of the Turn box” and “Cards in
-	// Effect for the Rest of the Game box” are placed in
-	// the appropriate discard pile.
-
-	if (game.support_hand.length !== 1)
-		throw Error("ASSERT game.support_hand.length === 1")
-	if (game.opposition_hand.length !== 1)
-		throw Error("ASSERT game.opposition_hand.length === 1")
-
-	if (game.turn < 6) {
-		start_turn()
-	} else {
-		goto_game_over(OPP, "Opposition wins.")
-	}
-}
-
-// public functions
+exports.scenarios = [ "Standard" ]
+exports.roles = [ SUF, OPP ]
 
 function gen_action(action, argument) {
 	if (argument === undefined) {
@@ -419,7 +119,103 @@ function goto_game_over(result, victory) {
 	log(game.victory)
 }
 
-// === VIEW ===
+// #endregion
+
+// #region SETUP
+
+exports.setup = function (seed, _scenario, _options) {
+	game = {
+		seed: seed,
+		log: [],
+		undo: [],
+		active: null,
+		state: null,
+
+		turn: 0,
+		round: 0,
+		congress: 0,
+		us_states: new Array(us_states_count).fill(0),
+
+		strategy_deck: [],
+		strategy_draw: [],
+		states_draw: [],
+
+		persisted_turn: [],
+		persisted_game: [],
+		persisted_ballot: [],
+
+		support_deck: [],
+		support_discard: [],
+		support_hand: [],
+		support_claimed: [],
+		purple_campaigner: [0, 0],
+		yellow_campaigner: [0, 0],
+		support_buttons: 0,
+
+		opposition_deck: [],
+		opposition_discard: [],
+		opposition_hand: [],
+		opposition_claimed: [],
+		opposition_campaigner: [0, 0],
+		opposition_buttons: 0,
+
+		out_of_play: []
+	}
+
+	log_h1("Votes for Women")
+	setup_game()
+	start_turn()
+	return game
+}
+
+function setup_game() {
+	// init card decks & shuffle
+	game.support_deck = init_player_cards(first_support_card)
+	game.support_hand.push(first_support_card)
+	game.opposition_deck = init_player_cards(first_opposition_card)
+	game.opposition_hand.push(first_opposition_card)
+
+	for (let c = first_strategy_card; c <= last_strategy_card; ++c) {
+		console.log("PUSH", c)
+		game.strategy_deck.push(c)
+	}
+	for (let c = first_states_card; c <= last_states_card; ++c)
+		game.states_draw.push(c)
+
+	shuffle(game.states_draw)
+	shuffle(game.strategy_deck)
+
+	game.out_of_play.push(...game.states_draw.splice(-3)) // 3 states card aren't used
+	log_h2("States Cards")
+	for (let c of game.states_draw)
+		log(`C${c}`)
+
+	game.strategy_draw = game.strategy_deck.splice(-3) // draw 3 strategy cards
+	log_h2("Strategy Cards")
+	for (let c of game.strategy_draw)
+		log(`C${c}`)
+}
+
+function init_player_cards(first_card) {
+	let c = first_card
+	let early = []
+	let middle = []
+	let late = []
+	for (let n = 0; n < era_cards_count; ++n)
+		early.push(++c)
+	for (let n = 0; n < era_cards_count; ++n)
+		middle.push(++c)
+	for (let n = 0; n < era_cards_count; ++n)
+		late.push(++c)
+	shuffle(early)
+	shuffle(middle)
+	shuffle(late)
+	return [].concat(late, middle, early)
+}
+
+// #endregion
+
+// #region VIEW
 
 exports.view = function(state, player) {
 	game = state
@@ -458,6 +254,8 @@ exports.view = function(state, player) {
 		opposition_campaigner: game.opposition_campaigner,
 		opposition_buttons: game.opposition_buttons,
 
+		out_of_play: game.out_of_play,
+
 		hand: 0,
 	}
 
@@ -493,8 +291,254 @@ exports.view = function(state, player) {
 	return view
 }
 
+// #endregion
 
-// === LOGGING ===
+// #region FLOW OF PLAY
+
+function start_turn() {
+	game.turn += 1
+	log_h1("Turn " + game.turn)
+
+	game.active = SUF
+	goto_planning_phase()
+}
+
+function goto_planning_phase() {
+	log_h2("Planning")
+	game.state = "planning_phase"
+}
+
+states.planning_phase = {
+	inactive: "do Planning.",
+	prompt() {
+		view.prompt = "Planning."
+		gen_action("draw")
+	},
+	draw() {
+		/*
+		Each player draws six cards from their Draw deck. When added to either their Start card (on
+		Turn 1) or their card held from the previous turn (on Turns 2-6), their hand should begin with
+		seven cards.
+		*/
+
+		for (let n = 0; n < 6; ++n) {
+			game.support_hand.push(draw_card(game.support_deck))
+			game.opposition_hand.push(draw_card(game.opposition_deck))
+		}
+
+		log("Suffragist drew 7 cards.")
+		log("Opposition drew 7 cards.")
+
+		end_planning_phase()
+	}
+}
+
+function end_planning_phase() {
+	if (game.support_hand.length !== 7)
+		throw Error("ASSERT game.support_hand.length === 7")
+	if (game.opposition_hand.length !== 7)
+		throw Error("ASSERT game.opposition_hand.length === 7")
+
+	if (game.turn === 1) {
+		goto_operations_phase()
+	} else {
+		goto_strategy_phase()
+	}
+}
+
+function goto_strategy_phase() {
+	log_h2("Strategy")
+	game.state = "strategy_phase"
+}
+
+states.strategy_phase = {
+	inactive: "do Strategy.",
+	prompt() {
+		view.prompt = "Strategy: TODO"
+		gen_action("done")
+	},
+	done() {
+		goto_operations_phase()
+	}
+}
+
+function goto_operations_phase() {
+	log_h2("Operations")
+	game.state = "operations_phase"
+	game.active = SUF
+	game.round = 1
+	begin_player_round()
+}
+
+
+function count_player_active_campaigners() {
+	if (game.active === SUF) {
+		return game.purple_campaigner.filter(value => value !== 0).length + game.yellow_campaigner.filter(value => value !== 0).length
+	} else {
+		return game.opposition_campaigner.filter(value => value !== 0).length
+	}
+}
+
+function has_player_active_campaigners() {
+	if (game.active === SUF) {
+		return game.purple_campaigner.some(value => value !== 0) || game.yellow_campaigner.some(value => value !== 0)
+	} else {
+		return game.opposition_campaigner.some(value => value !== 0)
+	}
+}
+
+function after_play_card(c) {
+	if (is_player_claimed_card(c)) {
+		game.has_played_claimed = 1
+		// remove from game
+		array_remove_item(player_claimed(), c)
+		game.out_of_play.push(c)
+	} else {
+		game.has_played_hand = 1
+		// move to discard
+		array_remove_item(player_hand(), c)
+		player_discard().push(c)
+	}
+}
+
+states.operations_phase = {
+	inactive: "Play a Card.",
+	prompt() {
+		view.prompt = "Operations: Play a Card."
+
+		if (!game.has_played_hand) {
+			for (let c of player_hand()) {
+				gen_action("card_event", c)
+				if (has_player_active_campaigners()) {
+					gen_action("card_campaigning", c)
+					gen_action("card_organizing", c)
+					gen_action("card_lobbying", c)
+				}
+			}
+		}
+
+		if (!game.has_played_claimed) {
+			// only one claimed can be played per turn
+			for (let c of player_claimed()) {
+				// TODO is this the right type of event?
+				gen_action("card_event", c)
+			}
+		}
+		if (game.has_played_hand)
+			gen_action("done")
+	},
+	card_event(c) {
+		push_undo()
+		log(`Played C${c} as Event`)
+		after_play_card(c)
+
+		// XXX auto-done to speed-up testing
+		end_player_round()
+	},
+	card_campaigning(c) {
+		push_undo()
+		log(`Played C${c} for Campaigning Action`)
+		after_play_card(c)
+	},
+	card_organizing(c) {
+		push_undo()
+		log(`Played C${c} for Organizing Action`)
+		after_play_card(c)
+	},
+	card_lobbying(c) {
+		push_undo()
+		log(`Played C${c} for Lobbying Action`)
+		after_play_card(c)
+	},
+	done() {
+		end_player_round()
+	}
+}
+
+function begin_player_round() {
+	log_round(`Round ${game.round}`)
+}
+
+function end_player_round() {
+	clear_undo()
+	delete game.has_played_claimed
+	delete game.has_played_hand
+
+	if (game.active === SUF) {
+		game.active = OPP
+	} else {
+		if (game.round < 6) {
+			game.active = SUF
+			game.round += 1
+		} else {
+			goto_cleanup_phase()
+			return
+		}
+	}
+	begin_player_round()
+}
+
+function goto_cleanup_phase() {
+	log_h2("Cleanup")
+	game.state = "cleanup_phase"
+}
+
+states.cleanup_phase = {
+	inactive: "do Cleanup.",
+	prompt() {
+		view.prompt = "Cleanup."
+		gen_action("done")
+	},
+	done() {
+		end_cleanup_phase()
+	}
+}
+
+function cleanup_persistent_turn_cards() {
+	// any cards in the “Cards in Effect for the Rest of the Turn box” are placed in the appropriate discard pile.
+	for (let c of game.persisted_turn) {
+		if (is_support_card(c)) {
+			game.support_discard.push(c)
+		} else if (is_opposition_card(c)) {
+			game.opposition_discard.push(c)
+		} else {
+			throw Error(`Unexpected card ${c} on persisted_turn`)
+		}
+	}
+	game.persisted_turn = []
+}
+
+function end_cleanup_phase() {
+	if (game.turn < 6) {
+		cleanup_persistent_turn_cards()
+
+		if (game.support_hand.length !== 1)
+			throw Error("ASSERT game.support_hand.length === 1")
+		if (game.opposition_hand.length !== 1)
+			throw Error("ASSERT game.opposition_hand.length === 1")
+
+		start_turn()
+		return
+	}
+
+	// TODO
+	// At the end of Turn 6, if the Nineteenth
+	// Amendment has not been sent to the states for
+	// ratification, the game ends in an Opposition victory.
+	// If the Nineteenth Amendment has been sent to the
+	// states for ratification but neither player has won
+	// the necessary number of states for victory, the game
+	// advances to Final Voting. Any cards in the “Cards
+	// in Effect for the Rest of the Turn box” and “Cards in
+	// Effect for the Rest of the Game box” are placed in
+	// the appropriate discard pile.
+
+	goto_game_over(OPP, "Opposition wins.")
+}
+
+// #endregion
+
+// #region LOGGING
 
 function log(msg) {
 	game.log.push(msg)
@@ -526,11 +570,22 @@ function log_h3(msg) {
 	log(".h3 " + msg)
 }
 
+function log_round(msg) {
+	log_br()
+	if (game.active === SUF)
+		log(".h3.suf " + msg)
+	else
+		log(".h3.opp " + msg)
+	log_br()
+}
+
 function log_sep() {
 	log(".hr")
 }
 
-// === COMMON LIBRARY ===
+// #endregion
+
+// #region COMMON LIBRARY
 
 function clear_undo() {
 	if (game.undo.length > 0)
@@ -620,4 +675,8 @@ function array_remove(array, index) {
 	array.length = n - 1
 }
 
-// === GENERATED EVENT CODE ===
+// #endregion
+
+// #region GENERATED EVENT CODE
+
+// #endregion

@@ -274,13 +274,19 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 		text = text.substring(4)
 		p.className = 'h1'
 	}
-
-	if (text.match(/^\.h2/)) {
+	else if (text.match(/^\.h2/)) {
 		text = text.substring(4)
 		p.className = 'h2'
 	}
-
-	if (text.match(/^\.h3/)) {
+	else if (text.match(/^\.h3.suf/)) {
+		text = text.substring(8)
+		p.className = 'h3 suf'
+	}
+	else if (text.match(/^\.h3.opp/)) {
+		text = text.substring(8)
+		p.className = 'h3 opp'
+	}
+	else if (text.match(/^\.h3/)) {
 		text = text.substring(4)
 		p.className = 'h3'
 	}
@@ -289,16 +295,15 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 	return p
 }
 
+const pluralize = (count, noun, suffix = 's') =>
+  `${count} ${noun}${count !== 1 ? suffix : ''}`;
+
 function support_info() {
-	if (view.support_hand === 1)
-		return "1 card in hand";
-	return view.support_hand + " cards in hand";
+	return `${pluralize(view.support_buttons, 'button')}, ${pluralize(view.support_hand, 'card')} in hand`
 }
 
 function opposition_info() {
-	if (view.opposition_hand === 1)
-		return "1 card in hand";
-	return view.opposition_hand + " cards in hand";
+	return `${pluralize(view.opposition_buttons, 'button')}, ${pluralize(view.opposition_hand, 'card')} in hand`
 }
 
 function on_update() { // eslint-disable-line no-unused-vars
@@ -311,8 +316,13 @@ function on_update() { // eslint-disable-line no-unused-vars
 	document.getElementById("opposition_info").textContent = opposition_info()
 
 	document.getElementById("hand").replaceChildren()
+	document.getElementById("support_claimed").replaceChildren()
+	document.getElementById("support_discard").replaceChildren()
+	document.getElementById("opposition_claimed").replaceChildren()
+	document.getElementById("opposition_discard").replaceChildren()
 	document.getElementById("states_draw").replaceChildren()
 	document.getElementById("strategy_draw").replaceChildren()
+	document.getElementById("out_of_play").replaceChildren()
 
     if (view.hand) {
 		document.getElementById("hand_panel").classList.remove("hide")
@@ -322,10 +332,27 @@ function on_update() { // eslint-disable-line no-unused-vars
 		document.getElementById("hand_panel").classList.add("hide")
 	}
 
+	for (let c of view.support_claimed)
+		document.getElementById("support_claimed").appendChild(ui.cards[c])
+	for (let c of view.support_discard)
+		document.getElementById("support_discard").appendChild(ui.cards[c])
+	for (let c of view.opposition_claimed)
+		document.getElementById("opposition_claimed").appendChild(ui.cards[c])
+	for (let c of view.opposition_discard)
+		document.getElementById("opposition_discard").appendChild(ui.cards[c])
+
 	for (let c of view.states_draw)
 		document.getElementById("states_draw").appendChild(ui.cards[c])
 	for (let c of view.strategy_draw)
 		document.getElementById("strategy_draw").appendChild(ui.cards[c])
+
+	for (let c of view.out_of_play)
+		document.getElementById("out_of_play").appendChild(ui.cards[c])
+
+	action_button("commit_1_button", "+1 Button")
+	action_button("defer", "Defer")
+	action_button("match", "Match")
+	action_button("supersede", "Supersede")
 
     action_button("draw", "Draw")
 
