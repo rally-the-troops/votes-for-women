@@ -1,0 +1,264 @@
+# Support Cards
+
+CARD 1 - Seneca Falls Convention
+
+CARD 2 - Property Rights for Women
+
+CARD 3 - Frances Willard
+
+CARD 4 - A Vindication of the Rights of Woman
+
+CARD 5 - Union Victory
+
+CARD 6 - Fifteenth Amendment
+
+CARD 7 - Reconstruction
+
+CARD 8 - Petition to Congress
+
+CARD 9 - Lucy Stone
+
+CARD 10 - Susan B. Anthony Indicted
+
+CARD 11 - Anna Dickinson
+
+CARD 12 - Frederick Douglass
+
+CARD 13 - Frances Harper
+
+CARD 14 - The Union Signal
+
+CARD 15 - Sojourner Truth
+
+CARD 16 - Pioneer Women
+
+CARD 17 - Women to the Polls
+
+CARD 18 - National Woman’s Rights Convention
+
+CARD 19 - National American Woman Suffrage Association
+
+CARD 20 - Jeannette Rankin
+
+CARD 21 - Ida B. Wells-Barnett
+
+CARD 22 - The Club Movement
+
+CARD 23 - Equality League of Self-Supporting Women
+
+CARD 24 - Emmeline Pankhurst
+
+CARD 25 - “Debate Us, You Cowards!”
+
+CARD 26 - Carrie Chapman Catt
+
+CARD 27 - Alice Paul & Lucy Burns
+
+CARD 28 - Inez Milholland
+
+CARD 29 - Farmers for Suffrage
+
+CARD 30 - Zitkala-Ša
+
+CARD 31 - Helen Keller
+
+CARD 32 - Maria de Lopez
+
+CARD 33 - Marie Louise Bottineau Baldwin
+
+CARD 34 - The West’s Awakening
+
+CARD 35 - Southern Strategy
+
+CARD 36 - Women’s Trade Union League
+
+CARD 37 - The Young Woman Citizen
+
+CARD 38 - 1918 Midterm Elections
+
+CARD 39 - Woodrow Wilson
+
+CARD 40 - Maud Wood Park
+
+CARD 41 - Voter Registration
+
+CARD 42 - Processions for Suffrage
+
+CARD 43 - Prison Tour Special
+
+CARD 44 - Victory Map
+
+CARD 45 - Women and World War I
+
+CARD 46 - Eighteenth Amendment
+
+CARD 47 - Mary McLeod Bethune
+
+CARD 48 - Make a Home Run for Suffrage
+
+CARD 49 - Mary Church Terrell
+
+CARD 50 - Tea Parties for Suffrage
+
+CARD 51 - Dr. Mabel Ping-Hua Lee
+
+CARD 52 - Miss Febb Wins the Last Vote
+
+# Opposition Cards
+
+CARD 53 - The Patriarchy
+
+CARD 54 - The Civil War
+
+CARD 55 - 15th Divides Suffragists
+
+CARD 56 - Senator Joseph Brown
+
+CARD 57 - Minor v. Happersett
+
+CARD 58 - Senate Rejects Suffrage Amendment
+
+CARD 59 - South Dakota Rejects Suffrage
+
+CARD 60 - Gerrymandering
+
+CARD 61 - Border States
+
+CARD 62 - Horace Greeley
+
+CARD 63 - New York Newspapers
+
+CARD 64 - Senator George Vest
+
+CARD 65 - Catharine Beecher
+
+CARD 66 - Progress, Not Politics
+
+CARD 67 - Southern “Hospitality”
+
+CARD 68 - Beer Brewers
+
+CARD 69 - Southern Resentment
+
+CARD 70 - Old Dixie
+
+CARD 71 - NAOWS Forms
+
+CARD 72 - Woman and the Republic
+
+CARD 73 - The Ladies’ Battle
+
+CARD 74 - Backlash to the Movement
+
+CARD 75 - Xenophobia
+
+CARD 76 - “O Save Us Senators, From Ourselves”
+
+CARD 77 - Emma Goldman
+
+CARD 78 - The Great 1906 San Francisco Earthquake
+
+CARD 79 - A Threat to the Ideal of Womanhood
+
+CARD 80 - “Unwarranted, Unnecessary & Dangerous Interference”
+
+CARD 81 - Conservative Opposition
+
+CARD 82 - The SSWSC
+
+CARD 83 - Western Saloons Push Suffrage Veto
+
+CARD 84 - Transcontinental Railroad
+
+CARD 85 - White Supremacy and the Suffrage Movement
+
+CARD 86 - Senator John Weeks
+
+CARD 87 - Senator “Cotton Ed” Smith
+
+CARD 88 - War in Europe
+
+CARD 89 - 1918 Pandemic
+
+CARD 90 - The Business of Being a Woman
+
+CARD 91 - The Eden Sphinx
+
+CARD 92 - Big Liquor’s Big Money
+
+CARD 93 - Red Scare
+
+CARD 94 - Southern Women’s Rejection League
+
+CARD 95 - United Daughters of the Confederacy
+
+CARD 96 - Cheers to “No on Suffrage”
+
+CARD 97 - The Unnecessary Privilege
+
+CARD 98 - Voter Suppression
+
+CARD 99 - Anti-Suffrage Riots
+
+CARD 100 - American Constitutional League
+
+CARD 101 - The Woman Patriot
+
+CARD 102 - Governor Clement’s Veto
+
+CARD 103 - Senator Henry Cabot Lodge
+
+CARD 104 - Senator William Borah
+
+# Strategy Cards
+
+CARD 105 - Efficient Organizing
+
+CARD 106 - Reconsideration
+
+CARD 107 - Opposition Research
+
+CARD 108 - Change In Plans
+
+CARD 109 - Bellwether State
+
+CARD 110 - Superior Lobbying
+
+CARD 111 - The Winning Plan
+
+CARD 112 - Regional Focus
+
+CARD 113 - Eye on the Future
+
+CARD 114 - Transportation
+
+CARD 115 - Counter Strat
+
+CARD 116 - National Focus
+
+# States Cards
+
+CARD 117 - California
+
+CARD 118 - Utah
+
+CARD 119 - Montana
+
+CARD 120 - Kansas
+
+CARD 121 - Texas
+
+CARD 122 - Georgia
+
+CARD 123 - Illinois
+
+CARD 124 - Ohio
+
+CARD 125 - Pennsylvania
+
+CARD 126 - Virginia
+
+CARD 127 - New York
+
+CARD 128 - New Jersey
+
