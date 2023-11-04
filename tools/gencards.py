@@ -35,6 +35,8 @@ def flush():
 
         cards.append(output)
 
+        # print("CARD {} - {}\n# {}\n".format(output['id'], output['title'], output['text']))
+
         # Reset card attributes for the next entry
         card['title'] = ""
         card['text'] = []
@@ -45,6 +47,7 @@ def read_cards(_card_type):
     card['type'] = _card_type
     card['era'] = ""
     filename = file_format.format(_card_type)
+    # print("# {} Cards\n".format(_card_type.title()))
 
     with open(filename) as fp:
         for line in fp:

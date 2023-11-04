@@ -1,264 +1,392 @@
 # Support Cards
 
 CARD 1 - Seneca Falls Convention
+# Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region. Receive 2 :badge and add 2 :purple_or_yellow_cube in New York.
 
 CARD 2 - Property Rights for Women
+# For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
 
 CARD 3 - Frances Willard
+# Add 1 :congressional_marker in Congress and receive 2 :badge.
 
 CARD 4 - A Vindication of the Rights of Woman
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 5 - Union Victory
+# Playable if *The Civil War* is in effect. Roll :d6. On a roll of 3-6, receive two :badge and move *The Civil War* to the discard pile.
 
 CARD 6 - Fifteenth Amendment
+# Playable if *The Civil War* is not in effect. Roll :d6. On a roll of 3-6, add 2 :congressional_marker in Congress and add 8 :purple_or_yellow_cube anywhere, no more than 2 per state.
 
 CARD 7 - Reconstruction
+# Playable if *The Civil War* is not in effect and the *Fifteenth Amendment* is in effect. Add 1 :purple_or_yellow_cube in each of Virginia, North Carolina, South Carolina, Georgia, Florida, Alabama, Mississippi, Tennessee, Arkansas, Louisiana and Texas.
 
 CARD 8 - Petition to Congress
+# Add 1 :congressional_marker in Congress and add 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 9 - Lucy Stone
+# Receive 1 :badge and add 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 10 - Susan B. Anthony Indicted
+# Receive 1 :badge and add 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 11 - Anna Dickinson
+# Receive 1 :badge and add 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 12 - Frederick Douglass
+# Roll :d8. Add that number :purple_or_yellow_cube in the Northeast region, no more than 1 per state.
 
 CARD 13 - Frances Harper
+# Roll :d8. Add that number :purple_or_yellow_cube in the Atlantic & Appalachia region, no more than 1 per state.
 
 CARD 14 - The Union Signal
+# Receive 1 :badge and add 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 15 - Sojourner Truth
+# Roll :d8. Add that number :purple_or_yellow_cube in the Midwest region, no more than 1 per state.
 
 CARD 16 - Pioneer Women
+# Roll :d8. Add that number :purple_or_yellow_cube in the Plains region, no more than 1 per state.
 
 CARD 17 - Women to the Polls
+# Add 2 :purple_or_yellow_cube in each of New Jersey, Pennsylvania and Delaware.
 
 CARD 18 - National Woman’s Rights Convention
+# Playable if *The Civil War* is not in effect. Add 1 :congressional_marker in Congress and 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 19 - National American Woman Suffrage Association
+# Add 1 :purple_campaigner in the Atlantic & Appalachia region. Receive 3 :badge.
 
 CARD 20 - Jeannette Rankin
+# Roll :d6. On a roll of 3-6, add 1 :congressional_marker in Congress and 4 :purple_or_yellow_cube in Montana and 2 :purple_or_yellow_cube in each other state in the Plains region.
 
 CARD 21 - Ida B. Wells-Barnett
+# Receive 2 :badge. Add 2 :purple_or_yellow_cube in Illinois and 1 :purple_or_yellow_cube in each other state in the Midwest region.
 
 CARD 22 - The Club Movement
+# Receive 4 :badge.
 
 CARD 23 - Equality League of Self-Supporting Women
+# Receive 2 :badge. Add 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 24 - Emmeline Pankhurst
+# Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
 
 CARD 25 - “Debate Us, You Cowards!”
+# Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.
 
 CARD 26 - Carrie Chapman Catt
+# Receive 2 :badge. Add 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 27 - Alice Paul & Lucy Burns
+# Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.
 
 CARD 28 - Inez Milholland
+# Add 1 :congressional_marker in Congress. Receive 2 :badge and add 1 :purple_or_yellow_cube in one state of each region.
 
 CARD 29 - Farmers for Suffrage
+# Add 2 :purple_or_yellow_cube in each of Wisconsin, Minnesota, Iowa, North Dakota and South Dakota.
 
 CARD 30 - Zitkala-Ša
+# Add 2 :purple_or_yellow_cube in each of North Dakota, South Dakota, Nebraska, Montana and Wyoming.
 
 CARD 31 - Helen Keller
+# Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
 
 CARD 32 - Maria de Lopez
+# Recieve 2 :badge. Add 2 :purple_or_yellow_cube in each of California, Nevada and Arizona.
 
 CARD 33 - Marie Louise Bottineau Baldwin
+# For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
 
 CARD 34 - The West’s Awakening
+# Add 2 :purple_or_yellow_cube in each state in the West region.
 
 CARD 35 - Southern Strategy
+# Receive 2 :badge. Add 2 :purple_or_yellow_cube in each state in the South region. Select and place in front of you 1 available Strategy card.
 
 CARD 36 - Women’s Trade Union League
+# Add 1 :yellow_campaigner in the Atlantic & Appalachia region. Add 1 :congressional_marker in Congress and receive 2 :badge.
 
 CARD 37 - The Young Woman Citizen
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 38 - 1918 Midterm Elections
+# Roll :d6. On a roll of 3-6, add 3 :congressional_marker in Congress.
 
 CARD 39 - Woodrow Wilson
+# Spend 4 :badge to select and place in front of you 1 available Strategy card.
 
 CARD 40 - Maud Wood Park
+# Add 2 :congressional_marker in Congress.
 
 CARD 41 - Voter Registration
+# The Suffragist player rolls :d8 instead of :d6 during Final Voting.
 
 CARD 42 - Processions for Suffrage
+# For the remainder of the turn, roll :d8 instead of :d6 when taking a Lobbying action. For each 6, 7 or 8 rolled, add 1 :congressional_marker in Congress.
 
 CARD 43 - Prison Tour Special
+# For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
 
 CARD 44 - Victory Map
+# Add 1 :purple_or_yellow_cube in each state in the West and Plains regions. Add 1 :purple_or_yellow_cube in each of Texas, Arkansas, Illinois, Michigan, New York and Vermont.
 
 CARD 45 - Women and World War I
+# Playable if *War in Europe* is in effect. Add 10 :purple_or_yellow_cube anywhere, no more than 2 per state.
 
 CARD 46 - Eighteenth Amendment
+# Roll :d6. On a roll of 3-6, add 1 congressional_marker in Congress and receive 2 :badge.
 
 CARD 47 - Mary McLeod Bethune
+# Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
 
 CARD 48 - Make a Home Run for Suffrage
+# Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
 
 CARD 49 - Mary Church Terrell
+# Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
 
 CARD 50 - Tea Parties for Suffrage
+# Add 1 :congressional_marker in Congress and receive 4 :badge
 
 CARD 51 - Dr. Mabel Ping-Hua Lee
+# Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
 
 CARD 52 - Miss Febb Wins the Last Vote
+# The Suffragist player wins all ties during Final Voting.
 
 # Opposition Cards
 
 CARD 53 - The Patriarchy
+# Add 1 :red_campaigner in the South region. Receive 4 :badge. Add 1 :red_cube in each state in the Northeast region, the Atlantic & Appalachia region, the South region and the Midwest region.
 
 CARD 54 - The Civil War
+# Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions.
 
 CARD 55 - 15th Divides Suffragists
+# Playable if *Fifteenth Amendment* is in effect. Remove all :purple_cube in up to 4 states. The Suffragist player loses 2 :badge.
 
 CARD 56 - Senator Joseph Brown
+# Remove 1 :congressional_marker from Congress and add 2 :red_cube in Georgia.
 
 CARD 57 - Minor v. Happersett
+# Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in Missouri.
 
 CARD 58 - Senate Rejects Suffrage Amendment
+# Roll :d6. On a roll of 3-6, receive 1 :badge and remove 1 :congressional_marker from Congress.
 
 CARD 59 - South Dakota Rejects Suffrage
+# Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in South Dakota.
 
 CARD 60 - Gerrymandering
+# Remove all :yellow_cube in up to 2 states.
 
 CARD 61 - Border States
+# Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri.
 
 CARD 62 - Horace Greeley
+# Place 2 :red_cube in each of New York and Connecticut.
 
 CARD 63 - New York Newspapers
+# Place 2 :red_cube in each of New York and New Jersey.
 
 CARD 64 - Senator George Vest
+# Remove 1 :congressional_marker from Congress and add 2 :red_cube in Missouri.
 
 CARD 65 - Catharine Beecher
+# Roll :d4. Add that number :red_cube anywhere, no more than 1 per state.
 
 CARD 66 - Progress, Not Politics
+# Draw 6 cards from your Draw Deck. Place any number of the 6 cards on the top of your Draw Deck and the rest at the bottom of your Draw Deck.
 
 CARD 67 - Southern “Hospitality”
+# Place 1 :red_cube in each of Virginia, North Carolina, South Carolina, Georgia and Tennessee.
 
 CARD 68 - Beer Brewers
+# Playable if Eighteenth Amendment is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
 
 CARD 69 - Southern Resentment
+# Playable if *Fifteenth Amendment* is in effect. Add 1 :red_cube in each of Texas, Louisiana, Arkansas, Mississippi and Alabama.
 
 CARD 70 - Old Dixie
+# Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida.
 
 CARD 71 - NAOWS Forms
+# Add 1 :red_campaigner in the Northeast region. Receive 2 :badge.
 
 CARD 72 - Woman and the Republic
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 73 - The Ladies’ Battle
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 74 - Backlash to the Movement
+# Remove 6 :purple_or_yellow_cube from anywhere, no more than 2 per state.
 
 CARD 75 - Xenophobia
+# Remove all from any 1 :purple_cube state. Remove all :yellow_cube from any 1 state.
 
 CARD 76 - “O Save Us Senators, From Ourselves”
+# Add 1 :red_cube in one state of each region.
 
 CARD 77 - Emma Goldman
+# Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
 
 CARD 78 - The Great 1906 San Francisco Earthquake
+# Remove all :yellow_cube and :purple_cube from California. The Suffragist player loses 1 :badge.
 
 CARD 79 - A Threat to the Ideal of Womanhood
+# For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
 
 CARD 80 - “Unwarranted, Unnecessary & Dangerous Interference”
+# Add 1 :red_cube in one state of each region.
 
 CARD 81 - Conservative Opposition
+# For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
 
 CARD 82 - The SSWSC
+# Playable if *Southern Strategy* is in effect. Receive 2 :badge and add 6 :red_cube in the South region, no more than 2 per state.
 
 CARD 83 - Western Saloons Push Suffrage Veto
+# Playable if *Eighteenth Amendment* is not in effect. Place 2 :red_cube in Arizona and 1 :red_cube in each of New Mexico, Nevada and Utah.
 
 CARD 84 - Transcontinental Railroad
+# Move each :red_campaigner to any region(s) without paying any :badge and then take a Campaigning action.
 
 CARD 85 - White Supremacy and the Suffrage Movement
+# Playable if *Southern Strategy* is in effect. Remove all :yellow_cube in up to 4 states. The Suffragist player loses 2 :badge.
 
 CARD 86 - Senator John Weeks
+# Remove 1 :congressional_marker from Congress and add 2 :red_cube in New Hampshire.
 
 CARD 87 - Senator “Cotton Ed” Smith
+# Remove 1 :congressional_marker from Congress and add 2 :red_cube in South Carolina.
 
 CARD 88 - War in Europe
+# Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to take a Campaigning action.
 
 CARD 89 - 1918 Pandemic
+# Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
 
 CARD 90 - The Business of Being a Woman
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 91 - The Eden Sphinx
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 92 - Big Liquor’s Big Money
+# Playable if *Eighteenth Amendment* is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
 
 CARD 93 - Red Scare
+# Remove all :purple_cube in up to 2 states.
 
 CARD 94 - Southern Women’s Rejection League
+# Playable if *Southern Strategy* is in effect. Roll :d8. Add that number :red_cube in the South region, no more than 2 per state.
 
 CARD 95 - United Daughters of the Confederacy
+# Playable if *Southern Strategy* is in effect. Roll :d8. Add that number :red_cube in the South region, no more than 2 per state.
 
 CARD 96 - Cheers to “No on Suffrage”
+# Playable if *Eighteenth Amendment* is not in effect. Roll :d8. Add that number :red_cube anywhere, no more than 2 per state.
 
 CARD 97 - The Unnecessary Privilege
+# Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
 
 CARD 98 - Voter Suppression
+# The Opposition player rolls :d8 instead of :d6 during Final Voting.
 
 CARD 99 - Anti-Suffrage Riots
+# The Suffragist player must discard 2 cards from their hand at random and then draw 2 cards from the Suffragist Draw Deck.
 
 CARD 100 - American Constitutional League
+# Spend 4 :badge to select, and place in front of you, 1 available Strategy card.
 
 CARD 101 - The Woman Patriot
+# Receive 3 :badge.
 
 CARD 102 - Governor Clement’s Veto
+# Replace 1 :green_check in a state with 1 :red_x.
 
 CARD 103 - Senator Henry Cabot Lodge
+# Remove 1 :congressional_marker from Congress and add 2 :red_cube in Massachusetts
 
 CARD 104 - Senator William Borah
+# Remove 1 :congressional_marker from Congress and add 2 :red_cube in Utah
 
 # Strategy Cards
 
 CARD 105 - Efficient Organizing
+# Receive 5 :badge.
 
 CARD 106 - Reconsideration
+# Replace 1 :red_x with 2 :purple_or_yellow_cube or 1 :green_check with 2 :red_cube.
 
 CARD 107 - Opposition Research
+# Your opponent must lose half (rounded up) of their :badge.
 
 CARD 108 - Change In Plans
+# Look at your opponent’s hand. Your opponent must discard 1 card of your choice that does not have a :yellow_campaigner / :purple_campaigner / :red_campaigner on it. Your opponent then draws 1 replacement card from their Draw Deck.
 
 CARD 109 - Bellwether State
+# Select one state and remove any :red_cube and add 4 :purple_or_yellow_cube or remove any :purple_or_yellow_cube and add 4 :red_cube.
 
 CARD 110 - Superior Lobbying
+# Roll 4 :d8. For each 6, 7 or 8 rolled, add 1 :congressional_marker to Congress or remove 1 :congressional_marker from Congress.
 
 CARD 111 - The Winning Plan
+# Draw 6 cards from your Draw Deck. Play 1 card for its event immediately. Place any number of the remaining 5 cards on the top of your Draw Deck and the rest at the bottom of your Draw Deck.
 
 CARD 112 - Regional Focus
+# Add 1 :purple_or_yellow_cube or 1 :red_cube per state in any one region.
 
 CARD 113 - Eye on the Future
+# Playable if it is Turn 5 or Turn 6. Look through your Draw Deck and select 1 card and play for its event immediately. Then reshuffle your Draw Deck.
 
 CARD 114 - Transportation
+# Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :badge and then take a Campaigning action.
 
 CARD 115 - Counter Strat
+# Remove one card that is “in effect for the remainder of the turn” and place it in the appropriate discard pile.
 
 CARD 116 - National Focus
+# Add 2 :purple_or_yellow_cube or 2 :red_cube in one state of each region.
 
 # States Cards
 
 CARD 117 - California
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 118 - Utah
+# Add 6 :pink_yellow_cube or 6 :red_cube in the West region, no more than 2 per state.
 
 CARD 119 - Montana
+# Receive 2 :badge.
 
 CARD 120 - Kansas
+# Add 6 :pink_yellow_cube or 6 :red_cube in the Plains region, no more than 2 per state.
 
 CARD 121 - Texas
+# Add 6 :pink_yellow_cube or 6 :red_cube in the South region, no more than 2 per state.
 
 CARD 122 - Georgia
+# Receive 2 :badge.
 
 CARD 123 - Illinois
+# Add 6 :pink_yellow_cube or 6 :red_cube in the Midwest region, no more than 2 per state.
 
 CARD 124 - Ohio
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 125 - Pennsylvania
+# Add 6 :pink_yellow_cube or 6 :red_cube in the Atlantic & Appalachia region, no more than 2 per state.
 
 CARD 126 - Virginia
+# Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
 
 CARD 127 - New York
+# Add 6 :pink_yellow_cube or 6 :red_cube in the Northeast region, no more than 2 per state.
 
 CARD 128 - New Jersey
+# Receive 2 :badge.
 
