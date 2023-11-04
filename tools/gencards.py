@@ -70,3 +70,4 @@ if __name__ == "__main__":
     read_cards("states")
 
     print("const CARDS = " + json.dumps(cards))
+    print("if (typeof module !== 'undefined') module.exports = {CARDS}")
