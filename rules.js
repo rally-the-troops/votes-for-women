@@ -147,9 +147,9 @@ exports.setup = function (seed, _scenario, _options) {
 		strategy_draw: [],
 		states_draw: [],
 
-		persisted_turn: [],
-		persisted_game: [],
-		persisted_ballot: [],
+		persistent_turn: [],
+		persistent_game: [],
+		persistent_ballot: [],
 
 		support_deck: [],
 		support_discard: [],
@@ -242,9 +242,9 @@ exports.view = function(state, player) {
 		strategy_draw: game.strategy_draw,
 		states_draw: game.states_draw,
 
-		persisted_turn: game.persisted_turn,
-		persisted_game: game.persisted_game,
-		persisted_ballot: game.persisted_ballot,
+		persistent_turn: game.persistent_turn,
+		persistent_game: game.persistent_game,
+		persistent_ballot: game.persistent_ballot,
 
 		support_deck: game.support_deck.length,
 		support_discard: game.support_discard, // top_discard?
@@ -565,16 +565,16 @@ states.cleanup_phase = {
 
 function cleanup_persistent_turn_cards() {
 	// any cards in the “Cards in Effect for the Rest of the Turn box” are placed in the appropriate discard pile.
-	for (let c of game.persisted_turn) {
+	for (let c of game.persistent_turn) {
 		if (is_support_card(c)) {
 			game.support_discard.push(c)
 		} else if (is_opposition_card(c)) {
 			game.opposition_discard.push(c)
 		} else {
-			throw Error(`Unexpected card ${c} on persisted_turn`)
+			throw Error(`Unexpected card ${c} on persistent_turn`)
 		}
 	}
-	game.persisted_turn = []
+	game.persistent_turn = []
 }
 
 function end_cleanup_phase() {

@@ -346,6 +346,17 @@ function on_update() { // eslint-disable-line no-unused-vars
 	for (let c of view.out_of_play)
 		document.getElementById("out_of_play").appendChild(ui.cards[c])
 
+	for (let id of ['persistent_turn', 'persistent_game', 'persistent_ballot']) {
+		document.getElementById(id).replaceChildren()
+		for (let c of view[id] || []) {
+			let elt = create("div", {
+				className: `persistent_card ${CARDS[c].type}`,
+				innerHTML: sub_card_name(null, c)
+			})
+			document.getElementById(id).appendChild(elt)
+		}
+	}
+
 	action_button("commit_1_button", "+1 Button")
 	action_button("defer", "Defer")
 	action_button("match", "Match")
