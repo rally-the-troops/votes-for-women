@@ -1,11 +1,32 @@
 "use strict"
 
-/* global action_button, send_action, view */
+/* global CARDS, US_STATES, action_button, send_action, view */
 
 const SUF = 0
 const OPP = 1
 const SUF_NAME = "Suffragist"
 const OPP_NAME = "Opposition"
+
+const WEST = 1
+const PLAINS = 2
+const SOUTH = 3
+const MIDWEST = 4
+const ATLANTIC_APPALACHIA = 5
+const NORTHEAST = 6
+
+const REGION_NAMES = [
+    null,
+    "West",
+    "Plains",
+    "South",
+    "Midwest",
+    "Atlantic & Appalachia",
+    "Northeast"
+]
+
+const region_count = 6
+const us_states_count = region_count * 8
+const card_count = 128
 
 let ui = {
 	status: document.getElementById("status"),
@@ -14,13 +35,15 @@ let ui = {
 		document.getElementById("role_Opposition"),
 	],
     cards: [ null ],
+	us_states: [ null ],
+	regions: [ null ],
 }
 
 // :r !python3 tools/genlayout.py
 const LAYOUT = {
-	"NorthEast": [914, 190],
+	"Northeast": [914, 190],
 	"AtlanticAppalachia": [797, 366],
-	"MidWest": [612, 298],
+	"Midwest": [612, 298],
 	"South": [574, 505],
 	"Plains": [406, 236],
 	"West": [127, 300],
@@ -168,6 +191,18 @@ function is_piece_action(i) {
 	return false
 }
 
+function is_region_action(i) {
+	if (view.actions && view.actions.region && view.actions.region.includes(i))
+		return true
+	return false
+}
+
+function is_us_state_action(i) {
+	if (view.actions && view.actions.us_state && view.actions.us_state.includes(i))
+		return true
+	return false
+}
+
 function is_space_action(i) {
 	if (view.actions && view.actions.space && view.actions.space.includes(i))
 		return true
@@ -176,6 +211,14 @@ function is_space_action(i) {
 
 function on_blur(_evt) {
 	document.getElementById("status").textContent = ""
+}
+
+function on_focus_region(evt) {
+	document.getElementById("status").textContent = REGION_NAMES[evt.target.my_region]
+}
+
+function on_focus_us_state(evt) {
+	document.getElementById("status").textContent = US_STATES[evt.target.my_us_state].name
 }
 
 function on_focus_space(evt) {
@@ -187,21 +230,29 @@ function on_focus_piece(evt) {
 		document.getElementById("status").textContent = evt.target.my_name
 }
 
-// function on_click_card(evt) {
-// 	if (evt.button === 0) {
-// 		if (send_action('card', evt.target.my_card))
-// 			evt.stopPropagation()
-// 	}
-// }
-
 function on_click_card(evt) {
 	let card = evt.target.my_card
-	console.log("CLICK", card)
 	if (is_action('card', card)) {
 		send_action('card', card)
 	} else {
 		show_popup_menu(evt, "popup", card, CARDS[card].title)
 	}
+}
+
+function on_click_region(evt) {
+	if (evt.button === 0) {
+		if (send_action('region', evt.target.my_region))
+			evt.stopPropagation()
+	}
+	hide_popup_menu()
+}
+
+function on_click_us_state(evt) {
+	if (evt.button === 0) {
+		if (send_action('us_state', evt.target.my_us_state))
+			evt.stopPropagation()
+	}
+	hide_popup_menu()
 }
 
 function on_click_space(evt) {
@@ -214,6 +265,7 @@ function on_click_space(evt) {
 
 function on_click_cube(evt) {
 	if (evt.button === 0) {
+		console.log("piece", evt.target.my_cube)
 		if (send_action('piece', evt.target.my_cube))
 			evt.stopPropagation()
 	}
@@ -230,7 +282,7 @@ function create(t, p, ...c) {
 function build_user_interface() {
 	let elt
 
-    for (let c = 1; c <= 128; ++c) {
+    for (let c = 1; c <= card_count; ++c) {
 		elt = ui.cards[c] = create("div", {
 			className: `card card_${c}`,
 			my_card: c,
@@ -238,6 +290,23 @@ function build_user_interface() {
 		})
 	}
 
+	for (let r = 1; r <= region_count; ++r) {
+		let region_name_css = REGION_NAMES[r].replaceAll(' & ', '')
+		elt = ui.regions[r] = document.querySelector(`#map #${region_name_css}`)
+		elt.my_region = r
+		elt.addEventListener("mousedown", on_click_region)
+		elt.addEventListener("mouseenter", on_focus_region)
+		elt.addEventListener("mouseleave", on_blur)
+	}
+
+	for (let s = 1; s <= us_states_count; ++s) {
+		let us_state_css = US_STATES[s].code
+		elt = ui.regions[s] = document.querySelector(`#map #${us_state_css}`)
+		elt.my_us_state = s
+		elt.addEventListener("mousedown", on_click_us_state)
+		elt.addEventListener("mouseenter", on_focus_us_state)
+		elt.addEventListener("mouseleave", on_blur)
+	}
 }
 
 function on_focus_card_tip(card_number) { // eslint-disable-line no-unused-vars

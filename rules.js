@@ -18,9 +18,25 @@ const last_strategy_card = 116
 const first_states_card = 117
 const last_states_card = 128
 
-const {
-	CARDS
-} = require("./cards.js")
+const WEST = 1
+const PLAINS = 2
+const SOUTH = 3
+const MIDWEST = 4
+const ATLANTIC_APPALACHIA = 5
+const NORTHEAST = 6
+
+const REGION_NAMES = [
+    null,
+    "West",
+    "Plains",
+    "South",
+    "Midwest",
+    "Atlantic & Appalachia",
+    "Northeast"
+]
+
+const {	CARDS } = require("./cards.js")
+const {	US_STATES } = require("./data.js")
 
 // #region CARD & HAND FUNCTIONS
 
