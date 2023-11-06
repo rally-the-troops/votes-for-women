@@ -46,6 +46,10 @@ const REST_OF_TURN = 1
 const REST_OF_GAME = 2
 const BALLOT_BOX = 3
 
+const D4 = 4
+const D6 = 6
+const D8 = 8
+
 const {	CARDS } = require("./cards.js")
 const {	US_STATES } = require("./data.js")
 
@@ -68,7 +72,7 @@ function is_states_card(c) {
 }
 
 function find_card(name) {
-	return CARDS.findIndex((x) => x.name === name)
+	return CARDS.findIndex((x) => x && x.name === name)
 }
 
 function draw_card(deck) {
@@ -110,6 +114,10 @@ function is_player_claimed_card(c) {
 
 // #region US_STATES & REGIONS FUNCTIONS
 
+function anywhere() {
+	return Array.from(Array(us_states_count), (e,i)=>i+1)
+}
+
 function find_us_state(name) {
 	return US_STATES.findIndex((x) => x && x.name === name)
 }
@@ -124,6 +132,11 @@ function region_us_states(region) {
 		if (element && element.region === region) indexes.push(index)
 	})
 	return indexes
+}
+
+function region_us_states_except(region, excluded) {
+	const to_remove = new Set(excluded)
+	return region_us_states(region).filter( x => !to_remove.has(x) )
 }
 
 // #endregion
@@ -660,7 +673,7 @@ function end_cleanup_phase() {
 
 // #endregion
 
-// #region EVENTS
+// #region EVENTS GENERIC
 
 function goto_play_event(c) {
 	// update_presence_and_control()
@@ -811,96 +824,285 @@ function vm_case() {
 	}
 }
 
-function vm_ops() {
-	goto_operations(vm_operand(1), vm_operand_spaces(2))
-}
+// #endregion
 
-function vm_operand_spaces(x) {
-	let s = vm_operand(x)
-	if (typeof s === "number")
-		return [ s ]
-	return s
-}
+// #region EVENTS VfW DSL
 
-function vm_remove_up_to() {
-	game.vm.upto = 1
+function vm_add_campaigner() {
 	game.vm.count = vm_operand(1)
-	game.vm.spaces = vm_operand_spaces(2)
-	goto_vm_remove()
+	game.vm.campaigner = vm_operand(2)
+	game.vm.region = vm_operand(3)
+	goto_vm_add_campaigner()
 }
 
-function vm_remove() {
+function vm_receive_badges() {
 	game.vm.count = vm_operand(1)
-	game.vm.spaces = vm_operand_spaces(2)
-	goto_vm_remove()
+	goto_vm_receive_badges()
 }
 
-function vm_remove_own() {
-	game.vm.spaces = vm_operand_spaces(1)
-	game.state = "vm_remove_own"
-}
-
-function vm_replace_up_to() {
-	game.vm.upto = 1
+function vm_spend_badges() {
+	// TODO assert
 	game.vm.count = vm_operand(1)
-	game.vm.spaces = vm_operand_spaces(2)
-	game.state = "vm_replace"
-	goto_vm_replace()
+	goto_vm_spend_badges()
 }
 
-function vm_replace_different() {
+function vm_opponent_loses_badges() {
+	// TODO assert
 	game.vm.count = vm_operand(1)
-	game.vm.spaces = vm_operand_spaces(2).slice() // make a copy for safe mutation
-	game.state = "vm_replace_different"
+	goto_vm_opponent_loses_badges()
+}
+
+function vm_add_cubes() {
+	game.vm.count = vm_operand(1)
+	game.vm.cubes = vm_operand(2)
+	game.vm.us_states = vm_operand(3)
+	goto_vm_add_cubes()
+}
+
+function vm_add_cubes_limit() {
+	game.vm.count = vm_operand(1)
+	game.vm.cubes = vm_operand(2)
+	game.vm.us_states = vm_operand(3)
+	game.vm.limit = vm_operand(4)
+	goto_vm_add_cubes()
+}
+
+function vm_add_cubes_in_each_of() {
+	game.vm.count = vm_operand(1)
+	game.vm.cubes = vm_operand(2)
+	game.vm.us_states = vm_operand(3)
+	game.vm.in_each_of = true
+	goto_vm_add_cubes()
+}
+
+function vm_add_cubes_in_one_state_of_each_region() {
+	game.vm.count = vm_operand(1)
+	game.vm.cubes = vm_operand(2)
+	game.vm.in_one_state_of_each_region = true
+	goto_vm_add_cubes()
+}
+
+function vm_add_cubes_per_state_in_any_one_region() {
+	game.vm.count = vm_operand(1)
+	game.vm.cubes = vm_operand(2)
+	game.vm.per_state_in_any_one_region = true
+	goto_vm_add_cubes()
+}
+
+function vm_remove_cubes_limit() {
+	game.vm.count = vm_operand(1)
+	game.vm.cubes = vm_operand(2)
+	game.vm.us_states = vm_operand(3)
+	game.vm.limit = vm_operand(4)
+	goto_vm_remove_cubes()
+}
+
+function vm_remove_all_cubes() {
+	game.vm.cubes = vm_operand(1)
+	game.vm.us_states = vm_operand(2)
+	game.vm.all = true
+	goto_vm_remove_cubes()
+}
+
+function vm_remove_all_cubes_up_to() {
+	game.vm.cubes = vm_operand(1)
+	game.vm.limit = vm_operand(2)
+	game.vm.all = true
+	goto_vm_remove_cubes()
 }
 
 function vm_replace() {
-	game.vm.count = vm_operand(1)
-	game.vm.spaces = vm_operand_spaces(2)
+	game.vm.what = vm_operand(1)
+	game.vm.count = vm_operand(2)
+	game.vm.replacement = vm_operand(3)
 	goto_vm_replace()
 }
 
-function vm_place_removed_up_to() {
-	game.vm.removed = 1
-	game.vm.upto = 1
+function vm_add_congress() {
 	game.vm.count = vm_operand(1)
-	game.vm.spaces = vm_operand_spaces(2)
-	goto_vm_place()
+	goto_vm_add_congress()
 }
 
-function vm_place_up_to() {
-	game.vm.upto = 1
+function vm_remove_congress() {
 	game.vm.count = vm_operand(1)
-	game.vm.spaces = vm_operand_spaces(2)
-	goto_vm_place()
+	goto_vm_remove_congress()
 }
 
-function vm_place() {
+function vm_roll() {
 	game.vm.count = vm_operand(1)
-	game.vm.spaces = vm_operand_spaces(2)
-	goto_vm_place()
+	game.vm.d = vm_operand(2)
+	goto_vm_roll_dice()
 }
 
-function vm_may_place_disc() {
-	game.vm.upto = 1
-	game.vm.count = 1
-	game.vm.spaces = vm_operand_spaces(1)
-	game.state = "vm_place_disc"
-	goto_vm_place_disc()
-}
-
-function vm_place_disc() {
-	game.vm.count = 1
-	game.vm.spaces = vm_operand_spaces(1)
-	goto_vm_place_disc()
-}
-
-function vm_move_up_to() {
+function vm_roll_success() {
 	game.vm.count = vm_operand(1)
-	game.vm.a = vm_operand_spaces(2)
-	game.vm.b = vm_operand_spaces(3)
-	goto_vm_move()
+	game.vm.d = vm_operand(2)
+	game.vm.on_success = true
+	goto_vm_roll_dice()
 }
+
+function vm_move_each_campaigner_free() {
+	game.vm.campaigner = vm_operand(1)
+	goto_vm_move_each_campaigner_free()
+}
+
+function vm_select_strategy_card() {
+	goto_vm_select_strategy_card()
+}
+
+function vm_select_us_state() {
+	goto_vm_select_us_state()
+}
+
+function vm_persistent() {
+	let type = vm_operand(1)
+	// TODO
+	log(`TODO Persistent Card type ${type}`)
+	vm_next()
+}
+
+function vm_requires_persistent() {
+	let card = vm_operand(1)
+	// TODO
+	log(`TODO ASSERT Persistent Card ${card}`)
+	vm_next()
+}
+
+function vm_requires_not_persistent() {
+	let card = vm_operand(1)
+	// TODO
+	log(`TODO ASSERT NOT Persistent Card ${card}`)
+	vm_next()
+}
+
+function vm_discard_persistent() {
+	let card = vm_operand(1)
+	// TODO
+	log(`TODO Discard Persistent Card ${card}`)
+	vm_next()
+}
+
+function vm_campaigning_action() {
+	// TODO
+	// ASSERT
+	log("TODO Campaigning Action")
+	vm_next()
+}
+
+function vm_todo() {
+	// TODO
+	log("TODO")
+	vm_next()
+}
+
+function vm_draw_2_play_1_event() {
+	log("TODO draw_2_play_1_event")
+	vm_next()
+}
+
+function vm_draw_6_place_any_on_top_of_draw() {
+	log("TODO draw_6_place_any_on_top_of_draw")
+	vm_next()
+}
+
+function vm_support_discard_2_random_draw_2() {
+	log("TODO support_discard_2_random_draw_2")
+	vm_next()
+}
+
+
+// XXX Placeholders from RFOP
+
+// function vm_ops() {
+// 	goto_operations(vm_operand(1), vm_operand_spaces(2))
+// }
+
+// function vm_operand_spaces(x) {
+// 	let s = vm_operand(x)
+// 	if (typeof s === "number")
+// 		return [ s ]
+// 	return s
+// }
+
+// function vm_remove_up_to() {
+// 	game.vm.upto = 1
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.spaces = vm_operand_spaces(2)
+// 	goto_vm_remove()
+// }
+
+// function vm_remove() {
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.spaces = vm_operand_spaces(2)
+// 	goto_vm_remove()
+// }
+
+// function vm_remove_own() {
+// 	game.vm.spaces = vm_operand_spaces(1)
+// 	game.state = "vm_remove_own"
+// }
+
+// function vm_replace_up_to() {
+// 	game.vm.upto = 1
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.spaces = vm_operand_spaces(2)
+// 	game.state = "vm_replace"
+// 	goto_vm_replace()
+// }
+
+// function vm_replace_different() {
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.spaces = vm_operand_spaces(2).slice() // make a copy for safe mutation
+// 	game.state = "vm_replace_different"
+// }
+
+// function vm_replace() {
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.spaces = vm_operand_spaces(2)
+// 	goto_vm_replace()
+// }
+
+// function vm_place_removed_up_to() {
+// 	game.vm.removed = 1
+// 	game.vm.upto = 1
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.spaces = vm_operand_spaces(2)
+// 	goto_vm_place()
+// }
+
+// function vm_place_up_to() {
+// 	game.vm.upto = 1
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.spaces = vm_operand_spaces(2)
+// 	goto_vm_place()
+// }
+
+// function vm_place() {
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.spaces = vm_operand_spaces(2)
+// 	goto_vm_place()
+// }
+
+// function vm_may_place_disc() {
+// 	game.vm.upto = 1
+// 	game.vm.count = 1
+// 	game.vm.spaces = vm_operand_spaces(1)
+// 	game.state = "vm_place_disc"
+// 	goto_vm_place_disc()
+// }
+
+// function vm_place_disc() {
+// 	game.vm.count = 1
+// 	game.vm.spaces = vm_operand_spaces(1)
+// 	goto_vm_place_disc()
+// }
+
+// function vm_move_up_to() {
+// 	game.vm.count = vm_operand(1)
+// 	game.vm.a = vm_operand_spaces(2)
+// 	game.vm.b = vm_operand_spaces(3)
+// 	goto_vm_move()
+// }
 
 // #endregion
 
@@ -1395,7 +1597,7 @@ CODE[4] = [ // A Vindication of the Rights of Woman
 
 CODE[5] = [ // Union Victory
 	[ vm_requires_persistent, find_card("The Civil War") ],
-	[ vm_roll_d6_success ],
+	[ vm_roll_success, 1, D6 ],
 	[ vm_receive_badges, 2 ],
 	[ vm_discard_persistent, find_card("The Civil War") ],
 	[ vm_return ],
@@ -1403,7 +1605,7 @@ CODE[5] = [ // Union Victory
 
 CODE[6] = [ // Fifteenth Amendment
 	[ vm_requires_not_persistent, find_card("The Civil War") ],
-	[ vm_roll_d6_success ],
+	[ vm_roll_success, 1, D6 ],
 	[ vm_add_congress, 2 ],
 	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
@@ -1441,7 +1643,7 @@ CODE[11] = [ // Anna Dickinson
 ]
 
 CODE[12] = [ // Frederick Douglass
-	[ vm_roll_d8 ],
+	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, region_us_states(NORTHEAST), 1 ],
 	[ vm_return ],
 ]
@@ -1457,13 +1659,13 @@ CODE[14] = [ // The Union Signal
 ]
 
 CODE[15] = [ // Sojourner Truth
-	[ vm_roll_d8 ],
+	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, region_us_states(MIDWEST), 1 ],
 	[ vm_return ],
 ]
 
 CODE[16] = [ // Pioneer Women
-	[ vm_roll_d8 ],
+	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, region_us_states(PLAINS), 1 ],
 	[ vm_return ],
 ]
@@ -1487,7 +1689,7 @@ CODE[19] = [ // National American Woman Suffrage Association
 ]
 
 CODE[20] = [ // Jeannette Rankin
-	[ vm_roll_d6_success ],
+	[ vm_roll_success, 1, D6 ],
 	[ vm_add_congress, 1 ],
 	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, us_states("Montana") ],
 	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states_except(PLAINS, us_states("Montana")) ],
@@ -1513,13 +1715,13 @@ CODE[23] = [ // Equality League of Self-Supporting Women
 ]
 
 CODE[24] = [ // Emmeline Pankhurst
-	[ vm_roll_2d6 ],
+	[ vm_roll, 2, D6 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, anywhere(), 1 ],
 	[ vm_return ],
 ]
 
 CODE[25] = [ // “Debate Us, You Cowards!”
-	[ vm_roll_2d6 ],
+	[ vm_roll, 2, D6 ],
 	[ vm_remove_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
@@ -1531,7 +1733,7 @@ CODE[26] = [ // Carrie Chapman Catt
 ]
 
 CODE[27] = [ // Alice Paul & Lucy Burns
-	[ vm_roll_2d6 ],
+	[ vm_roll, 2, D6 ],
 	[ vm_remove_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
@@ -1554,7 +1756,7 @@ CODE[30] = [ // Zitkala-Ša
 ]
 
 CODE[31] = [ // Helen Keller
-	[ vm_roll_2d6 ],
+	[ vm_roll, 2, D6 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
@@ -1596,7 +1798,7 @@ CODE[37] = [ // The Young Woman Citizen
 ]
 
 CODE[38] = [ // 1918 Midterm Elections
-	[ vm_roll_d6_success ],
+	[ vm_roll_success, 1, D6 ],
 	[ vm_add_congress, 3 ],
 	[ vm_return ],
 ]
@@ -1649,19 +1851,19 @@ CODE[46] = [ // Eighteenth Amendment
 ]
 
 CODE[47] = [ // Mary McLeod Bethune
-	[ vm_roll_2d8 ],
+	[ vm_roll, 2, D8 ],
 	[ vm_remove_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
 CODE[48] = [ // Make a Home Run for Suffrage
-	[ vm_roll_2d8 ],
+	[ vm_roll, 2, D8 ],
 	[ vm_remove_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
 CODE[49] = [ // Mary Church Terrell
-	[ vm_roll_2d8 ],
+	[ vm_roll, 2, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
@@ -1673,7 +1875,7 @@ CODE[50] = [ // Tea Parties for Suffrage
 ]
 
 CODE[51] = [ // Dr. Mabel Ping-Hua Lee
-	[ vm_roll_2d8 ],
+	[ vm_roll, 2, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
@@ -1700,7 +1902,7 @@ CODE[54] = [ // The Civil War
 
 CODE[55] = [ // 15th Divides Suffragists
 	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
-	[ vm_remove_all_up_to, PURPLE, 4 ],
+	[ vm_remove_all_cubes_up_to, PURPLE, 4 ],
 	[ vm_opponent_loses_badges, 2 ],
 	[ vm_return ],
 ]
@@ -1712,28 +1914,28 @@ CODE[56] = [ // Senator Joseph Brown
 ]
 
 CODE[57] = [ // Minor v. Happersett
-	[ vm_roll_d6_success ],
+	[ vm_roll_success, 1, D6 ],
 	[ vm_remove_congress, 1 ],
 	[ vm_add_cubes, 2, RED, us_states("Missouri") ],
 	[ vm_return ],
 ]
 
 CODE[58] = [ // Senate Rejects Suffrage Amendment
-	[ vm_roll_d6_success ],
+	[ vm_roll_success, 1, D6 ],
 	[ vm_receive_badges, 1 ],
 	[ vm_remove_congress, 1 ],
 	[ vm_return ],
 ]
 
 CODE[59] = [ // South Dakota Rejects Suffrage
-	[ vm_roll_d6_success ],
+	[ vm_roll_success, 1, D6 ],
 	[ vm_remove_congress, 1 ],
 	[ vm_add_cubes, 2, RED, us_states("South Dakota") ],
 	[ vm_return ],
 ]
 
 CODE[60] = [ // Gerrymandering
-	[ vm_remove_all_up_to, YELLOW, 2 ],
+	[ vm_remove_all_cubes_up_to, YELLOW, 2 ],
 	[ vm_return ],
 ]
 
@@ -1759,7 +1961,7 @@ CODE[64] = [ // Senator George Vest
 ]
 
 CODE[65] = [ // Catharine Beecher
-	[ vm_roll_d4 ],
+	[ vm_roll, 1, D4 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 1 ],
 	[ vm_return ],
 ]
@@ -1814,8 +2016,8 @@ CODE[74] = [ // Backlash to the Movement
 ]
 
 CODE[75] = [ // Xenophobia
-	[ vm_remove_all_up_to, PURPLE, 1 ],
-	[ vm_remove_all_up_to, YELLOW, 1 ],
+	[ vm_remove_all_cubes_up_to, PURPLE, 1 ],
+	[ vm_remove_all_cubes_up_to, YELLOW, 1 ],
 	[ vm_return ],
 ]
 
@@ -1825,13 +2027,13 @@ CODE[76] = [ // “O Save Us Senators, From Ourselves”
 ]
 
 CODE[77] = [ // Emma Goldman
-	[ vm_roll_d6 ],
+	[ vm_roll, 1, D6 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 1 ],
 	[ vm_return ],
 ]
 
 CODE[78] = [ // The Great 1906 San Francisco Earthquake
-	[ vm_remove_all, PURPLE_OR_YELLOW, us_states("California") ],
+	[ vm_remove_all_cubes, PURPLE_OR_YELLOW, us_states("California") ],
 	[ vm_opponent_loses_badges, 1 ],
 	[ vm_return ],
 ]
@@ -1875,7 +2077,7 @@ CODE[84] = [ // Transcontinental Railroad
 
 CODE[85] = [ // White Supremacy and the Suffrage Movement
 	[ vm_requires_persistent, find_card("Southern Strategy") ],
-	[ vm_remove_all_up_to, YELLOW, 4 ],
+	[ vm_remove_all_cubes_up_to, YELLOW, 4 ],
 	[ vm_opponent_loses_badges, 2 ],
 	[ vm_return ],
 ]
@@ -1924,33 +2126,33 @@ CODE[92] = [ // Big Liquor’s Big Money
 ]
 
 CODE[93] = [ // Red Scare
-	[ vm_remove_all_up_to, PURPLE, 2 ],
+	[ vm_remove_all_cubes_up_to, PURPLE, 2 ],
 	[ vm_return ],
 ]
 
 CODE[94] = [ // Southern Women’s Rejection League
 	[ vm_requires_persistent, find_card("Southern Strategy") ],
-	[ vm_roll_d8 ],
+	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[95] = [ // United Daughters of the Confederacy
 	[ vm_requires_persistent, find_card("Southern Strategy") ],
-	[ vm_roll_d8 ],
+	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[96] = [ // Cheers to “No on Suffrage”
 	[ vm_requires_persistent, find_card("Eighteenth Amendment") ],
-	[ vm_roll_d8 ],
+	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
 CODE[97] = [ // The Unnecessary Privilege
-	[ vm_roll_d6 ],
+	[ vm_roll, 1, D6 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 1 ],
 	[ vm_return ],
 ]
@@ -2021,10 +2223,10 @@ CODE[108] = [ // Change In Plans
 CODE[109] = [ // Bellwether State
 	[ vm_select_us_state ],
 	[ vm_if, ()=>(game.active === SUF) ],
-	[ vm_remove_any, RED, ()=>(game.vm.selected_us_state) ],
+	[ vm_remove_all_cubes, RED, ()=>(game.vm.selected_us_state) ],
 	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, ()=>(game.vm.selected_us_state) ],
 	[ vm_else ],
-	[ vm_remove_any, PURPLE_OR_YELLOW, ()=>(game.vm.selected_us_state) ],
+	[ vm_remove_all_cubes, PURPLE_OR_YELLOW, ()=>(game.vm.selected_us_state) ],
 	[ vm_add_cubes, 4, RED, ()=>(game.vm.selected_us_state) ],
 	[ vm_endif ],
 	[ vm_return ],

@@ -24,14 +24,14 @@ CARD 4 - A Vindication of the Rights of Woman
 CARD 5 - Union Victory
 # Playable if *The Civil War* is in effect. Roll :d6. On a roll of 3-6, receive two :badge and move *The Civil War* to the discard pile.
     requires_persistent find_card("The Civil War")
-    roll_d6_success
+    roll_success 1 D6
     receive_badges 2
     discard_persistent find_card("The Civil War")
 
 CARD 6 - Fifteenth Amendment
 # Playable if *The Civil War* is not in effect. Roll :d6. On a roll of 3-6, add 2 :congressional_marker in Congress and add 8 :purple_or_yellow_cube anywhere, no more than 2 per state.
     requires_not_persistent find_card("The Civil War")
-    roll_d6_success
+    roll_success 1 D6
     add_congress 2
     add_cubes_limit 8 PURPLE_OR_YELLOW anywhere() 2
 
@@ -64,7 +64,7 @@ CARD 11 - Anna Dickinson
 
 CARD 12 - Frederick Douglass
 # Roll :d8. Add that number :purple_or_yellow_cube in the Northeast region, no more than 1 per state.
-    roll_d8
+    roll 1 D8
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW region_us_states(NORTHEAST) 1
 
 CARD 13 - Frances Harper
@@ -77,12 +77,12 @@ CARD 14 - The Union Signal
 
 CARD 15 - Sojourner Truth
 # Roll :d8. Add that number :purple_or_yellow_cube in the Midwest region, no more than 1 per state.
-    roll_d8
+    roll 1 D8
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW region_us_states(MIDWEST) 1
 
 CARD 16 - Pioneer Women
 # Roll :d8. Add that number :purple_or_yellow_cube in the Plains region, no more than 1 per state.
-    roll_d8
+    roll 1 D8
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW region_us_states(PLAINS) 1
 
 CARD 17 - Women to the Polls
@@ -102,7 +102,7 @@ CARD 19 - National American Woman Suffrage Association
 
 CARD 20 - Jeannette Rankin
 # Roll :d6. On a roll of 3-6, add 1 :congressional_marker in Congress and 4 :purple_or_yellow_cube in Montana and 2 :purple_or_yellow_cube in each other state in the Plains region.
-    roll_d6_success
+    roll_success 1 D6
     add_congress 1
     add_cubes 4 PURPLE_OR_YELLOW us_states("Montana")
     add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states_except(PLAINS, us_states("Montana"))
@@ -124,12 +124,12 @@ CARD 23 - Equality League of Self-Supporting Women
 
 CARD 24 - Emmeline Pankhurst
 # Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
-    roll_2d6
+    roll 2 D6
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 1
 
 CARD 25 - “Debate Us, You Cowards!”
 # Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.
-    roll_2d6
+    roll 2 D6
     remove_cubes_limit (game.vm.die) RED anywhere() 2
 
 CARD 26 - Carrie Chapman Catt
@@ -139,7 +139,7 @@ CARD 26 - Carrie Chapman Catt
 
 CARD 27 - Alice Paul & Lucy Burns
 # Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.
-    roll_2d6
+    roll 2 D6
     remove_cubes_limit (game.vm.die) RED anywhere() 2
 
 CARD 28 - Inez Milholland
@@ -158,7 +158,7 @@ CARD 30 - Zitkala-Ša
 
 CARD 31 - Helen Keller
 # Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
-    roll_2d6
+    roll 2 D6
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 32 - Maria de Lopez
@@ -193,7 +193,7 @@ CARD 37 - The Young Woman Citizen
 
 CARD 38 - 1918 Midterm Elections
 # Roll :d6. On a roll of 3-6, add 3 :congressional_marker in Congress.
-    roll_d6_success
+    roll_success 1 D6
     add_congress 3
 
 CARD 39 - Woodrow Wilson
@@ -237,17 +237,17 @@ CARD 46 - Eighteenth Amendment
 
 CARD 47 - Mary McLeod Bethune
 # Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
-    roll_2d8
+    roll 2 D8
     remove_cubes_limit (game.vm.die) RED anywhere() 2
 
 CARD 48 - Make a Home Run for Suffrage
 # Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
-    roll_2d8
+    roll 2 D8
     remove_cubes_limit (game.vm.die) RED anywhere() 2
 
 CARD 49 - Mary Church Terrell
 # Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
-    roll_2d8
+    roll 2 D8
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 50 - Tea Parties for Suffrage
@@ -257,7 +257,7 @@ CARD 50 - Tea Parties for Suffrage
 
 CARD 51 - Dr. Mabel Ping-Hua Lee
 # Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
-    roll_2d8
+    roll 2 D8
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 52 - Miss Febb Wins the Last Vote
@@ -282,7 +282,7 @@ CARD 54 - The Civil War
 CARD 55 - 15th Divides Suffragists
 # Playable if *Fifteenth Amendment* is in effect. Remove all :purple_cube in up to 4 states. The Suffragist player loses 2 :badge.
     requires_persistent find_card("Fifteenth Amendment")
-    remove_all_up_to PURPLE 4
+    remove_all_cubes_up_to PURPLE 4
     opponent_loses_badges 2
 
 CARD 56 - Senator Joseph Brown
@@ -292,25 +292,25 @@ CARD 56 - Senator Joseph Brown
 
 CARD 57 - Minor v. Happersett
 # Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in Missouri.
-    roll_d6_success
+    roll_success 1 D6
     remove_congress 1
     add_cubes 2 RED us_states("Missouri")
 
 CARD 58 - Senate Rejects Suffrage Amendment
 # Roll :d6. On a roll of 3-6, receive 1 :badge and remove 1 :congressional_marker from Congress.
-    roll_d6_success
+    roll_success 1 D6
     receive_badges 1
     remove_congress 1
 
 CARD 59 - South Dakota Rejects Suffrage
 # Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in South Dakota.
-    roll_d6_success
+    roll_success 1 D6
     remove_congress 1
     add_cubes 2 RED us_states("South Dakota")
 
 CARD 60 - Gerrymandering
 # Remove all :yellow_cube in up to 2 states.
-    remove_all_up_to YELLOW 2
+    remove_all_cubes_up_to YELLOW 2
 
 CARD 61 - Border States
 # Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri.
@@ -331,7 +331,7 @@ CARD 64 - Senator George Vest
 
 CARD 65 - Catharine Beecher
 # Roll :d4. Add that number :red_cube anywhere, no more than 1 per state.
-    roll_d4
+    roll 1 D4
     add_cubes_limit (game.vm.die) RED anywhere() 1
 
 CARD 66 - Progress, Not Politics
@@ -376,8 +376,8 @@ CARD 74 - Backlash to the Movement
 
 CARD 75 - Xenophobia
 # Remove all from any 1 :purple_cube state. Remove all :yellow_cube from any 1 state.
-    remove_all_up_to PURPLE 1
-    remove_all_up_to YELLOW 1
+    remove_all_cubes_up_to PURPLE 1
+    remove_all_cubes_up_to YELLOW 1
 
 CARD 76 - “O Save Us Senators, From Ourselves”
 # Add 1 :red_cube in one state of each region.
@@ -385,12 +385,12 @@ CARD 76 - “O Save Us Senators, From Ourselves”
 
 CARD 77 - Emma Goldman
 # Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
-    roll_d6
+    roll 1 D6
     add_cubes_limit (game.vm.die) RED anywhere() 1
 
 CARD 78 - The Great 1906 San Francisco Earthquake
 # Remove all :yellow_cube and :purple_cube from California. The Suffragist player loses 1 :badge.
-    remove_all PURPLE_OR_YELLOW us_states("California")
+    remove_all_cubes PURPLE_OR_YELLOW us_states("California")
     opponent_loses_badges 1
 
 CARD 79 - A Threat to the Ideal of Womanhood
@@ -427,7 +427,7 @@ CARD 84 - Transcontinental Railroad
 CARD 85 - White Supremacy and the Suffrage Movement
 # Playable if *Southern Strategy* is in effect. Remove all :yellow_cube in up to 4 states. The Suffragist player loses 2 :badge.
     requires_persistent find_card("Southern Strategy")
-    remove_all_up_to YELLOW 4
+    remove_all_cubes_up_to YELLOW 4
     opponent_loses_badges 2
 
 CARD 86 - Senator John Weeks
@@ -468,29 +468,29 @@ CARD 92 - Big Liquor’s Big Money
 
 CARD 93 - Red Scare
 # Remove all :purple_cube in up to 2 states.
-    remove_all_up_to PURPLE 2
+    remove_all_cubes_up_to PURPLE 2
 
 CARD 94 - Southern Women’s Rejection League
 # Playable if *Southern Strategy* is in effect. Roll :d8. Add that number :red_cube in the South region, no more than 2 per state.
     requires_persistent find_card("Southern Strategy")
-    roll_d8
+    roll 1 D8
     add_cubes_limit (game.vm.die) RED region_us_states(SOUTH) 2
 
 CARD 95 - United Daughters of the Confederacy
 # Playable if *Southern Strategy* is in effect. Roll :d8. Add that number :red_cube in the South region, no more than 2 per state.
     requires_persistent find_card("Southern Strategy")
-    roll_d8
+    roll 1 D8
     add_cubes_limit (game.vm.die) RED region_us_states(SOUTH) 2
 
 CARD 96 - Cheers to “No on Suffrage”
 # Playable if *Eighteenth Amendment* is not in effect. Roll :d8. Add that number :red_cube anywhere, no more than 2 per state.
     requires_persistent find_card("Eighteenth Amendment")
-    roll_d8
+    roll 1 D8
     add_cubes_limit (game.vm.die) RED anywhere() 2
 
 CARD 97 - The Unnecessary Privilege
 # Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
-    roll_d6
+    roll 1 D6
     add_cubes_limit (game.vm.die) RED anywhere() 1
 
 CARD 98 - Voter Suppression
@@ -551,10 +551,10 @@ CARD 109 - Bellwether State
 # Select one state and remove any :red_cube and add 4 :purple_or_yellow_cube or remove any :purple_or_yellow_cube and add 4 :red_cube.
     select_us_state
     if (game.active === SUF)
-        remove_any RED (game.vm.selected_us_state)
+        remove_all_cubes RED (game.vm.selected_us_state)
         add_cubes 4 PURPLE_OR_YELLOW (game.vm.selected_us_state)
     else
-        remove_any PURPLE_OR_YELLOW (game.vm.selected_us_state)
+        remove_all_cubes PURPLE_OR_YELLOW (game.vm.selected_us_state)
         add_cubes 4 RED (game.vm.selected_us_state)
     endif
 
