@@ -4,6 +4,50 @@ let fs = require("fs")
 
 let pc = 0
 
+function tokenize(s) {
+	let list = []
+	let p = 0,
+		n = s.length
+	while (p < n) {
+		while (p < n && s[p] === " ")
+			++p
+		if (p < n) {
+			let m = p
+			while (p < n && s[p] !== " ") {
+				let q = s[p++]
+				switch (q) {
+					case "(":
+					case "[":
+					case "{":
+						for (let x = 1; p < n && x > 0; ++p) {
+							switch (s[p]) {
+								case "(":
+								case "[":
+								case "{":
+									++x
+									break
+								case ")":
+								case "]":
+								case "}":
+									--x
+									break
+							}
+						}
+						break
+					case '"':
+					case "'":
+					case "`":
+						while (p < n && s[p] !== q)
+							++p
+					break
+				}
+			}
+			list.push(s.substring(m, p))
+		}
+	}
+	return list
+}
+
 function emit(line) {
 	++pc
 	line[0] = "vm_" + line[0]
@@ -30,9 +74,7 @@ for (let line of fs.readFileSync("events.txt", "utf-8").split("\n")) {
 		continue
 	if (line === "EOF")
 		break
-	// line = line.split(" ")
-	// split by spaces unless those spaces are within double quotes.
-	line = line.match(/(?:[^\s"]+|"[^"]*")+/g)
+	line = tokenize(line)
 	switch (line[0]) {
 	case "CARD":
 		if (first++) {

@@ -40,7 +40,7 @@ CARD 7 - Reconstruction
 # Add 1 :purple_or_yellow_cube in each of Virginia, North Carolina, South Carolina, Georgia, Florida, Alabama, Mississippi, Tennessee, Arkansas, Louisiana and Texas.
     requires_not_persistent find_card("The Civil War")
     requires_persistent find_card("Fifteenth Amendment")
-    add_cubes_in_each_of 1 PURPLE_OR_YELLOW us_states("Virginia","North Carolina","South Carolina","Georgia","Florida","Alabama","Mississippi","Tennessee","Arkansas","Louisiana","Texas")
+    add_cubes_in_each_of 1 PURPLE_OR_YELLOW us_states("Virginia", "North Carolina", "South Carolina", "Georgia", "Florida", "Alabama", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Texas")
 
 CARD 8 - Petition to Congress
 # Add 1 :congressional_marker in Congress and add 1 :purple_or_yellow_cube in one state of each region.
@@ -87,7 +87,7 @@ CARD 16 - Pioneer Women
 
 CARD 17 - Women to the Polls
 # Add 2 :purple_or_yellow_cube in each of New Jersey, Pennsylvania and Delaware.
-    add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("New Jersey","Pennsylvania","Delaware")
+    add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("New Jersey", "Pennsylvania", "Delaware")
 
 CARD 18 - National Woman’s Rights Convention
 # Playable if *The Civil War* is not in effect. Add 1 :congressional_marker in Congress and 1 :purple_or_yellow_cube in one state of each region.
@@ -105,13 +105,13 @@ CARD 20 - Jeannette Rankin
     roll_d6_success
     add_congress 1
     add_cubes 4 PURPLE_OR_YELLOW us_states("Montana")
-    add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states_except(PLAINS,us_states("Montana"))
+    add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states_except(PLAINS, us_states("Montana"))
 
 CARD 21 - Ida B. Wells-Barnett
 # Receive 2 :badge. Add 2 :purple_or_yellow_cube in Illinois and 1 :purple_or_yellow_cube in each other state in the Midwest region.
     receive_badges 2
     add_cubes 2 PURPLE_OR_YELLOW us_states("Illinois")
-    add_cubes_in_each_of 1 PURPLE_OR_YELLOW region_us_states_except(MIDWEST,us_states("Illinois"))
+    add_cubes_in_each_of 1 PURPLE_OR_YELLOW region_us_states_except(MIDWEST, us_states("Illinois"))
 
 CARD 22 - The Club Movement
 # Receive 4 :badge.
@@ -150,11 +150,11 @@ CARD 28 - Inez Milholland
 
 CARD 29 - Farmers for Suffrage
 # Add 2 :purple_or_yellow_cube in each of Wisconsin, Minnesota, Iowa, North Dakota and South Dakota.
-    add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("Wisconsin","Minnesota","Iowa","North Dakota","South Dakota")
+    add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("Wisconsin", "Minnesota", "Iowa", "North Dakota", "South Dakota")
 
 CARD 30 - Zitkala-Ša
 # Add 2 :purple_or_yellow_cube in each of North Dakota, South Dakota, Nebraska, Montana and Wyoming.
-    add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("North Dakota","South Dakota","Nebraska","Montana","Wyoming")
+    add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("North Dakota", "South Dakota", "Nebraska", "Montana", "Wyoming")
 
 CARD 31 - Helen Keller
 # Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
@@ -164,7 +164,7 @@ CARD 31 - Helen Keller
 CARD 32 - Maria de Lopez
 # Recieve 2 :badge. Add 2 :purple_or_yellow_cube in each of California, Nevada and Arizona.
     receive_badges 2
-    add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("California","Nevada","Arizona")
+    add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("California", "Nevada", "Arizona")
 
 CARD 33 - Marie Louise Bottineau Baldwin
 # For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
@@ -222,8 +222,8 @@ CARD 43 - Prison Tour Special
 
 CARD 44 - Victory Map
 # Add 1 :purple_or_yellow_cube in each state in the West and Plains regions. Add 1 :purple_or_yellow_cube in each of Texas, Arkansas, Illinois, Michigan, New York and Vermont.
-    add_cubes_in_each_of 1 PURPLE_OR_YELLOW region_us_states(WEST,PLAINS)
-    add_cubes_in_each_of 1 PURPLE_OR_YELLOW us_states("Texas","Arkansas","Illinois","Michigan","New York","Vermont")
+    add_cubes_in_each_of 1 PURPLE_OR_YELLOW region_us_states(WEST, PLAINS)
+    add_cubes_in_each_of 1 PURPLE_OR_YELLOW us_states("Texas", "Arkansas", "Illinois", "Michigan", "New York", "Vermont")
 
 CARD 45 - Women and World War I
 # Playable if *War in Europe* is in effect. Add 10 :purple_or_yellow_cube anywhere, no more than 2 per state.
@@ -271,7 +271,7 @@ CARD 53 - The Patriarchy
 # Add 1 :red_campaigner in the South region. Receive 4 :badge. Add 1 :red_cube in each state in the Northeast region, the Atlantic & Appalachia region, the South region and the Midwest region.
     add_campaigner 1 RED SOUTH
     receive_badges 4
-    add_cubes_in_each_of 1 RED region_us_states(NORTHEAST,ATLANTIC_APPALACHIA,SOUTH,MIDWEST)
+    add_cubes_in_each_of 1 RED region_us_states(NORTHEAST, ATLANTIC_APPALACHIA, SOUTH, MIDWEST)
 
 CARD 54 - The Civil War
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions.
@@ -314,15 +314,15 @@ CARD 60 - Gerrymandering
 
 CARD 61 - Border States
 # Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri.
-    add_cubes_in_each_of 1 RED us_states("Delaware","Maryland","West Virginia","Kentucky","Missouri")
+    add_cubes_in_each_of 1 RED us_states("Delaware", "Maryland", "West Virginia", "Kentucky", "Missouri")
 
 CARD 62 - Horace Greeley
 # Place 2 :red_cube in each of New York and Connecticut.
-    add_cubes_in_each_of 2 RED us_states("New York","Connecticut")
+    add_cubes_in_each_of 2 RED us_states("New York", "Connecticut")
 
 CARD 63 - New York Newspapers
 # Place 2 :red_cube in each of New York and New Jersey.
-    add_cubes_in_each_of 2 RED us_states("New York","New Jersey")
+    add_cubes_in_each_of 2 RED us_states("New York", "New Jersey")
 
 CARD 64 - Senator George Vest
 # Remove 1 :congressional_marker from Congress and add 2 :red_cube in Missouri.
@@ -340,7 +340,7 @@ CARD 66 - Progress, Not Politics
 
 CARD 67 - Southern “Hospitality”
 # Place 1 :red_cube in each of Virginia, North Carolina, South Carolina, Georgia and Tennessee.
-    add_cubes_in_each_of 1 RED us_states("Virginia","North Carolina","South Carolina","Georgia","Tennessee")
+    add_cubes_in_each_of 1 RED us_states("Virginia", "North Carolina", "South Carolina", "Georgia", "Tennessee")
 
 CARD 68 - Beer Brewers
 # Playable if Eighteenth Amendment is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
@@ -351,11 +351,11 @@ CARD 68 - Beer Brewers
 CARD 69 - Southern Resentment
 # Playable if *Fifteenth Amendment* is in effect. Add 1 :red_cube in each of Texas, Louisiana, Arkansas, Mississippi and Alabama.
     requires_persistent find_card("Fifteenth Amendment")
-    add_cubes_in_each_of 1 RED us_states("Texas","Louisiana","Arkansas","Mississippi","Alabama")
+    add_cubes_in_each_of 1 RED us_states("Texas", "Louisiana", "Arkansas", "Mississippi", "Alabama")
 
 CARD 70 - Old Dixie
 # Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida.
-    add_cubes_in_each_of 1 RED us_states("Louisiana","Mississippi","Alabama","Georgia","Florida")
+    add_cubes_in_each_of 1 RED us_states("Louisiana", "Mississippi", "Alabama", "Georgia", "Florida")
 
 CARD 71 - NAOWS Forms
 # Add 1 :red_campaigner in the Northeast region. Receive 2 :badge.
@@ -417,7 +417,7 @@ CARD 83 - Western Saloons Push Suffrage Veto
 # Playable if *Eighteenth Amendment* is not in effect. Place 2 :red_cube in Arizona and 1 :red_cube in each of New Mexico, Nevada and Utah.
     requires_not_persistent find_card("Eighteenth Amendment")
     add_cubes 2 RED us_states("Arizona")
-    add_cubes_in_each_of 1 RED us_states("New Mexico","Nevada","Utah")
+    add_cubes_in_each_of 1 RED us_states("New Mexico", "Nevada", "Utah")
 
 CARD 84 - Transcontinental Railroad
 # Move each :red_campaigner to any region(s) without paying any :badge and then take a Campaigning action.

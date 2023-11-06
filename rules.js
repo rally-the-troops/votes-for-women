@@ -1412,7 +1412,7 @@ CODE[6] = [ // Fifteenth Amendment
 CODE[7] = [ // Reconstruction
 	[ vm_requires_not_persistent, find_card("The Civil War") ],
 	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
-	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, us_states("Virginia","North Carolina","South Carolina","Georgia","Florida","Alabama","Mississippi","Tennessee","Arkansas","Louisiana","Texas") ],
+	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, us_states("Virginia", "North Carolina", "South Carolina", "Georgia", "Florida", "Alabama", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Texas") ],
 	[ vm_return ],
 ]
 
@@ -1469,7 +1469,7 @@ CODE[16] = [ // Pioneer Women
 ]
 
 CODE[17] = [ // Women to the Polls
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("New Jersey","Pennsylvania","Delaware") ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("New Jersey", "Pennsylvania", "Delaware") ],
 	[ vm_return ],
 ]
 
@@ -1490,14 +1490,14 @@ CODE[20] = [ // Jeannette Rankin
 	[ vm_roll_d6_success ],
 	[ vm_add_congress, 1 ],
 	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, us_states("Montana") ],
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states_except(PLAINS,us_states("Montana")) ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states_except(PLAINS, us_states("Montana")) ],
 	[ vm_return ],
 ]
 
 CODE[21] = [ // Ida B. Wells-Barnett
 	[ vm_receive_badges, 2 ],
 	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, us_states("Illinois") ],
-	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states_except(MIDWEST,us_states("Illinois")) ],
+	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states_except(MIDWEST, us_states("Illinois")) ],
 	[ vm_return ],
 ]
 
@@ -1544,12 +1544,12 @@ CODE[28] = [ // Inez Milholland
 ]
 
 CODE[29] = [ // Farmers for Suffrage
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("Wisconsin","Minnesota","Iowa","North Dakota","South Dakota") ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("Wisconsin", "Minnesota", "Iowa", "North Dakota", "South Dakota") ],
 	[ vm_return ],
 ]
 
 CODE[30] = [ // Zitkala-Ša
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("North Dakota","South Dakota","Nebraska","Montana","Wyoming") ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("North Dakota", "South Dakota", "Nebraska", "Montana", "Wyoming") ],
 	[ vm_return ],
 ]
 
@@ -1561,7 +1561,7 @@ CODE[31] = [ // Helen Keller
 
 CODE[32] = [ // Maria de Lopez
 	[ vm_receive_badges, 2 ],
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("California","Nevada","Arizona") ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("California", "Nevada", "Arizona") ],
 	[ vm_return ],
 ]
 
@@ -1631,8 +1631,8 @@ CODE[43] = [ // Prison Tour Special
 ]
 
 CODE[44] = [ // Victory Map
-	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states(WEST,PLAINS) ],
-	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, us_states("Texas","Arkansas","Illinois","Michigan","New York","Vermont") ],
+	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states(WEST, PLAINS) ],
+	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, us_states("Texas", "Arkansas", "Illinois", "Michigan", "New York", "Vermont") ],
 	[ vm_return ],
 ]
 
@@ -1687,7 +1687,7 @@ CODE[52] = [ // Miss Febb Wins the Last Vote
 CODE[53] = [ // The Patriarchy
 	[ vm_add_campaigner, 1, RED, SOUTH ],
 	[ vm_receive_badges, 4 ],
-	[ vm_add_cubes_in_each_of, 1, RED, region_us_states(NORTHEAST,ATLANTIC_APPALACHIA,SOUTH,MIDWEST) ],
+	[ vm_add_cubes_in_each_of, 1, RED, region_us_states(NORTHEAST, ATLANTIC_APPALACHIA, SOUTH, MIDWEST) ],
 	[ vm_return ],
 ]
 
@@ -1738,17 +1738,17 @@ CODE[60] = [ // Gerrymandering
 ]
 
 CODE[61] = [ // Border States
-	[ vm_add_cubes_in_each_of, 1, RED, us_states("Delaware","Maryland","West Virginia","Kentucky","Missouri") ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("Delaware", "Maryland", "West Virginia", "Kentucky", "Missouri") ],
 	[ vm_return ],
 ]
 
 CODE[62] = [ // Horace Greeley
-	[ vm_add_cubes_in_each_of, 2, RED, us_states("New York","Connecticut") ],
+	[ vm_add_cubes_in_each_of, 2, RED, us_states("New York", "Connecticut") ],
 	[ vm_return ],
 ]
 
 CODE[63] = [ // New York Newspapers
-	[ vm_add_cubes_in_each_of, 2, RED, us_states("New York","New Jersey") ],
+	[ vm_add_cubes_in_each_of, 2, RED, us_states("New York", "New Jersey") ],
 	[ vm_return ],
 ]
 
@@ -1770,7 +1770,7 @@ CODE[66] = [ // Progress, Not Politics
 ]
 
 CODE[67] = [ // Southern “Hospitality”
-	[ vm_add_cubes_in_each_of, 1, RED, us_states("Virginia","North Carolina","South Carolina","Georgia","Tennessee") ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("Virginia", "North Carolina", "South Carolina", "Georgia", "Tennessee") ],
 	[ vm_return ],
 ]
 
@@ -1783,12 +1783,12 @@ CODE[68] = [ // Beer Brewers
 
 CODE[69] = [ // Southern Resentment
 	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
-	[ vm_add_cubes_in_each_of, 1, RED, us_states("Texas","Louisiana","Arkansas","Mississippi","Alabama") ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("Texas", "Louisiana", "Arkansas", "Mississippi", "Alabama") ],
 	[ vm_return ],
 ]
 
 CODE[70] = [ // Old Dixie
-	[ vm_add_cubes_in_each_of, 1, RED, us_states("Louisiana","Mississippi","Alabama","Georgia","Florida") ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("Louisiana", "Mississippi", "Alabama", "Georgia", "Florida") ],
 	[ vm_return ],
 ]
 
@@ -1863,7 +1863,7 @@ CODE[82] = [ // The SSWSC
 CODE[83] = [ // Western Saloons Push Suffrage Veto
 	[ vm_requires_not_persistent, find_card("Eighteenth Amendment") ],
 	[ vm_add_cubes, 2, RED, us_states("Arizona") ],
-	[ vm_add_cubes_in_each_of, 1, RED, us_states("New Mexico","Nevada","Utah") ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("New Mexico", "Nevada", "Utah") ],
 	[ vm_return ],
 ]
 
