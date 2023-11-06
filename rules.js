@@ -35,6 +35,17 @@ const REGION_NAMES = [
     "Northeast"
 ]
 
+const PURPLE = 1
+const YELLOW = 2
+const PURPLE_OR_YELLOW = 3
+const RED = 4
+const GREEN_CHECK = 5
+const RED_X = 6
+
+const REST_OF_TURN = 1
+const REST_OF_GAME = 2
+const BALLOT_BOX = 3
+
 const {	CARDS } = require("./cards.js")
 const {	US_STATES } = require("./data.js")
 
@@ -54,6 +65,10 @@ function is_strategy_card(c) {
 
 function is_states_card(c) {
 	return c >= first_states_card && c <= last_states_card
+}
+
+function find_card(name) {
+	return CARDS.findIndex((x) => x.name === name)
 }
 
 function draw_card(deck) {
@@ -90,6 +105,28 @@ function player_discard() {
 function is_player_claimed_card(c) {
 	return player_claimed().includes(c)
 }
+
+// #endregion
+
+// #region US_STATES & REGIONS FUNCTIONS
+
+function find_us_state(name) {
+	return US_STATES.findIndex((x) => x.name === name)
+}
+
+function us_states(...args) {
+	return args.map(find_us_state)
+}
+
+function region_us_states(region) {
+	const indexes = []
+	US_STATES.forEach((element, index) => {
+		if (element.region === region) indexes.push(index)
+	})
+	return indexes
+}
+
+// #endregion
 
 // #region PUBLIC FUNCTIONS
 
@@ -637,10 +674,6 @@ function end_event() {
 	end_play_card(c)
 }
 
-function end_crisis_breach_objective() {
-	goto_objective_card_play()
-}
-
 function goto_vm(proc) {
 	game.state = "vm"
 	game.vm = {
@@ -656,7 +689,7 @@ function event_prompt(str) {
 		str = CODE[game.vm.fp][game.vm.prompt][1]
 	if (typeof str === "function")
 		str = str()
-	view.prompt = CARDS[game.vm.fp].title + ": " + str
+	view.prompt = CARDS[game.vm.fp].name + ": " + str
 }
 
 function vm_inst(a) {
@@ -780,48 +813,6 @@ function vm_case() {
 
 function vm_ops() {
 	goto_operations(vm_operand(1), vm_operand_spaces(2))
-}
-
-function vm_increase_revolutionary_momentum() {
-	if (game.red_momentum < 3)
-		game.state = "vm_increase_revolutionary_momentum"
-	else
-		vm_next()
-}
-
-function vm_increase_prussian_collaboration() {
-	if (game.blue_momentum < 3)
-		game.state = "vm_increase_prussian_collaboration"
-	else
-		vm_next()
-}
-
-function vm_may_increase_revolutionary_momentum() {
-	if (game.red_momentum < 3)
-		game.state = "vm_may_increase_revolutionary_momentum"
-	else
-		vm_next()
-}
-
-function vm_may_increase_prussian_collaboration() {
-	if (game.blue_momentum < 3)
-		game.state = "vm_may_increase_prussian_collaboration"
-	else
-		vm_next()
-}
-
-function vm_decrease_revolutionary_momentum() {
-	if (game.red_momentum > 0)
-		game.state = "vm_decrease_revolutionary_momentum"
-	else
-		vm_next()
-}
-
-function vm_decrease_prussian_collaboration() {
-	if (game.blue_momentum > 0)
-		game.state = "vm_decrease_prussian_collaboration"
-	else
-		vm_next()
 }
 
 function vm_operand_spaces(x) {
@@ -969,88 +960,6 @@ states.vm_switch = {
 	},
 }
 
-states.vm_increase_revolutionary_momentum = {
-	inactive: "increase Revolutionary Momentum",
-	prompt() {
-		event_prompt("Increase Revolutionary Momentum.")
-		view.actions.red_momentum = 1
-	},
-	red_momentum() {
-		push_undo()
-		increase_revolutionary_momentum()
-	},
-}
-
-states.vm_may_increase_revolutionary_momentum = {
-	inactive: "increase Revolutionary Momentum",
-	prompt() {
-		event_prompt("Increase Revolutionary Momentum.")
-		view.actions.red_momentum = 1
-		view.actions.pass = 1
-	},
-	red_momentum() {
-		push_undo()
-		increase_revolutionary_momentum()
-	},
-	pass() {
-		push_undo()
-		vm_next()
-	},
-}
-
-states.vm_increase_prussian_collaboration = {
-	inactive: "increase Prussian Collaboration",
-	prompt() {
-		event_prompt("Increase Prussian Collaboration.")
-		view.actions.blue_momentum = 1
-	},
-	blue_momentum() {
-		push_undo()
-		increase_prussian_collaboration()
-	},
-}
-
-states.vm_may_increase_prussian_collaboration = {
-	inactive: "increase Prussian Collaboration",
-	prompt() {
-		event_prompt("Increase Prussian Collaboration.")
-		view.actions.blue_momentum = 1
-		view.actions.pass = 1
-	},
-	blue_momentum() {
-		push_undo()
-		increase_prussian_collaboration()
-	},
-	pass() {
-		push_undo()
-		vm_next()
-	},
-}
-
-states.vm_decrease_revolutionary_momentum = {
-	inactive: "decrease Revolutionary Momentum",
-	prompt() {
-		event_prompt("Decrease Revolutionary Momentum.")
-		view.actions.red_momentum = 1
-	},
-	red_momentum() {
-		push_undo()
-		decrease_revolutionary_momentum()
-	},
-}
-
-states.vm_decrease_prussian_collaboration = {
-	inactive: "decrease Prussian Collaboration",
-	prompt() {
-		event_prompt("Decrease Prussian Collaboration.")
-		view.actions.blue_momentum = 1
-	},
-	blue_momentum() {
-		push_undo()
-		decrease_prussian_collaboration()
-	},
-}
-
 function can_vm_place() {
 	for (let s of game.vm.spaces)
 		if (can_place_cube(s, game.vm.removed))
@@ -1078,7 +987,7 @@ states.vm_place = {
 	space(s) {
 		push_undo()
 		place_cube(s, game.vm.removed)
-		if (game.active === COMMUNE)
+		if (game.active === SUF)
 			log("Placed RC in S" + s + ".")
 		else
 			log("Placed BC in S" + s + ".")
@@ -1115,7 +1024,7 @@ states.vm_move_disc = {
 		event_prompt("Remove a disc to place it elsewhere.")
 		if (game.vm.upto)
 			view.actions.skip = 1
-		if (game.active === COMMUNE)
+		if (game.active === SUF)
 			for (let p = first_commune_disc; p <= last_commune_disc; ++p)
 				gen_action_piece(p)
 		else
@@ -1125,7 +1034,7 @@ states.vm_move_disc = {
 	piece(p) {
 		push_undo()
 		let s = game.pieces[p]
-		if (game.active === COMMUNE)
+		if (game.active === SUF)
 			log("Moved RD from S" + s + ".")
 		else
 			log("Moved BD from S" + s + ".")
@@ -1150,7 +1059,7 @@ states.vm_place_disc = {
 	},
 	space(s) {
 		push_undo()
-		if (game.active === COMMUNE)
+		if (game.active === SUF)
 			log("Placed RD in S" + s + ".")
 		else
 			log("Placed BD in S" + s + ".")
@@ -1228,7 +1137,7 @@ states.vm_remove = {
 	piece(p) {
 		push_undo()
 		let s = game.pieces[p]
-		if (game.active === COMMUNE)
+		if (game.active === SUF)
 			log("Removed BC from S" + s + ".")
 		else
 			log("Removed RC from S" + s + ".")
@@ -1252,7 +1161,7 @@ states.vm_remove_own = {
 	piece(p) {
 		push_undo()
 		let s = game.pieces[p]
-		if (game.active === COMMUNE)
+		if (game.active === SUF)
 			log("Removed RC from S" + s + ".")
 		else
 			log("Removed BC from S" + s + ".")
@@ -1463,7 +1372,7 @@ CODE[1] = [ // Seneca Falls Convention
 	[ vm_add_campaigner, 1, PURPLE, NORTHEAST ],
 	[ vm_add_campaigner, 1, YELLOW, NORTHEAST ],
 	[ vm_receive_badges, 2 ],
-	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, "New, York" ],
+	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, us_states("New York") ],
 	[ vm_return ],
 ]
 
@@ -1485,15 +1394,15 @@ CODE[4] = [ // A Vindication of the Rights of Woman
 ]
 
 CODE[5] = [ // Union Victory
-	[ vm_requires_persistent, "The, Civil, War" ],
+	[ vm_requires_persistent, find_card("The Civil War") ],
 	[ vm_roll_d6_success ],
 	[ vm_receive_badges, 2 ],
-	[ vm_discard_persistent, "The, Civil, War" ],
+	[ vm_discard_persistent, find_card("The Civil War") ],
 	[ vm_return ],
 ]
 
 CODE[6] = [ // Fifteenth Amendment
-	[ vm_requires_not_persistent, "The, Civil, War" ],
+	[ vm_requires_not_persistent, find_card("The Civil War") ],
 	[ vm_roll_d6_success ],
 	[ vm_add_congress, 2 ],
 	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, anywhere(), 2 ],
@@ -1501,9 +1410,9 @@ CODE[6] = [ // Fifteenth Amendment
 ]
 
 CODE[7] = [ // Reconstruction
-	[ vm_requires_not_persistent, "The, Civil, War" ],
-	[ vm_requires_persistent, "Fifteenth, Amendment" ],
-	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, ["Virginia",, "North, Carolina",, "South, Carolina",, "Georgia",, "Florida",, "Alabama",, "Mississippi",, "Tennessee",, "Arkansas",, "Louisiana",, "Texas"] ],
+	[ vm_requires_not_persistent, find_card("The Civil War") ],
+	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
+	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, us_states("Virginia","North Carolina","South Carolina","Georgia","Florida","Alabama","Mississippi","Tennessee","Arkansas","Louisiana","Texas") ],
 	[ vm_return ],
 ]
 
@@ -1560,7 +1469,7 @@ CODE[16] = [ // Pioneer Women
 ]
 
 CODE[17] = [ // Women to the Polls
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, ["New, Jersey",, "Pennsylvania",, "Delaware"] ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("New Jersey","Pennsylvania","Delaware") ],
 	[ vm_return ],
 ]
 
@@ -1580,15 +1489,15 @@ CODE[19] = [ // National American Woman Suffrage Association
 CODE[20] = [ // Jeannette Rankin
 	[ vm_roll_d6_success ],
 	[ vm_add_congress, 1 ],
-	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, "Montana" ],
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states_except(PLAINS,, "Montana") ],
+	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, us_states("Montana") ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states_except(PLAINS,us_states("Montana")) ],
 	[ vm_return ],
 ]
 
 CODE[21] = [ // Ida B. Wells-Barnett
 	[ vm_receive_badges, 2 ],
-	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, "Illinois" ],
-	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states_except(MIDWEST,, "Illinois") ],
+	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, us_states("Illinois") ],
+	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states_except(MIDWEST,us_states("Illinois")) ],
 	[ vm_return ],
 ]
 
@@ -1635,12 +1544,12 @@ CODE[28] = [ // Inez Milholland
 ]
 
 CODE[29] = [ // Farmers for Suffrage
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, ["Wisconsin",, "Minnesota",, "Iowa",, "North, Dakota",, "South, Dakota"] ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("Wisconsin","Minnesota","Iowa","North Dakota","South Dakota") ],
 	[ vm_return ],
 ]
 
 CODE[30] = [ // Zitkala-Ša
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, ["North, Dakota",, "South, Dakota",, "Nebraska",, "Montana",, "Wyoming"] ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("North Dakota","South Dakota","Nebraska","Montana","Wyoming") ],
 	[ vm_return ],
 ]
 
@@ -1652,7 +1561,7 @@ CODE[31] = [ // Helen Keller
 
 CODE[32] = [ // Maria de Lopez
 	[ vm_receive_badges, 2 ],
-	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, ["California",, "Nevada",, "Arizona"] ],
+	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("California","Nevada","Arizona") ],
 	[ vm_return ],
 ]
 
@@ -1722,13 +1631,13 @@ CODE[43] = [ // Prison Tour Special
 ]
 
 CODE[44] = [ // Victory Map
-	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states(WEST,, PLAINS) ],
-	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, ["Texas",, "Arkansas",, "Illinois",, "Michigan",, "New, York",, "Vermont"] ],
+	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states(WEST,PLAINS) ],
+	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, us_states("Texas","Arkansas","Illinois","Michigan","New York","Vermont") ],
 	[ vm_return ],
 ]
 
 CODE[45] = [ // Women and World War I
-	[ vm_requires_persistent, "War, in, Europe" ],
+	[ vm_requires_persistent, find_card("War in Europe") ],
 	[ vm_add_cubes_limit, 10, PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
@@ -1778,7 +1687,7 @@ CODE[52] = [ // Miss Febb Wins the Last Vote
 CODE[53] = [ // The Patriarchy
 	[ vm_add_campaigner, 1, RED, SOUTH ],
 	[ vm_receive_badges, 4 ],
-	[ vm_add_cubes_in_each_of, 1, RED, region_us_states(NORTHEAST,, ATLANTIC_APPALACHIA,, SOUTH,, MIDWEST) ],
+	[ vm_add_cubes_in_each_of, 1, RED, region_us_states(NORTHEAST,ATLANTIC_APPALACHIA,SOUTH,MIDWEST) ],
 	[ vm_return ],
 ]
 
@@ -1790,7 +1699,7 @@ CODE[54] = [ // The Civil War
 ]
 
 CODE[55] = [ // 15th Divides Suffragists
-	[ vm_requires_persistent, "Fifteenth, Amendment" ],
+	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
 	[ vm_remove_all_up_to, PURPLE, 4 ],
 	[ vm_opponent_loses_badges, 2 ],
 	[ vm_return ],
@@ -1798,14 +1707,14 @@ CODE[55] = [ // 15th Divides Suffragists
 
 CODE[56] = [ // Senator Joseph Brown
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, RED, "Georgia" ],
+	[ vm_add_cubes, 2, RED, us_states("Georgia") ],
 	[ vm_return ],
 ]
 
 CODE[57] = [ // Minor v. Happersett
 	[ vm_roll_d6_success ],
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, RED, "Missouri" ],
+	[ vm_add_cubes, 2, RED, us_states("Missouri") ],
 	[ vm_return ],
 ]
 
@@ -1819,7 +1728,7 @@ CODE[58] = [ // Senate Rejects Suffrage Amendment
 CODE[59] = [ // South Dakota Rejects Suffrage
 	[ vm_roll_d6_success ],
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, RED, "South, Dakota" ],
+	[ vm_add_cubes, 2, RED, us_states("South Dakota") ],
 	[ vm_return ],
 ]
 
@@ -1829,23 +1738,23 @@ CODE[60] = [ // Gerrymandering
 ]
 
 CODE[61] = [ // Border States
-	[ vm_add_cubes_in_each_of, 1, RED, ["Delaware",, "Maryland",, "West, Virginia",, "Kentucky",, "Missouri"] ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("Delaware","Maryland","West Virginia","Kentucky","Missouri") ],
 	[ vm_return ],
 ]
 
 CODE[62] = [ // Horace Greeley
-	[ vm_add_cubes_in_each_of, 2, RED, ["New, York",, "Connecticut"] ],
+	[ vm_add_cubes_in_each_of, 2, RED, us_states("New York","Connecticut") ],
 	[ vm_return ],
 ]
 
 CODE[63] = [ // New York Newspapers
-	[ vm_add_cubes_in_each_of, 2, RED, ["New, York",, "New, Jersey"] ],
+	[ vm_add_cubes_in_each_of, 2, RED, us_states("New York","New Jersey") ],
 	[ vm_return ],
 ]
 
 CODE[64] = [ // Senator George Vest
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, "Missouri" ],
+	[ vm_add_cubes, 2, us_states("Missouri") ],
 	[ vm_return ],
 ]
 
@@ -1861,25 +1770,25 @@ CODE[66] = [ // Progress, Not Politics
 ]
 
 CODE[67] = [ // Southern “Hospitality”
-	[ vm_add_cubes_in_each_of, 1, RED, ["Virginia",, "North, Carolina",, "South, Carolina",, "Georgia",, "Tennessee"] ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("Virginia","North Carolina","South Carolina","Georgia","Tennessee") ],
 	[ vm_return ],
 ]
 
 CODE[68] = [ // Beer Brewers
-	[ vm_requires_not_persistent, "Eighteenth, Amendment" ],
+	[ vm_requires_not_persistent, find_card("Eighteenth Amendment") ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_todo ],
 	[ vm_return ],
 ]
 
 CODE[69] = [ // Southern Resentment
-	[ vm_requires_persistent, "Fifteenth, Amendment" ],
-	[ vm_add_cubes_in_each_of, 1, RED, ["Texas",, "Louisiana",, "Arkansas",, "Mississippi",, "Alabama"] ],
+	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("Texas","Louisiana","Arkansas","Mississippi","Alabama") ],
 	[ vm_return ],
 ]
 
 CODE[70] = [ // Old Dixie
-	[ vm_add_cubes_in_each_of, 1, RED, ["Louisiana",, "Mississippi",, "Alabama",, "Georgia",, "Florida"] ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("Louisiana","Mississippi","Alabama","Georgia","Florida") ],
 	[ vm_return ],
 ]
 
@@ -1922,7 +1831,7 @@ CODE[77] = [ // Emma Goldman
 ]
 
 CODE[78] = [ // The Great 1906 San Francisco Earthquake
-	[ vm_remove_all, PURPLE_OR_YELLOW, "California" ],
+	[ vm_remove_all, PURPLE_OR_YELLOW, us_states("California") ],
 	[ vm_opponent_loses_badges, 1 ],
 	[ vm_return ],
 ]
@@ -1945,16 +1854,16 @@ CODE[81] = [ // Conservative Opposition
 ]
 
 CODE[82] = [ // The SSWSC
-	[ vm_requires_persistent, "Southern, Strategy" ],
+	[ vm_requires_persistent, find_card("Southern Strategy") ],
 	[ vm_receive_badges, 2 ],
 	[ vm_add_cubes_limit, 6, RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[83] = [ // Western Saloons Push Suffrage Veto
-	[ vm_requires_not_persistent, "Eighteenth, Amendment" ],
-	[ vm_add_cubes, 2, RED, "Arizona" ],
-	[ vm_add_cubes_in_each_of, 1, RED, ["New, Mexico",, "Nevada",, "Utah"] ],
+	[ vm_requires_not_persistent, find_card("Eighteenth Amendment") ],
+	[ vm_add_cubes, 2, RED, us_states("Arizona") ],
+	[ vm_add_cubes_in_each_of, 1, RED, us_states("New Mexico","Nevada","Utah") ],
 	[ vm_return ],
 ]
 
@@ -1965,7 +1874,7 @@ CODE[84] = [ // Transcontinental Railroad
 ]
 
 CODE[85] = [ // White Supremacy and the Suffrage Movement
-	[ vm_requires_persistent, "Southern, Strategy" ],
+	[ vm_requires_persistent, find_card("Southern Strategy") ],
 	[ vm_remove_all_up_to, YELLOW, 4 ],
 	[ vm_opponent_loses_badges, 2 ],
 	[ vm_return ],
@@ -1973,13 +1882,13 @@ CODE[85] = [ // White Supremacy and the Suffrage Movement
 
 CODE[86] = [ // Senator John Weeks
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, RED, "New, Hampshire" ],
+	[ vm_add_cubes, 2, RED, us_states("New Hampshire") ],
 	[ vm_return ],
 ]
 
 CODE[87] = [ // Senator “Cotton Ed” Smith
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, RED, "South, Carolina" ],
+	[ vm_add_cubes, 2, RED, us_states("South Carolina") ],
 	[ vm_return ],
 ]
 
@@ -2008,7 +1917,7 @@ CODE[91] = [ // The Eden Sphinx
 ]
 
 CODE[92] = [ // Big Liquor’s Big Money
-	[ vm_requires_not_persistent, "Eighteenth, Amendment" ],
+	[ vm_requires_not_persistent, find_card("Eighteenth Amendment") ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_todo ],
 	[ vm_return ],
@@ -2020,21 +1929,21 @@ CODE[93] = [ // Red Scare
 ]
 
 CODE[94] = [ // Southern Women’s Rejection League
-	[ vm_requires_persistent, "Southern, Strategy" ],
+	[ vm_requires_persistent, find_card("Southern Strategy") ],
 	[ vm_roll_d8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[95] = [ // United Daughters of the Confederacy
-	[ vm_requires_persistent, "Southern, Strategy" ],
+	[ vm_requires_persistent, find_card("Southern Strategy") ],
 	[ vm_roll_d8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[96] = [ // Cheers to “No on Suffrage”
-	[ vm_requires_persistent, "Eighteenth, Amendment" ],
+	[ vm_requires_persistent, find_card("Eighteenth Amendment") ],
 	[ vm_roll_d8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
 	[ vm_return ],
@@ -2075,13 +1984,13 @@ CODE[102] = [ // Governor Clement’s Veto
 
 CODE[103] = [ // Senator Henry Cabot Lodge
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, RED, "Massachusetts" ],
+	[ vm_add_cubes, 2, RED, us_states("Massachusetts") ],
 	[ vm_return ],
 ]
 
 CODE[104] = [ // Senator William Borah
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, RED, "Utah" ],
+	[ vm_add_cubes, 2, RED, us_states("Utah") ],
 	[ vm_return ],
 ]
 

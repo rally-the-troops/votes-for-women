@@ -9,7 +9,7 @@ cards = [None]
 card = {
     'id': 1,
     'type': "",
-    'title': "",
+    'name': "",
     'era': "",
     'text': [],
     'attrs': {}
@@ -19,7 +19,7 @@ kv_pattern = r'<!--\s*(?P<key>[^:]+):\s*(?P<value>[^->]+)\s*-->'
 file_format = "tools/{}_cards.md"
 
 def flush():
-    if card['title']:
+    if card['name']:
         output = card.copy()
         # Combine text into a single string
         output['text'] = " ".join(output['text'])
@@ -35,10 +35,10 @@ def flush():
 
         cards.append(output)
 
-        # print("CARD {} - {}\n# {}\n".format(output['id'], output['title'], output['text']))
+        # print("CARD {} - {}\n# {}\n".format(output['id'], output['name'], output['text']))
 
         # Reset card attributes for the next entry
-        card['title'] = ""
+        card['name'] = ""
         card['text'] = []
         card['attrs'] = {}
         card['id'] += 1
@@ -57,7 +57,7 @@ def read_cards(_card_type):
                 card['era'] = line[2:].strip()
             elif line.startswith("## "):
                 flush()
-                card['title'] = line[3:].strip()
+                card['name'] = line[3:].strip()
             elif match := re.match(kv_pattern, line):
                 key = match.group('key').strip()
                 value = match.group('value').strip()

@@ -30,7 +30,9 @@ for (let line of fs.readFileSync("events.txt", "utf-8").split("\n")) {
 		continue
 	if (line === "EOF")
 		break
-	line = line.split(" ")
+	// line = line.split(" ")
+	// split by spaces unless those spaces are within double quotes.
+	line = line.match(/(?:[^\s"]+|"[^"]*")+/g)
 	switch (line[0]) {
 	case "CARD":
 		if (first++) {

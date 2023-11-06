@@ -235,7 +235,7 @@ function on_click_card(evt) {
 	if (is_action('card', card)) {
 		send_action('card', card)
 	} else {
-		show_popup_menu(evt, "popup", card, CARDS[card].title)
+		show_popup_menu(evt, "popup", card, CARDS[card].name)
 	}
 }
 
