@@ -442,11 +442,13 @@ CARD 87 - Senator “Cotton Ed” Smith
 
 CARD 88 - War in Europe
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to take a Campaigning action.
+    remove_congress 1
     persistent REST_OF_TURN
     todo
 
 CARD 89 - 1918 Pandemic
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
+    remove_congress 1
     persistent REST_OF_TURN
     todo
 
@@ -511,7 +513,7 @@ CARD 101 - The Woman Patriot
 
 CARD 102 - Governor Clement’s Veto
 # Replace 1 :green_check in a state with 1 :red_x.
-    replace 1 GREEN_CHECK
+    replace GREEN_CHECK 1 RED_X
 
 CARD 103 - Senator Henry Cabot Lodge
 # Remove 1 :congressional_marker from Congress and add 2 :red_cube in Massachusetts
@@ -531,12 +533,15 @@ CARD 105 - Efficient Organizing
 
 CARD 106 - Reconsideration
 # Replace 1 :red_x with 2 :purple_or_yellow_cube or 1 :green_check with 2 :red_cube.
-    todo
+    if (game.active === SUF)
+        replace RED_X 2 PURPLE_OR_YELLOW
+    else
+        replace GREEN_CHECK 2 RED
+    endif
 
 CARD 107 - Opposition Research
 # Your opponent must lose half (rounded up) of their :badge.
-    asm game.vm.opponent_half_badges = Math.ceil(opponent_badges() / 2)
-    opponent_loses_badges game.vm.opponent_half_badges
+    opponent_loses_badges (Math.ceil(opponent_badges()/2))
 
 CARD 108 - Change In Plans
 # Look at your opponent’s hand. Your opponent must discard 1 card of your choice that does not have a :yellow_campaigner / :purple_campaigner / :red_campaigner on it. Your opponent then draws 1 replacement card from their Draw Deck.
@@ -544,7 +549,14 @@ CARD 108 - Change In Plans
 
 CARD 109 - Bellwether State
 # Select one state and remove any :red_cube and add 4 :purple_or_yellow_cube or remove any :purple_or_yellow_cube and add 4 :red_cube.
-    todo
+    select_us_state
+    if (game.active === SUF)
+        remove_any RED (game.vm.selected_us_state)
+        add_cubes 4 PURPLE_OR_YELLOW (game.vm.selected_us_state)
+    else
+        remove_any PURPLE_OR_YELLOW (game.vm.selected_us_state)
+        add_cubes 4 RED (game.vm.selected_us_state)
+    endif
 
 CARD 110 - Superior Lobbying
 # Roll 4 :d8. For each 6, 7 or 8 rolled, add 1 :congressional_marker to Congress or remove 1 :congressional_marker from Congress.
@@ -556,7 +568,11 @@ CARD 111 - The Winning Plan
 
 CARD 112 - Regional Focus
 # Add 1 :purple_or_yellow_cube or 1 :red_cube per state in any one region.
-    todo
+    if (game.active === SUF)
+        add_cubes_per_state_in_any_one_region 1 PURPLE_OR_YELLOW
+    else
+        add_cubes_per_state_in_any_one_region 1 RED
+    endif
 
 CARD 113 - Eye on the Future
 # Playable if it is Turn 5 or Turn 6. Look through your Draw Deck and select 1 card and play for its event immediately. Then reshuffle your Draw Deck.
@@ -564,7 +580,12 @@ CARD 113 - Eye on the Future
 
 CARD 114 - Transportation
 # Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :badge and then take a Campaigning action.
-    todo
+    if (game.active === SUF)
+        move_each_campaigner_free PURPLE_OR_YELLOW
+    else
+        move_each_campaigner_free RED
+    endif
+    campaigning_action
 
 CARD 115 - Counter Strat
 # Remove one card that is “in effect for the remainder of the turn” and place it in the appropriate discard pile.
@@ -572,7 +593,11 @@ CARD 115 - Counter Strat
 
 CARD 116 - National Focus
 # Add 2 :purple_or_yellow_cube or 2 :red_cube in one state of each region.
-    todo
+    if (game.active === SUF)
+        add_cubes_in_one_state_of_each_region 2 PURPLE_OR_YELLOW
+    else
+        add_cubes_in_one_state_of_each_region 2 RED
+    endif
 
 # States Cards
 
@@ -581,36 +606,69 @@ CARD 117 - California
     draw_2_play_1_event
 
 CARD 118 - Utah
-# Add 6 :pink_yellow_cube or 6 :red_cube in the West region, no more than 2 per state.
+# Add 6 :purple_or_yellow_cube or 6 :red_cube in the West region, no more than 2 per state.
+    if (game.active === SUF)
+        add_cubes_limit 6 PURPLE_OR_YELLOW region_us_states(WEST) 2
+    else
+        add_cubes_limit 6 RED region_us_states(WEST) 2
+    endif
 
 CARD 119 - Montana
 # Receive 2 :badge.
+    receive_badges 2
 
 CARD 120 - Kansas
-# Add 6 :pink_yellow_cube or 6 :red_cube in the Plains region, no more than 2 per state.
+# Add 6 :purple_or_yellow_cube or 6 :red_cube in the Plains region, no more than 2 per state.
+    if (game.active === SUF)
+        add_cubes_limit 6 PURPLE_OR_YELLOW region_us_states(PLAINS) 2
+    else
+        add_cubes_limit 6 RED region_us_states(PLAINS) 2
+    endif
 
 CARD 121 - Texas
-# Add 6 :pink_yellow_cube or 6 :red_cube in the South region, no more than 2 per state.
+# Add 6 :purple_or_yellow_cube or 6 :red_cube in the South region, no more than 2 per state.
+    if (game.active === SUF)
+        add_cubes_limit 6 PURPLE_OR_YELLOW region_us_states(SOUTH) 2
+    else
+        add_cubes_limit 6 RED region_us_states(SOUTH) 2
+    endif
 
 CARD 122 - Georgia
 # Receive 2 :badge.
+    receive_badges 2
 
 CARD 123 - Illinois
-# Add 6 :pink_yellow_cube or 6 :red_cube in the Midwest region, no more than 2 per state.
+# Add 6 :purple_or_yellow_cube or 6 :red_cube in the Midwest region, no more than 2 per state.
+    if (game.active === SUF)
+        add_cubes_limit 6 PURPLE_OR_YELLOW region_us_states(MIDWEST) 2
+    else
+        add_cubes_limit 6 RED region_us_states(MIDWEST) 2
+    endif
 
 CARD 124 - Ohio
 # Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
     draw_2_play_1_event
 
 CARD 125 - Pennsylvania
-# Add 6 :pink_yellow_cube or 6 :red_cube in the Atlantic & Appalachia region, no more than 2 per state.
+# Add 6 :purple_or_yellow_cube or 6 :red_cube in the Atlantic & Appalachia region, no more than 2 per state.
+    if (game.active === SUF)
+        add_cubes_limit 6 PURPLE_OR_YELLOW region_us_states(ATLANTIC_APPALACHIA) 2
+    else
+        add_cubes_limit 6 RED region_us_states(ATLANTIC_APPALACHIA) 2
+    endif
 
 CARD 126 - Virginia
 # Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
     draw_2_play_1_event
 
 CARD 127 - New York
-# Add 6 :pink_yellow_cube or 6 :red_cube in the Northeast region, no more than 2 per state.
+# Add 6 :purple_or_yellow_cube or 6 :red_cube in the Northeast region, no more than 2 per state.
+    if (game.active === SUF)
+        add_cubes_limit 6 PURPLE_OR_YELLOW region_us_states(NORTHEAST) 2
+    else
+        add_cubes_limit 6 RED region_us_states(NORTHEAST) 2
+    endif
 
 CARD 128 - New Jersey
 # Receive 2 :badge.
+    receive_badges 2

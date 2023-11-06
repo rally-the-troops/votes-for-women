@@ -1984,12 +1984,14 @@ CODE[87] = [ // Senator “Cotton Ed” Smith
 ]
 
 CODE[88] = [ // War in Europe
+	[ vm_remove_congress, 1 ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_todo ],
 	[ vm_return ],
 ]
 
 CODE[89] = [ // 1918 Pandemic
+	[ vm_remove_congress, 1 ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_todo ],
 	[ vm_return ],
@@ -2067,7 +2069,7 @@ CODE[101] = [ // The Woman Patriot
 ]
 
 CODE[102] = [ // Governor Clement’s Veto
-	[ vm_replace, 1, GREEN_CHECK ],
+	[ vm_replace, GREEN_CHECK, 1, RED_X ],
 	[ vm_return ],
 ]
 
@@ -2089,13 +2091,16 @@ CODE[105] = [ // Efficient Organizing
 ]
 
 CODE[106] = [ // Reconsideration
-	[ vm_todo ],
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_replace, RED_X, 2, PURPLE_OR_YELLOW ],
+	[ vm_else ],
+	[ vm_replace, GREEN_CHECK, 2, RED ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[107] = [ // Opposition Research
-	[ vm_asm, ()=>game.vm.opponent_half_badges = Math.ceil(opponent_badges() / 2) ],
-	[ vm_opponent_loses_badges, game.vm.opponent_half_badges ],
+	[ vm_opponent_loses_badges, ()=>(Math.ceil(opponent_badges()/2)) ],
 	[ vm_return ],
 ]
 
@@ -2105,7 +2110,14 @@ CODE[108] = [ // Change In Plans
 ]
 
 CODE[109] = [ // Bellwether State
-	[ vm_todo ],
+	[ vm_select_us_state ],
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_remove_any, RED, ()=>(game.vm.selected_us_state) ],
+	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, ()=>(game.vm.selected_us_state) ],
+	[ vm_else ],
+	[ vm_remove_any, PURPLE_OR_YELLOW, ()=>(game.vm.selected_us_state) ],
+	[ vm_add_cubes, 4, RED, ()=>(game.vm.selected_us_state) ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
@@ -2120,7 +2132,11 @@ CODE[111] = [ // The Winning Plan
 ]
 
 CODE[112] = [ // Regional Focus
-	[ vm_todo ],
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_cubes_per_state_in_any_one_region, 1, PURPLE_OR_YELLOW ],
+	[ vm_else ],
+	[ vm_add_cubes_per_state_in_any_one_region, 1, RED ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
@@ -2130,7 +2146,12 @@ CODE[113] = [ // Eye on the Future
 ]
 
 CODE[114] = [ // Transportation
-	[ vm_todo ],
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_move_each_campaigner_free, PURPLE_OR_YELLOW ],
+	[ vm_else ],
+	[ vm_move_each_campaigner_free, RED ],
+	[ vm_endif ],
+	[ vm_campaigning_action ],
 	[ vm_return ],
 ]
 
@@ -2140,7 +2161,11 @@ CODE[115] = [ // Counter Strat
 ]
 
 CODE[116] = [ // National Focus
-	[ vm_todo ],
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_cubes_in_one_state_of_each_region, 2, PURPLE_OR_YELLOW ],
+	[ vm_else ],
+	[ vm_add_cubes_in_one_state_of_each_region, 2, RED ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
@@ -2150,26 +2175,48 @@ CODE[117] = [ // California
 ]
 
 CODE[118] = [ // Utah
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_cubes_limit, 6, PURPLE_OR_YELLOW, region_us_states(WEST), 2 ],
+	[ vm_else ],
+	[ vm_add_cubes_limit, 6, RED, region_us_states(WEST), 2 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[119] = [ // Montana
+	[ vm_receive_badges, 2 ],
 	[ vm_return ],
 ]
 
 CODE[120] = [ // Kansas
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_cubes_limit, 6, PURPLE_OR_YELLOW, region_us_states(PLAINS), 2 ],
+	[ vm_else ],
+	[ vm_add_cubes_limit, 6, RED, region_us_states(PLAINS), 2 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[121] = [ // Texas
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_cubes_limit, 6, PURPLE_OR_YELLOW, region_us_states(SOUTH), 2 ],
+	[ vm_else ],
+	[ vm_add_cubes_limit, 6, RED, region_us_states(SOUTH), 2 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[122] = [ // Georgia
+	[ vm_receive_badges, 2 ],
 	[ vm_return ],
 ]
 
 CODE[123] = [ // Illinois
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_cubes_limit, 6, PURPLE_OR_YELLOW, region_us_states(MIDWEST), 2 ],
+	[ vm_else ],
+	[ vm_add_cubes_limit, 6, RED, region_us_states(MIDWEST), 2 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
@@ -2179,6 +2226,11 @@ CODE[124] = [ // Ohio
 ]
 
 CODE[125] = [ // Pennsylvania
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_cubes_limit, 6, PURPLE_OR_YELLOW, region_us_states(ATLANTIC_APPALACHIA), 2 ],
+	[ vm_else ],
+	[ vm_add_cubes_limit, 6, RED, region_us_states(ATLANTIC_APPALACHIA), 2 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
@@ -2188,10 +2240,16 @@ CODE[126] = [ // Virginia
 ]
 
 CODE[127] = [ // New York
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_cubes_limit, 6, PURPLE_OR_YELLOW, region_us_states(NORTHEAST), 2 ],
+	[ vm_else ],
+	[ vm_add_cubes_limit, 6, RED, region_us_states(NORTHEAST), 2 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[128] = [ // New Jersey
+	[ vm_receive_badges, 2 ],
 	[ vm_return ],
 ]
 // #endregion
