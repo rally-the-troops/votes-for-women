@@ -111,7 +111,7 @@ function is_player_claimed_card(c) {
 // #region US_STATES & REGIONS FUNCTIONS
 
 function find_us_state(name) {
-	return US_STATES.findIndex((x) => x.name === name)
+	return US_STATES.findIndex((x) => x && x.name === name)
 }
 
 function us_states(...args) {
@@ -121,7 +121,7 @@ function us_states(...args) {
 function region_us_states(region) {
 	const indexes = []
 	US_STATES.forEach((element, index) => {
-		if (element.region === region) indexes.push(index)
+		if (element && element.region === region) indexes.push(index)
 	})
 	return indexes
 }
