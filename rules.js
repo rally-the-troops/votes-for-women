@@ -107,6 +107,14 @@ function player_buttons() {
 	}
 }
 
+function opponent_buttons() {
+	if (game.active === SUF) {
+		return game.opposition_buttons
+	} else {
+		return game.support_buttons
+	}
+}
+
 function player_claimed() {
 	if (game.active === SUF) {
 		return game.support_claimed
@@ -140,7 +148,7 @@ function find_us_state(name) {
 }
 
 function us_states(...args) {
-	return args.map(find_us_state)
+	return args.map(find_us_state).sort()
 }
 
 function region_us_states(region) {
@@ -154,6 +162,10 @@ function region_us_states(region) {
 function region_us_states_except(region, excluded) {
 	const to_remove = new Set(excluded)
 	return region_us_states(region).filter( x => !to_remove.has(x) )
+}
+
+function us_state_region(s) {
+	return US_STATES[s].region
 }
 
 function find_campaigners(campaigner) {
@@ -254,6 +266,8 @@ exports.setup = function (seed, _scenario, _options) {
 		active: null,
 		state: null,
 
+		selected_card: 0,
+
 		turn: 0,
 		round: 0,
 		congress: 0,
@@ -348,6 +362,8 @@ exports.view = function(state, player) {
 		active: game.active,
 		prompt: null,
 		actions: null,
+
+		selected_card: game.selected_card,
 
 		turn: game.turn,
 		round: game.round,
@@ -632,6 +648,7 @@ function end_play_card(c) {
 		game.has_played_hand = 1
 		discard_card_from_hand(c)
 	}
+	game.selected_card = 0
 	game.state = "operations_phase"
 }
 
@@ -773,6 +790,7 @@ function end_cleanup_phase() {
 
 function goto_play_event(c) {
 	// update_presence_and_control()
+	game.selected_card = c
 	goto_vm(c)
 }
 
@@ -943,8 +961,9 @@ function vm_spend_buttons() {
 }
 
 function vm_opponent_loses_buttons() {
-	// TODO assert
 	game.vm.count = vm_operand(1)
+	if (opponent_buttons() < game.vm.count)
+		throw Error("ASSERT: Insufficient buttons")
 	goto_vm_opponent_loses_buttons()
 }
 
@@ -974,6 +993,7 @@ function vm_add_cubes_in_each_of() {
 function vm_add_cubes_in_one_state_of_each_region() {
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
+	game.vm.us_states = anywhere()
 	game.vm.in_one_state_of_each_region = true
 	goto_vm_add_cubes()
 }
@@ -1015,13 +1035,21 @@ function vm_replace() {
 }
 
 function vm_add_congress() {
-	game.vm.count = vm_operand(1)
-	goto_vm_add_congress()
+	if (!game.nineteenth_amendment) {
+		game.vm.count = vm_operand(1)
+		game.state = "vm_add_congress"
+	} else {
+		vm_next()
+	}
 }
 
 function vm_remove_congress() {
-	game.vm.count = vm_operand(1)
-	goto_vm_remove_congress()
+	if (!game.nineteenth_amendment && game.congress > 0) {
+		game.vm.count = vm_operand(1)
+		game.state = "vm_remove_congress"
+	} else {
+		vm_next()
+	}
 }
 
 function vm_roll() {
@@ -1276,7 +1304,7 @@ states.vm_receive_buttons = {
 		if (game.active === SUF) {
 			game.support_buttons += game.vm.count
 		} else {
-			game.opponent_buttons += game.vm.count
+			game.opposition_buttons += game.vm.count
 		}
 		vm_next()
 	}
@@ -1294,7 +1322,7 @@ states.vm_spend_buttons = {
 		if (game.active === SUF) {
 			game.support_buttons -= game.vm.count
 		} else {
-			game.opponent_buttons -= game.vm.count
+			game.opposition_buttons -= game.vm.count
 		}
 		vm_next()
 	}
@@ -1307,6 +1335,7 @@ function goto_vm_add_cubes() {
 	} else {
 		game.vm.cube_color = game.vm.cubes
 	}
+	game.vm.added = []
 }
 
 states.vm_add_cubes = {
@@ -1331,8 +1360,57 @@ states.vm_add_cubes = {
 	us_state(s) {
 		push_undo()
 		add_cube(game.vm.cube_color, s)
-		if (--game.vm.count === 0)
+		map_incr(game.vm.added, s, 1)
+
+		if (game.vm.in_one_state_of_each_region) {
+			for (let other of region_us_states(us_state_region(s)))
+				if (s !== other)
+					set_delete(game.vm.us_states, other)
+		}
+
+		if (game.vm.limit) {
+			if (map_get(game.vm.added, s) === game.vm.limit)
+				set_delete(game.vm.us_states, s)
+			if (game.vm.added.length === game.vm.count)
+				vm_next()
+		} else {
+			if (map_get(game.vm.added, s) === game.vm.count)
+				set_delete(game.vm.us_states, s)
+		}
+
+		if (!game.vm.us_states.length)
 			vm_next()
+	}
+}
+
+states.vm_add_congress = {
+	inactive: "add a congressional marker",
+	prompt() {
+		event_prompt()
+		gen_action("congress")
+	},
+	congress() {
+		game.congress = Math.min(game.congress + game.vm.count, 6)
+		log(`+${pluralize(game.vm.count, 'congressional marker')}.`)
+
+		// TODO Trigger Nineteenth Amendment
+		if (game.congress >= 6) {
+			game.nineteenth_amendment = 1
+		}
+		vm_next()
+	}
+}
+
+states.vm_remove_congress = {
+	inactive: "remove a congressional marker",
+	prompt() {
+		event_prompt()
+		gen_action("congress")
+	},
+	congress() {
+		game.congress = Math.max(game.congress - game.vm.count, 0)
+		log(`-${pluralize(game.vm.count, 'congressional marker')}.`)
+		vm_next()
 	}
 }
 
@@ -1886,6 +1964,24 @@ function map_set(map, key, value) {
 	array_insert_pair(map, a<<1, key, value)
 }
 
+function map_incr(map, key, value) {
+	let a = 0
+	let b = (map.length >> 1) - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = map[m<<1]
+		if (key < x)
+			b = m - 1
+		else if (key > x)
+			a = m + 1
+		else {
+			map[(m<<1)+1] += value
+			return
+		}
+	}
+	array_insert_pair(map, a<<1, key, value)
+}
+
 function map_delete(map, item) {
 	let a = 0
 	let b = (map.length >> 1) - 1
@@ -1981,7 +2077,9 @@ CODE[9] = [ // Lucy Stone
 ]
 
 CODE[10] = [ // Susan B. Anthony Indicted
+	[ vm_prompt, "Receive 1 :button." ],
 	[ vm_receive_buttons, 1 ],
+	[ vm_prompt, "Add 1 :purple_or_yellow_cube in one state of each region." ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -2026,8 +2124,9 @@ CODE[17] = [ // Women to the Polls
 ]
 
 CODE[18] = [ // National Woman’s Rights Convention
+	[ vm_prompt, "Add 1 :congressional_marker in Congress." ],
 	[ vm_add_congress, 1 ],
-	[ vm_receive_buttons, 1 ],
+	[ vm_prompt, "Add 1 :purple_or_yellow_cube in one state of each region." ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -2300,6 +2399,7 @@ CODE[60] = [ // Gerrymandering
 ]
 
 CODE[61] = [ // Border States
+	[ vm_prompt, "Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri." ],
 	[ vm_add_cubes_in_each_of, 1, RED, us_states("Delaware", "Maryland", "West Virginia", "Kentucky", "Missouri") ],
 	[ vm_return ],
 ]
@@ -2350,6 +2450,7 @@ CODE[69] = [ // Southern Resentment
 ]
 
 CODE[70] = [ // Old Dixie
+	[ vm_prompt, "Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida." ],
 	[ vm_add_cubes_in_each_of, 1, RED, us_states("Louisiana", "Mississippi", "Alabama", "Georgia", "Florida") ],
 	[ vm_return ],
 ]

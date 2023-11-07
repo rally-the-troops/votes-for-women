@@ -61,7 +61,9 @@ CARD 9 - Lucy Stone
 
 CARD 10 - Susan B. Anthony Indicted
 # Receive 1 :button and add 1 :purple_or_yellow_cube in one state of each region.
+    prompt "Receive 1 :button."
     receive_buttons 1
+    prompt "Add 1 :purple_or_yellow_cube in one state of each region."
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 11 - Anna Dickinson
@@ -98,8 +100,9 @@ CARD 17 - Women to the Polls
 
 CARD 18 - National Woman’s Rights Convention
 # Playable if *The Civil War* is not in effect. Add 1 :congressional_marker in Congress and 1 :purple_or_yellow_cube in one state of each region.
+    prompt "Add 1 :congressional_marker in Congress."
     add_congress 1
-    receive_buttons 1
+    prompt "Add 1 :purple_or_yellow_cube in one state of each region."
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 19 - National American Woman Suffrage Association
@@ -331,6 +334,7 @@ CARD 60 - Gerrymandering
 
 CARD 61 - Border States
 # Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri.
+    prompt "Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri."
     add_cubes_in_each_of 1 RED us_states("Delaware", "Maryland", "West Virginia", "Kentucky", "Missouri")
 
 CARD 62 - Horace Greeley
@@ -372,6 +376,7 @@ CARD 69 - Southern Resentment
 
 CARD 70 - Old Dixie
 # Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida.
+    prompt "Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida."
     add_cubes_in_each_of 1 RED us_states("Louisiana", "Mississippi", "Alabama", "Georgia", "Florida")
 
 CARD 71 - NAOWS Forms

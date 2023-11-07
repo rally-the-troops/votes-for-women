@@ -458,6 +458,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 
 	for (let i = 1; i < ui.cards.length; ++i) {
 		ui.cards[i].classList.toggle("action", is_card_enabled(i))
+		ui.cards[i].classList.toggle("selected", i === view.selected_card)
 	}
 
 	for (let i = 1; i <= region_count; ++i) {
