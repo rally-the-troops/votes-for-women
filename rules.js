@@ -115,6 +115,14 @@ function opponent_buttons() {
 	}
 }
 
+function player_campaigners() {
+	if (game.active === SUF) {
+		return game.support_campaigner
+	} else {
+		return game.opposition_campaigner
+	}
+}
+
 function player_claimed() {
 	if (game.active === SUF) {
 		return game.support_claimed
@@ -168,25 +176,21 @@ function us_state_region(s) {
 	return US_STATES[s].region
 }
 
-function find_campaigners(campaigner) {
-	if (campaigner === PURPLE) {
-		return game.purple_campaigner
-	} else if (campaigner === YELLOW) {
-		return game.yellow_campaigner
-	} else {
-		return game.opposition_campaigner
-	}
+function free_campaigner(campaigners, color) {
+	const start = color === YELLOW ? 2 : 0
+	const index = campaigners.indexOf(0, start)
+	return color !== YELLOW && index > 1 ? -1 : index
 }
 
-function add_campaigner(campaigner, region) {
-	const campaigners = find_campaigners(campaigner)
-	const index = campaigners.indexOf(0)
+function add_campaigner(campaigner_color, region) {
+	const campaigners = player_campaigners()
+	const index = free_campaigner(campaigners, campaigner_color)
 	if (index !== -1) {
 		campaigners[index] = region
 	} else {
 		throw Error("No free campaigners")
 	}
-	log(`Placed ${COLOR_CODE[campaigner]}R in R${region}`)
+	log(`Placed ${COLOR_CODE[campaigner_color]}R in R${region}`)
 }
 
 function add_cube(cube, us_state) {
@@ -285,8 +289,7 @@ exports.setup = function (seed, _scenario, _options) {
 		support_discard: [],
 		support_hand: [],
 		support_claimed: [],
-		purple_campaigner: [0, 0],
-		yellow_campaigner: [0, 0],
+		support_campaigner: [0, 0, 0, 0], // purple, purple, yellow, yellow
 		support_buttons: 0,
 
 		opposition_deck: [],
@@ -382,8 +385,7 @@ exports.view = function(state, player) {
 		support_discard: game.support_discard, // top_discard?
 		support_hand: game.support_hand.length,
 		support_claimed: game.support_claimed,
-		purple_campaigner: game.purple_campaigner,
-		yellow_campaigner: game.yellow_campaigner,
+		support_campaigner: game.support_campaigner,
 		support_buttons: game.support_buttons,
 
 		opposition_deck: game.opposition_deck.length,
@@ -614,19 +616,11 @@ function can_play_event(c) {
 }
 
 function count_player_active_campaigners() {
-	if (game.active === SUF) {
-		return game.purple_campaigner.filter(value => value !== 0).length + game.yellow_campaigner.filter(value => value !== 0).length
-	} else {
-		return game.opposition_campaigner.filter(value => value !== 0).length
-	}
+	return player_campaigners().filter(value => value !== 0).length
 }
 
 function has_player_active_campaigners() {
-	if (game.active === SUF) {
-		return game.purple_campaigner.some(value => value !== 0) || game.yellow_campaigner.some(value => value !== 0)
-	} else {
-		return game.opposition_campaigner.some(value => value !== 0)
-	}
+	return player_campaigners().some(value => value !== 0)
 }
 
 function remove_claimed_card(c) {

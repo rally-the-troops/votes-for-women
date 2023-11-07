@@ -37,6 +37,9 @@ let ui = {
 		document.getElementById("role_Suffragist"),
 		document.getElementById("role_Opposition"),
 	],
+	pieces: document.getElementById("pieces"),
+	support_campaigner: [],
+	opposition_campaigner: [],
     cards: [ null ],
 	us_states: [ null ],
 	regions: [ null ],
@@ -99,6 +102,9 @@ const LAYOUT = {
 	"OR": [135, 173],
 	"WA": [158, 97],
 }
+
+const US_STATES_LAYOUT = [ null ]
+const REGIONS_LAYOUT = [ null ]
 
 // CARD MENU
 
@@ -244,7 +250,6 @@ function on_click_card(evt) {
 
 function on_click_congress(evt) {
 	if (evt.button === 0) {
-		console.log("congress")
 		if (send_action('congress'))
 			evt.stopPropagation()
 	}
@@ -262,6 +267,14 @@ function on_click_region(evt) {
 function on_click_us_state(evt) {
 	if (evt.button === 0) {
 		if (send_action('us_state', evt.target.my_us_state))
+			evt.stopPropagation()
+	}
+	hide_popup_menu()
+}
+
+function on_click_campaigner(evt) {
+	if (evt.button === 0) {
+		if (send_action('campaigner', evt.target.my_campaigner))
 			evt.stopPropagation()
 	}
 	hide_popup_menu()
@@ -291,8 +304,23 @@ function create(t, p, ...c) {
 	return e
 }
 
+function create_campaigner(color, i) {
+	return create("div", {
+		className: `piece ${color}`,
+		my_campaigner: i,
+		onmousedown: on_click_campaigner
+	})
+}
+
 function build_user_interface() {
 	let elt
+
+	for(let s of US_STATES) {
+		if (s) US_STATES_LAYOUT.push(LAYOUT[s.code])
+	}
+	for(let r of REGION_NAMES) {
+		if (r) REGIONS_LAYOUT.push(LAYOUT[r])
+	}
 
 	ui.congress_box.onmousedown = on_click_congress
 	for (let c = 1; c <= 6; ++c) {
@@ -328,6 +356,17 @@ function build_user_interface() {
 		elt.addEventListener("mouseenter", on_focus_us_state)
 		elt.addEventListener("mouseleave", on_blur)
 	}
+
+	ui.support_campaigner = [
+		create_campaigner('purple1', 1),
+		create_campaigner('purple2', 2),
+		create_campaigner('yellow1', 3),
+		create_campaigner('yellow2', 4)
+	]
+	ui.opposition_campaigner = [
+		create_campaigner('red1', 1),
+		create_campaigner('red2', 2),
+	]
 }
 
 function on_focus_card_tip(card_number) { // eslint-disable-line no-unused-vars
@@ -461,13 +500,34 @@ function on_update() { // eslint-disable-line no-unused-vars
 		ui.cards[i].classList.toggle("selected", i === view.selected_card)
 	}
 
-	for (let i = 1; i <= region_count; ++i) {
+	for (let i = 1; i < ui.regions.length; ++i) {
 		ui.regions[i].classList.toggle("action", is_region_action(i))
 	}
 
-	for (let i = 1; i <= us_states_count; ++i) {
+	for (let i = 1; i < ui.us_states.length; ++i) {
 		ui.us_states[i].classList.toggle("action", is_us_state_action(i))
 	}
+
+
+	// ui.pieces.replaceChildren()
+
+	for (let i = 0; i < ui.support_campaigner.length; ++i) {
+		// TODO Cleanup
+		let campaigner_region = view.support_campaigner[i]
+		if (campaigner_region) {
+			ui.pieces.appendChild(ui.support_campaigner[i])
+			let [x, y] = REGIONS_LAYOUT[campaigner_region]
+			ui.support_campaigner[i].style.left = x - 30 + (15 * i) + "px"
+			ui.support_campaigner[i].style.top = y - 40 + "px"
+		} else {
+			ui.support_campaigner[i].remove()
+		}
+	}
+	for (let i = 0; i < ui.opposition_campaigner.length; ++i) {
+		// TODO
+		ui.opposition_campaigner[i].classList.toggle("hide", !view.opposition_campaigner[i])
+	}
+
 
 	action_button("commit_1_button", "+1 Button")
 	action_button("defer", "Defer")
