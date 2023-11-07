@@ -301,7 +301,7 @@ function build_user_interface() {
 
 	for (let s = 1; s <= us_states_count; ++s) {
 		let us_state_css = US_STATES[s].code
-		elt = ui.regions[s] = document.querySelector(`#map #${us_state_css}`)
+		elt = ui.us_states[s] = document.querySelector(`#map #${us_state_css}`)
 		elt.my_us_state = s
 		elt.addEventListener("mousedown", on_click_us_state)
 		elt.addEventListener("mouseenter", on_focus_us_state)
@@ -427,8 +427,15 @@ function on_update() { // eslint-disable-line no-unused-vars
 	}
 
 	for (let i = 1; i < ui.cards.length; ++i) {
-		// ui.cards[i].classList.toggle("action", is_card_action('card', i))
 		ui.cards[i].classList.toggle("action", is_card_enabled(i))
+	}
+
+	for (let i = 1; i <= region_count; ++i) {
+		ui.regions[i].classList.toggle("action", is_region_action(i))
+	}
+
+	for (let i = 1; i <= us_states_count; ++i) {
+		ui.us_states[i].classList.toggle("action", is_us_state_action(i))
 	}
 
 	action_button("commit_1_button", "+1 Button")
@@ -437,6 +444,9 @@ function on_update() { // eslint-disable-line no-unused-vars
 	action_button("supersede", "Supersede")
 
     action_button("draw", "Draw")
+	action_button("next", "Next")
+	action_button("purple", "Purple")
+	action_button("yellow", "Yellow")
 	action_button("end_event", "End Event")
 
     action_button("skip", "Skip")

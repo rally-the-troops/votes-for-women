@@ -124,6 +124,12 @@ svg {
 	position: absolute;
 }
 
+path.state.action {
+	fill: yellow; fill-opacity: 0.8;
+	stroke: white;
+	stroke-width: 20;
+}
+
 path.state:hover {
 	fill: white;
 }
@@ -139,6 +145,11 @@ div.state {
 	height: 64px;
 }
 
+div.state.action {
+	background-color: rgba(251, 186, 0, 0.5);
+	border-color: white;
+}
+
 div.state:hover {
 	background-color: #fff8;
 }
@@ -152,6 +163,11 @@ div.region {
 	border: 5px solid transparent;
 	width: 65px;
 	height: 65px;
+}
+
+div.region.action {
+	background-color: rgba(251, 186, 0, 0.5);
+	border-color: white;
 }
 
 div.region:hover {

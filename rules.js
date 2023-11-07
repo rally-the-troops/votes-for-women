@@ -50,6 +50,15 @@ const D4 = 4
 const D6 = 6
 const D8 = 8
 
+const COLOR_CODE = {
+	[PURPLE]: "P",
+	[YELLOW]: "Y",
+	[PURPLE_OR_YELLOW]: "PY",
+	[RED]: "R",
+	[GREEN_CHECK]: "GV",
+	[RED_X]: "RX",
+}
+
 const {	CARDS } = require("./cards.js")
 const {	US_STATES } = require("./data.js")
 
@@ -147,6 +156,31 @@ function region_us_states_except(region, excluded) {
 	return region_us_states(region).filter( x => !to_remove.has(x) )
 }
 
+function find_campaigners(campaigner) {
+	if (campaigner === PURPLE) {
+		return game.purple_campaigner
+	} else if (campaigner === YELLOW) {
+		return game.yellow_campaigner
+	} else {
+		return game.opposition_campaigner
+	}
+}
+
+function add_campaigner(campaigner, region) {
+	const campaigners = find_campaigners(campaigner)
+	const index = campaigners.indexOf(0)
+	if (index !== -1) {
+		campaigners[index] = region
+	} else {
+		throw Error("No free campaigners")
+	}
+	log(`Placed ${COLOR_CODE[campaigner]}R in R${region}`)
+}
+
+function add_cube(cube, us_state) {
+	log(`Added ${COLOR_CODE[cube]}C in S${us_state}`)
+}
+
 // #endregion
 
 // #region PUBLIC FUNCTIONS
@@ -162,6 +196,14 @@ function gen_action(action, argument) {
 			view.actions[action] = []
 		view.actions[action].push(argument)
 	}
+}
+
+function gen_action_region(r) {
+	gen_action("region", r)
+}
+
+function gen_action_us_state(s) {
+	gen_action("us_state", s)
 }
 
 exports.action = function (state, player, action, arg) {
@@ -555,7 +597,6 @@ function can_play_event(c) {
 	return true
 }
 
-
 function count_player_active_campaigners() {
 	if (game.active === SUF) {
 		return game.purple_campaigner.filter(value => value !== 0).length + game.yellow_campaigner.filter(value => value !== 0).length
@@ -614,7 +655,6 @@ states.operations_phase = {
 		if (!game.has_played_claimed) {
 			// only one claimed can be played per turn
 			for (let c of player_claimed()) {
-				// TODO is this the right type of event?
 				gen_action("card_event", c)
 			}
 		}
@@ -885,21 +925,21 @@ function vm_case() {
 // #region EVENTS VfW DSL
 
 function vm_add_campaigner() {
-	game.vm.count = vm_operand(1)
-	game.vm.campaigner = vm_operand(2)
-	game.vm.region = vm_operand(3)
-	goto_vm_add_campaigner()
+	game.vm.campaigner = vm_operand(1)
+	game.vm.region = vm_operand(2)
+	game.state = "vm_add_campaigner"
 }
 
 function vm_receive_buttons() {
 	game.vm.count = vm_operand(1)
-	goto_vm_receive_buttons()
+	game.state = "vm_receive_buttons"
 }
 
 function vm_spend_buttons() {
-	// TODO assert
 	game.vm.count = vm_operand(1)
-	goto_vm_spend_buttons()
+	game.state = "vm_spend_buttons"
+	if (player_buttons() < game.vm.count)
+		throw Error("ASSERT: Insufficient buttons")
 }
 
 function vm_opponent_loses_buttons() {
@@ -1209,6 +1249,91 @@ states.vm_switch = {
 		game.vm.choice = "paris"
 		vm_next()
 	},
+}
+
+states.vm_add_campaigner = {
+	inactive: "add a campaigner",
+	prompt() {
+		event_prompt()
+		gen_action_region(game.vm.region)
+	},
+	region(r) {
+		push_undo()
+		add_campaigner(game.vm.campaigner, r)
+		vm_next()
+	}
+}
+
+states.vm_receive_buttons = {
+	inactive: "receive buttons",
+	prompt() {
+		event_prompt()
+		gen_action("next")
+	},
+	next() {
+		push_undo()
+		log(`+${pluralize(game.vm.count, 'button')}.`)
+		if (game.active === SUF) {
+			game.support_buttons += game.vm.count
+		} else {
+			game.opponent_buttons += game.vm.count
+		}
+		vm_next()
+	}
+}
+
+states.vm_spend_buttons = {
+	inactive: "spend buttons",
+	prompt() {
+		event_prompt()
+		gen_action("next")
+	},
+	next() {
+		push_undo()
+		log(`-${pluralize(game.vm.count, 'button')}.`)
+		if (game.active === SUF) {
+			game.support_buttons -= game.vm.count
+		} else {
+			game.opponent_buttons -= game.vm.count
+		}
+		vm_next()
+	}
+}
+
+function goto_vm_add_cubes() {
+	game.state = "vm_add_cubes"
+	if (game.vm.cubes === PURPLE_OR_YELLOW) {
+		game.vm.cube_color = 0
+	} else {
+		game.vm.cube_color = game.vm.cubes
+	}
+}
+
+states.vm_add_cubes = {
+	inactive: "add a cube",
+	prompt() {
+		event_prompt()
+		if (game.vm.cubes === PURPLE_OR_YELLOW) {
+			gen_action("purple")
+			gen_action("yellow")
+		}
+		if (game.vm.cube_color) {
+			for (let s of game.vm.us_states)
+				gen_action_us_state(s)
+		}
+	},
+	purple() {
+		game.vm.cube_color = PURPLE
+	},
+	yellow() {
+		game.vm.cube_color = YELLOW
+	},
+	us_state(s) {
+		push_undo()
+		add_cube(game.vm.cube_color, s)
+		if (--game.vm.count === 0)
+			vm_next()
+	}
 }
 
 function can_vm_place() {
@@ -1614,15 +1739,187 @@ function array_remove(array, index) {
 	array.length = n - 1
 }
 
+
+// insert item at index (faster than splice)
+function array_insert(array, index, item) {
+	for (let i = array.length; i > index; --i)
+		array[i] = array[i - 1]
+	array[index] = item
+	return array
+}
+
+function array_remove_pair(array, index) {
+	let n = array.length
+	for (let i = index + 2; i < n; ++i)
+		array[i - 2] = array[i]
+	array.length = n - 2
+}
+
+function array_insert_pair(array, index, key, value) {
+	for (let i = array.length; i > index; i -= 2) {
+		array[i] = array[i-2]
+		array[i+1] = array[i-1]
+	}
+	array[index] = key
+	array[index+1] = value
+}
+
+function set_clear(set) {
+	set.length = 0
+}
+
+function set_has(set, item) {
+	let a = 0
+	let b = set.length - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = set[m]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else
+			return true
+	}
+	return false
+}
+
+function set_add(set, item) {
+	let a = 0
+	let b = set.length - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = set[m]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else
+			return set
+	}
+	return array_insert(set, a, item)
+}
+
+function set_delete(set, item) {
+	let a = 0
+	let b = set.length - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = set[m]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else
+			return array_remove(set, m)
+	}
+	return set
+}
+
+function set_toggle(set, item) {
+	let a = 0
+	let b = set.length - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = set[m]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else
+			return array_remove(set, m)
+	}
+	return array_insert(set, a, item)
+}
+
+function map_clear(map) {
+	map.length = 0
+}
+
+function map_has(map, key) {
+	let a = 0
+	let b = (map.length >> 1) - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = map[m<<1]
+		if (key < x)
+			b = m - 1
+		else if (key > x)
+			a = m + 1
+		else
+			return true
+	}
+	return false
+}
+
+function map_get(map, key, missing) {
+	let a = 0
+	let b = (map.length >> 1) - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = map[m<<1]
+		if (key < x)
+			b = m - 1
+		else if (key > x)
+			a = m + 1
+		else
+			return map[(m<<1)+1]
+	}
+	return missing
+}
+
+function map_set(map, key, value) {
+	let a = 0
+	let b = (map.length >> 1) - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = map[m<<1]
+		if (key < x)
+			b = m - 1
+		else if (key > x)
+			a = m + 1
+		else {
+			map[(m<<1)+1] = value
+			return
+		}
+	}
+	array_insert_pair(map, a<<1, key, value)
+}
+
+function map_delete(map, item) {
+	let a = 0
+	let b = (map.length >> 1) - 1
+	while (a <= b) {
+		let m = (a + b) >> 1
+		let x = map[m<<1]
+		if (item < x)
+			b = m - 1
+		else if (item > x)
+			a = m + 1
+		else {
+			array_remove_pair(map, m<<1)
+			return
+		}
+	}
+}
+
+function map_for_each(map, f) {
+	for (let i = 0; i < map.length; i += 2)
+		f(map[i], map[i+1])
+}
+
 // #endregion
 
 // #region GENERATED EVENT CODE
 const CODE = []
 
 CODE[1] = [ // Seneca Falls Convention
-	[ vm_add_campaigner, 1, PURPLE, NORTHEAST ],
-	[ vm_add_campaigner, 1, YELLOW, NORTHEAST ],
+	[ vm_prompt, "Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region." ],
+	[ vm_add_campaigner, PURPLE, NORTHEAST ],
+	[ vm_add_campaigner, YELLOW, NORTHEAST ],
+	[ vm_prompt, "Receive 2 :button." ],
 	[ vm_receive_buttons, 2 ],
+	[ vm_prompt, "Add 2 :purple_or_yellow_cube in New York." ],
 	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, us_states("New York") ],
 	[ vm_return ],
 ]
@@ -1736,7 +2033,7 @@ CODE[18] = [ // National Woman’s Rights Convention
 ]
 
 CODE[19] = [ // National American Woman Suffrage Association
-	[ vm_add_campaigner, 1, PURPLE, ATLANTIC_APPALACHIA ],
+	[ vm_add_campaigner, PURPLE, ATLANTIC_APPALACHIA ],
 	[ vm_receive_buttons, 3 ],
 	[ vm_return ],
 ]
@@ -1841,7 +2138,7 @@ CODE[35] = [ // Southern Strategy
 ]
 
 CODE[36] = [ // Women’s Trade Union League
-	[ vm_add_cubes_in_each_of, 1, YELLOW, region_us_states(ATLANTIC_APPALACHIA) ],
+	[ vm_add_campaigner, YELLOW, ATLANTIC_APPALACHIA ],
 	[ vm_add_congress, 1 ],
 	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
@@ -1944,7 +2241,7 @@ CODE[52] = [ // Miss Febb Wins the Last Vote
 ]
 
 CODE[53] = [ // The Patriarchy
-	[ vm_add_campaigner, 1, RED, SOUTH ],
+	[ vm_add_campaigner, RED, SOUTH ],
 	[ vm_receive_buttons, 4 ],
 	[ vm_add_cubes_in_each_of, 1, RED, region_us_states(NORTHEAST, ATLANTIC_APPALACHIA, SOUTH, MIDWEST) ],
 	[ vm_return ],
@@ -2058,7 +2355,7 @@ CODE[70] = [ // Old Dixie
 ]
 
 CODE[71] = [ // NAOWS Forms
-	[ vm_add_campaigner, 1, NORTHEAST ],
+	[ vm_add_campaigner, NORTHEAST ],
 	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
 ]

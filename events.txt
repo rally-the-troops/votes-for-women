@@ -2,9 +2,12 @@
 
 CARD 1 - Seneca Falls Convention
 # Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region. Receive 2 :button and add 2 :purple_or_yellow_cube in New York.
-    add_campaigner 1 PURPLE NORTHEAST
-    add_campaigner 1 YELLOW NORTHEAST
+    prompt "Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region."
+    add_campaigner PURPLE NORTHEAST
+    add_campaigner YELLOW NORTHEAST
+    prompt "Receive 2 :button."
     receive_buttons 2
+    prompt "Add 2 :purple_or_yellow_cube in New York."
     add_cubes 2 PURPLE_OR_YELLOW us_states("New York")
 
 CARD 2 - Property Rights for Women
@@ -101,7 +104,7 @@ CARD 18 - National Woman’s Rights Convention
 
 CARD 19 - National American Woman Suffrage Association
 # Add 1 :purple_campaigner in the Atlantic & Appalachia region. Receive 3 :button.
-    add_campaigner 1 PURPLE ATLANTIC_APPALACHIA
+    add_campaigner PURPLE ATLANTIC_APPALACHIA
     receive_buttons 3
 
 CARD 20 - Jeannette Rankin
@@ -189,7 +192,7 @@ CARD 35 - Southern Strategy
 
 CARD 36 - Women’s Trade Union League
 # Add 1 :yellow_campaigner in the Atlantic & Appalachia region. Add 1 :congressional_marker in Congress and receive 2 :button.
-    add_cubes_in_each_of 1 YELLOW region_us_states(ATLANTIC_APPALACHIA)
+    add_campaigner YELLOW ATLANTIC_APPALACHIA
     add_congress 1
     receive_buttons 2
 
@@ -277,7 +280,7 @@ CARD 52 - Miss Febb Wins the Last Vote
 
 CARD 53 - The Patriarchy
 # Add 1 :red_campaigner in the South region. Receive 4 :button. Add 1 :red_cube in each state in the Northeast region, the Atlantic & Appalachia region, the South region and the Midwest region.
-    add_campaigner 1 RED SOUTH
+    add_campaigner RED SOUTH
     receive_buttons 4
     add_cubes_in_each_of 1 RED region_us_states(NORTHEAST, ATLANTIC_APPALACHIA, SOUTH, MIDWEST)
 
@@ -373,7 +376,7 @@ CARD 70 - Old Dixie
 
 CARD 71 - NAOWS Forms
 # Add 1 :red_campaigner in the Northeast region. Receive 2 :button.
-    add_campaigner 1 NORTHEAST
+    add_campaigner NORTHEAST
     receive_buttons 2
 
 CARD 72 - Woman and the Republic
