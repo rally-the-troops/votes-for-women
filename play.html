@@ -193,6 +193,17 @@ div.persistent_box {
 .persistent_card.support { background-color: var(--suff-85); }
 .persistent_card.opposition { background-color: var(--opp-85); }
 
+div.congress_box {
+	position: absolute;
+	box-sizing: border-box;
+}
+
+div.congress_box.action {
+	background-clip: padding-box;
+	background-color: #fff8;
+	border: 5px solid white;
+}
+
 .piece {
 	position: absolute;
 	background-repeat: no-repeat;
@@ -919,7 +930,10 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 		<div id="Northeast" class="region" style="top:158px;left:881px;"></div>
 
 		<div id="turn" class="piece turn" style="left:800px;top:765px;"></div>
-		<div class="piece congress" style="left:500px;top:765px;"></div>
+		<div id="congress_box" class="congress_box" style="left:490px;top:760px;width:270px;height:60px;">
+		<!-- <div class="piece congress" style="left:500px;top:765px;"></div> -->
+		</div>
+
 		<div class="piece red1" style="left:350px;top:100px;"></div>
 		<div class="piece red2 action" style="left:450px;top:175px;"></div>
 		<div class="piece red3" style="left:550px;top:150px;"></div>

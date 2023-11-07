@@ -30,6 +30,9 @@ const card_count = 128
 
 let ui = {
 	status: document.getElementById("status"),
+	turn: document.getElementById("turn"),
+	congress_box: document.getElementById("congress_box"),
+	congress: [ null ],
 	player: [
 		document.getElementById("role_Suffragist"),
 		document.getElementById("role_Opposition"),
@@ -239,6 +242,15 @@ function on_click_card(evt) {
 	}
 }
 
+function on_click_congress(evt) {
+	if (evt.button === 0) {
+		console.log("congress")
+		if (send_action('congress'))
+			evt.stopPropagation()
+	}
+	hide_popup_menu()
+}
+
 function on_click_region(evt) {
 	if (evt.button === 0) {
 		if (send_action('region', evt.target.my_region))
@@ -281,6 +293,15 @@ function create(t, p, ...c) {
 
 function build_user_interface() {
 	let elt
+
+	ui.congress_box.onmousedown = on_click_congress
+	for (let c = 1; c <= 6; ++c) {
+		elt = ui.congress[c] = create("div", {
+			className: "piece congress",
+			style: `left:${10 + (c-1) * 42}px;top:5px;`,
+			onmousedown: on_click_congress
+		})
+	}
 
     for (let c = 1; c <= card_count; ++c) {
 		elt = ui.cards[c] = create("div", {
@@ -380,6 +401,15 @@ function on_update() { // eslint-disable-line no-unused-vars
 
 	document.getElementById("support_info").textContent = support_info()
 	document.getElementById("opposition_info").textContent = opposition_info()
+
+	ui.turn.style.left = 800 + (42 * (view.turn - 1)) + "px"
+
+	ui.congress_box.replaceChildren()
+	ui.congress_box.classList.toggle("action", !view.congress && is_action("congress"))
+	for (let c = 1; c <= view.congress; ++c) {
+		ui.congress_box.appendChild(ui.congress[c])
+		ui.congress[c].classList.toggle("action", is_action("congress"))
+	}
 
 	document.getElementById("hand").replaceChildren()
 	document.getElementById("support_claimed").replaceChildren()
