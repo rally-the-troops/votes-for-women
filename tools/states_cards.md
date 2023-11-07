@@ -5,7 +5,7 @@ Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its
 Add 6 :purple_or_yellow_cube or 6 :red_cube in the West region, no more than 2 per state.
 
 ## Montana
-Receive 2 :badge.
+Receive 2 :button.
 
 ## Kansas
 Add 6 :purple_or_yellow_cube or 6 :red_cube in the Plains region, no more than 2 per state.
@@ -14,7 +14,7 @@ Add 6 :purple_or_yellow_cube or 6 :red_cube in the Plains region, no more than 2
 Add 6 :purple_or_yellow_cube or 6 :red_cube in the South region, no more than 2 per state.
 
 ## Georgia
-Receive 2 :badge.
+Receive 2 :button.
 
 ## Illinois
 Add 6 :purple_or_yellow_cube or 6 :red_cube in the Midwest region, no more than 2 per state.
@@ -32,4 +32,4 @@ Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its
 Add 6 :purple_or_yellow_cube or 6 :red_cube in the Northeast region, no more than 2 per state.
 
 ## New Jersey
-Receive 2 :badge.
+Receive 2 :button.

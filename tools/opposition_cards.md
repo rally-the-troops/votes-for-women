@@ -1,7 +1,7 @@
 # Start
 
 ## The Patriarchy
-Add 1 :red_campaigner in the South region. Receive 4 :badge. Add 1 :red_cube in each state in the Northeast region, the Atlantic & Appalachia region, the South region and the Midwest region.
+Add 1 :red_campaigner in the South region. Receive 4 :button. Add 1 :red_cube in each state in the Northeast region, the Atlantic & Appalachia region, the South region and the Midwest region.
 
 # Early
 
@@ -10,7 +10,7 @@ Remove 1 :congressional_marker from Congress. For the remainder of the turn, the
 <!-- persistent: rest_of_turn -->
 
 ## 15th Divides Suffragists
-Playable if *Fifteenth Amendment* is in effect. Remove all :purple_cube in up to 4 states. The Suffragist player loses 2 :badge.
+Playable if *Fifteenth Amendment* is in effect. Remove all :purple_cube in up to 4 states. The Suffragist player loses 2 :button.
 
 ## Senator Joseph Brown
 Remove 1 :congressional_marker from Congress and add 2 :red_cube in Georgia.
@@ -19,7 +19,7 @@ Remove 1 :congressional_marker from Congress and add 2 :red_cube in Georgia.
 Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in Missouri.
 
 ## Senate Rejects Suffrage Amendment
-Roll :d6. On a roll of 3-6, receive 1 :badge and remove 1 :congressional_marker from Congress.
+Roll :d6. On a roll of 3-6, receive 1 :button and remove 1 :congressional_marker from Congress.
 
 ## South Dakota Rejects Suffrage
 Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in South Dakota.
@@ -49,7 +49,7 @@ Draw 6 cards from your Draw Deck. Place any number of the 6 cards on the top of 
 Place 1 :red_cube in each of Virginia, North Carolina, South Carolina, Georgia and Tennessee.
 
 ## Beer Brewers
-Playable if Eighteenth Amendment is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
+Playable if *Eighteenth Amendment* is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
 <!-- persistent: rest_of_turn -->
 
 ## Southern Resentment
@@ -61,7 +61,7 @@ Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida.
 # Middle
 
 ## NAOWS Forms
-Add 1 :red_campaigner in the Northeast region. Receive 2 :badge.
+Add 1 :red_campaigner in the Northeast region. Receive 2 :button.
 
 ## Woman and the Republic
 Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
@@ -82,10 +82,10 @@ Add 1 :red_cube in one state of each region.
 Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
 
 ## The Great 1906 San Francisco Earthquake
-Remove all :yellow_cube and :purple_cube from California. The Suffragist player loses 1 :badge.
+Remove all :yellow_cube and :purple_cube from California. The Suffragist player loses 1 :button.
 
 ## A Threat to the Ideal of Womanhood
-For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
+For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event.
 <!-- persistent: rest_of_turn -->
 
 ## “Unwarranted, Unnecessary & Dangerous Interference”
@@ -96,16 +96,16 @@ For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning
 <!-- persistent: rest_of_turn -->
 
 ## The SSWSC
-Playable if *Southern Strategy* is in effect. Receive 2 :badge and add 6 :red_cube in the South region, no more than 2 per state.
+Playable if *Southern Strategy* is in effect. Receive 2 :button and add 6 :red_cube in the South region, no more than 2 per state.
 
 ## Western Saloons Push Suffrage Veto
 Playable if *Eighteenth Amendment* is not in effect. Place 2 :red_cube in Arizona and 1 :red_cube in each of New Mexico, Nevada and Utah.
 
 ## Transcontinental Railroad
-Move each :red_campaigner to any region(s) without paying any :badge and then take a Campaigning action.
+Move each :red_campaigner to any region(s) without paying any :button and then take a Campaigning action.
 
 ## White Supremacy and the Suffrage Movement
-Playable if *Southern Strategy* is in effect. Remove all :yellow_cube in up to 4 states. The Suffragist player loses 2 :badge.
+Playable if *Southern Strategy* is in effect. Remove all :yellow_cube in up to 4 states. The Suffragist player loses 2 :button.
 
 ## Senator John Weeks
 Remove 1 :congressional_marker from Congress and add 2 :red_cube in New Hampshire.
@@ -116,11 +116,11 @@ Remove 1 :congressional_marker from Congress and add 2 :red_cube in South Caroli
 # Late
 
 ## War in Europe
-Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to take a Campaigning action.
+Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action.
 <!-- persistent: rest_of_turn -->
 
 ## 1918 Pandemic
-Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
+Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event.
 <!-- persistent: rest_of_turn -->
 
 ## The Business of Being a Woman
@@ -156,10 +156,10 @@ The Opposition player rolls :d8 instead of :d6 during Final Voting.
 The Suffragist player must discard 2 cards from their hand at random and then draw 2 cards from the Suffragist Draw Deck.
 
 ## American Constitutional League
-Spend 4 :badge to select, and place in front of you, 1 available Strategy card.
+Spend 4 :button to select, and place in front of you, 1 available Strategy card.
 
 ## The Woman Patriot
-Receive 3 :badge.
+Receive 3 :button.
 
 ## Governor Clement’s Veto
 Replace 1 :green_check in a state with 1 :red_x.

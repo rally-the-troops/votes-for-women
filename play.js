@@ -319,7 +319,7 @@ function on_blur_card_tip() { // eslint-disable-line no-unused-vars
 
 function sub_card_name(_match, p1, _offset, _string) {
 	let c = p1 | 0
-	let n = CARDS[c].title
+	let n = CARDS[c].name
 	return `<span class="tip" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${n}</span>`
 }
 
@@ -424,6 +424,11 @@ function on_update() { // eslint-disable-line no-unused-vars
 			})
 			document.getElementById(id).appendChild(elt)
 		}
+	}
+
+	for (let i = 1; i < ui.cards.length; ++i) {
+		// ui.cards[i].classList.toggle("action", is_card_action('card', i))
+		ui.cards[i].classList.toggle("action", is_card_enabled(i))
 	}
 
 	action_button("commit_1_button", "+1 Button")

@@ -90,6 +90,14 @@ function player_hand() {
 	return []
 }
 
+function player_buttons() {
+	if (game.active === SUF) {
+		return game.support_buttons
+	} else {
+		return game.opposition_buttons
+	}
+}
+
 function player_claimed() {
 	if (game.active === SUF) {
 		return game.support_claimed
@@ -500,6 +508,53 @@ function goto_operations_phase() {
 	begin_player_round()
 }
 
+const THE_CIVIL_WAR = find_card("The Civil War")
+const WAR_IN_EUROPE = find_card("War in Europe")
+const FIFTEENTH_AMENDMENT = find_card("Fifteenth Amendment")
+const EIGHTEENTH_AMENDMENT = find_card("Eighteenth Amendment")
+const SOUTHERN_STRATEGY = find_card("Southern Strategy")
+
+function can_play_event(c) {
+	if (game.active === SUF && is_opposition_card(c))
+		return false
+	if (game.active === OPP && is_support_card(c))
+		return false
+
+	// Playable if *The Civil War* is in effect
+	if (c === 5 && !game.persistent_turn.includes(THE_CIVIL_WAR))
+		return false
+
+	// Playable if *The Civil War* is not in effect
+	if ([6, 7, 18].includes(c) && game.persistent_turn.includes(THE_CIVIL_WAR))
+		return false
+
+	// Playable if *War in Europe* is in effect.
+	if (c === 45 && !game.persistent_turn.includes(WAR_IN_EUROPE))
+		return false
+
+	// Playable if *Fifteenth Amendment* is in effect
+	if ([55, 69].includes(c) && !game.persistent_game.includes(FIFTEENTH_AMENDMENT))
+		return false
+
+	// Playable if *Eighteenth Amendment* is not in effect
+	if ([68, 83, 92, 96].includes(c) && game.persistent_game.includes(EIGHTEENTH_AMENDMENT))
+		return false
+
+	// Playable if *Southern Strategy* is in effect
+	if ([82, 85, 94, 95].includes(c) && !game.persistent_game.includes(SOUTHERN_STRATEGY))
+		return false
+
+	// Spend 4 buttons to select
+	if ([39, 100].includes(c) && player_buttons() < 4)
+		return false
+
+	// Playable if it is Turn 5 or Turn 6
+	if (c === 113 && game.turn < 5)
+		return false
+
+	return true
+}
+
 
 function count_player_active_campaigners() {
 	if (game.active === SUF) {
@@ -546,7 +601,8 @@ states.operations_phase = {
 
 		if (!game.has_played_hand) {
 			for (let c of player_hand()) {
-				gen_action("card_event", c)
+				if (can_play_event(c))
+					gen_action("card_event", c)
 				if (has_player_active_campaigners()) {
 					gen_action("card_campaigning", c)
 					gen_action("card_organizing", c)
@@ -835,21 +891,21 @@ function vm_add_campaigner() {
 	goto_vm_add_campaigner()
 }
 
-function vm_receive_badges() {
+function vm_receive_buttons() {
 	game.vm.count = vm_operand(1)
-	goto_vm_receive_badges()
+	goto_vm_receive_buttons()
 }
 
-function vm_spend_badges() {
+function vm_spend_buttons() {
 	// TODO assert
 	game.vm.count = vm_operand(1)
-	goto_vm_spend_badges()
+	goto_vm_spend_buttons()
 }
 
-function vm_opponent_loses_badges() {
+function vm_opponent_loses_buttons() {
 	// TODO assert
 	game.vm.count = vm_operand(1)
-	goto_vm_opponent_loses_badges()
+	goto_vm_opponent_loses_buttons()
 }
 
 function vm_add_cubes() {
@@ -931,13 +987,6 @@ function vm_remove_congress() {
 function vm_roll() {
 	game.vm.count = vm_operand(1)
 	game.vm.d = vm_operand(2)
-	goto_vm_roll_dice()
-}
-
-function vm_roll_success() {
-	game.vm.count = vm_operand(1)
-	game.vm.d = vm_operand(2)
-	game.vm.on_success = true
 	goto_vm_roll_dice()
 }
 
@@ -1573,7 +1622,7 @@ const CODE = []
 CODE[1] = [ // Seneca Falls Convention
 	[ vm_add_campaigner, 1, PURPLE, NORTHEAST ],
 	[ vm_add_campaigner, 1, YELLOW, NORTHEAST ],
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, us_states("New York") ],
 	[ vm_return ],
 ]
@@ -1586,7 +1635,7 @@ CODE[2] = [ // Property Rights for Women
 
 CODE[3] = [ // Frances Willard
 	[ vm_add_congress, 1 ],
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
 ]
 
@@ -1597,17 +1646,21 @@ CODE[4] = [ // A Vindication of the Rights of Woman
 
 CODE[5] = [ // Union Victory
 	[ vm_requires_persistent, find_card("The Civil War") ],
-	[ vm_roll_success, 1, D6 ],
-	[ vm_receive_badges, 2 ],
+	[ vm_roll, 1, D6 ],
+	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_discard_persistent, find_card("The Civil War") ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[6] = [ // Fifteenth Amendment
 	[ vm_requires_not_persistent, find_card("The Civil War") ],
-	[ vm_roll_success, 1, D6 ],
+	[ vm_roll, 1, D6 ],
+	[ vm_if, ()=>(game.vm.die >= 3) ],
 	[ vm_add_congress, 2 ],
 	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
@@ -1625,19 +1678,19 @@ CODE[8] = [ // Petition to Congress
 ]
 
 CODE[9] = [ // Lucy Stone
-	[ vm_receive_badges, 1 ],
+	[ vm_receive_buttons, 1 ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
 
 CODE[10] = [ // Susan B. Anthony Indicted
-	[ vm_receive_badges, 1 ],
+	[ vm_receive_buttons, 1 ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
 
 CODE[11] = [ // Anna Dickinson
-	[ vm_receive_badges, 1 ],
+	[ vm_receive_buttons, 1 ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -1653,7 +1706,7 @@ CODE[13] = [ // Frances Harper
 ]
 
 CODE[14] = [ // The Union Signal
-	[ vm_receive_badges, 1 ],
+	[ vm_receive_buttons, 1 ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -1677,39 +1730,41 @@ CODE[17] = [ // Women to the Polls
 
 CODE[18] = [ // National Woman’s Rights Convention
 	[ vm_add_congress, 1 ],
-	[ vm_receive_badges, 1 ],
+	[ vm_receive_buttons, 1 ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
 
 CODE[19] = [ // National American Woman Suffrage Association
 	[ vm_add_campaigner, 1, PURPLE, ATLANTIC_APPALACHIA ],
-	[ vm_receive_badges, 3 ],
+	[ vm_receive_buttons, 3 ],
 	[ vm_return ],
 ]
 
 CODE[20] = [ // Jeannette Rankin
-	[ vm_roll_success, 1, D6 ],
+	[ vm_roll, 1, D6 ],
+	[ vm_if, ()=>(game.vm.die >= 3) ],
 	[ vm_add_congress, 1 ],
 	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, us_states("Montana") ],
 	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states_except(PLAINS, us_states("Montana")) ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[21] = [ // Ida B. Wells-Barnett
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, us_states("Illinois") ],
 	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, region_us_states_except(MIDWEST, us_states("Illinois")) ],
 	[ vm_return ],
 ]
 
 CODE[22] = [ // The Club Movement
-	[ vm_receive_badges, 4 ],
+	[ vm_receive_buttons, 4 ],
 	[ vm_return ],
 ]
 
 CODE[23] = [ // Equality League of Self-Supporting Women
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -1727,7 +1782,7 @@ CODE[25] = [ // “Debate Us, You Cowards!”
 ]
 
 CODE[26] = [ // Carrie Chapman Catt
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -1740,7 +1795,7 @@ CODE[27] = [ // Alice Paul & Lucy Burns
 
 CODE[28] = [ // Inez Milholland
 	[ vm_add_congress, 1 ],
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -1762,7 +1817,7 @@ CODE[31] = [ // Helen Keller
 ]
 
 CODE[32] = [ // Maria de Lopez
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, us_states("California", "Nevada", "Arizona") ],
 	[ vm_return ],
 ]
@@ -1779,7 +1834,7 @@ CODE[34] = [ // The West’s Awakening
 ]
 
 CODE[35] = [ // Southern Strategy
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states(SOUTH) ],
 	[ vm_select_strategy_card ],
 	[ vm_return ],
@@ -1788,7 +1843,7 @@ CODE[35] = [ // Southern Strategy
 CODE[36] = [ // Women’s Trade Union League
 	[ vm_add_cubes_in_each_of, 1, YELLOW, region_us_states(ATLANTIC_APPALACHIA) ],
 	[ vm_add_congress, 1 ],
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
 ]
 
@@ -1798,13 +1853,15 @@ CODE[37] = [ // The Young Woman Citizen
 ]
 
 CODE[38] = [ // 1918 Midterm Elections
-	[ vm_roll_success, 1, D6 ],
+	[ vm_roll, 1, D6 ],
+	[ vm_if, ()=>(game.vm.die >= 3) ],
 	[ vm_add_congress, 3 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[39] = [ // Woodrow Wilson
-	[ vm_spend_badges, 4 ],
+	[ vm_spend_buttons, 4 ],
 	[ vm_select_strategy_card ],
 	[ vm_return ],
 ]
@@ -1870,7 +1927,7 @@ CODE[49] = [ // Mary Church Terrell
 
 CODE[50] = [ // Tea Parties for Suffrage
 	[ vm_add_congress, 1 ],
-	[ vm_receive_badges, 4 ],
+	[ vm_receive_buttons, 4 ],
 	[ vm_return ],
 ]
 
@@ -1888,7 +1945,7 @@ CODE[52] = [ // Miss Febb Wins the Last Vote
 
 CODE[53] = [ // The Patriarchy
 	[ vm_add_campaigner, 1, RED, SOUTH ],
-	[ vm_receive_badges, 4 ],
+	[ vm_receive_buttons, 4 ],
 	[ vm_add_cubes_in_each_of, 1, RED, region_us_states(NORTHEAST, ATLANTIC_APPALACHIA, SOUTH, MIDWEST) ],
 	[ vm_return ],
 ]
@@ -1903,7 +1960,7 @@ CODE[54] = [ // The Civil War
 CODE[55] = [ // 15th Divides Suffragists
 	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
 	[ vm_remove_all_cubes_up_to, PURPLE, 4 ],
-	[ vm_opponent_loses_badges, 2 ],
+	[ vm_opponent_loses_buttons, 2 ],
 	[ vm_return ],
 ]
 
@@ -1914,23 +1971,29 @@ CODE[56] = [ // Senator Joseph Brown
 ]
 
 CODE[57] = [ // Minor v. Happersett
-	[ vm_roll_success, 1, D6 ],
+	[ vm_roll, 1, D6 ],
+	[ vm_if, ()=>(game.vm.die >= 3) ],
 	[ vm_remove_congress, 1 ],
 	[ vm_add_cubes, 2, RED, us_states("Missouri") ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[58] = [ // Senate Rejects Suffrage Amendment
-	[ vm_roll_success, 1, D6 ],
-	[ vm_receive_badges, 1 ],
+	[ vm_roll, 1, D6 ],
+	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_receive_buttons, 1 ],
 	[ vm_remove_congress, 1 ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[59] = [ // South Dakota Rejects Suffrage
-	[ vm_roll_success, 1, D6 ],
+	[ vm_roll, 1, D6 ],
+	[ vm_if, ()=>(game.vm.die >= 3) ],
 	[ vm_remove_congress, 1 ],
 	[ vm_add_cubes, 2, RED, us_states("South Dakota") ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
@@ -1996,7 +2059,7 @@ CODE[70] = [ // Old Dixie
 
 CODE[71] = [ // NAOWS Forms
 	[ vm_add_campaigner, 1, NORTHEAST ],
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
 ]
 
@@ -2034,7 +2097,7 @@ CODE[77] = [ // Emma Goldman
 
 CODE[78] = [ // The Great 1906 San Francisco Earthquake
 	[ vm_remove_all_cubes, PURPLE_OR_YELLOW, us_states("California") ],
-	[ vm_opponent_loses_badges, 1 ],
+	[ vm_opponent_loses_buttons, 1 ],
 	[ vm_return ],
 ]
 
@@ -2057,7 +2120,7 @@ CODE[81] = [ // Conservative Opposition
 
 CODE[82] = [ // The SSWSC
 	[ vm_requires_persistent, find_card("Southern Strategy") ],
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_limit, 6, RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
@@ -2078,7 +2141,7 @@ CODE[84] = [ // Transcontinental Railroad
 CODE[85] = [ // White Supremacy and the Suffrage Movement
 	[ vm_requires_persistent, find_card("Southern Strategy") ],
 	[ vm_remove_all_cubes_up_to, YELLOW, 4 ],
-	[ vm_opponent_loses_badges, 2 ],
+	[ vm_opponent_loses_buttons, 2 ],
 	[ vm_return ],
 ]
 
@@ -2169,13 +2232,13 @@ CODE[99] = [ // Anti-Suffrage Riots
 ]
 
 CODE[100] = [ // American Constitutional League
-	[ vm_spend_badges, 4 ],
+	[ vm_spend_buttons, 4 ],
 	[ vm_select_strategy_card ],
 	[ vm_return ],
 ]
 
 CODE[101] = [ // The Woman Patriot
-	[ vm_receive_badges, 3 ],
+	[ vm_receive_buttons, 3 ],
 	[ vm_return ],
 ]
 
@@ -2197,7 +2260,7 @@ CODE[104] = [ // Senator William Borah
 ]
 
 CODE[105] = [ // Efficient Organizing
-	[ vm_receive_badges, 5 ],
+	[ vm_receive_buttons, 5 ],
 	[ vm_return ],
 ]
 
@@ -2211,7 +2274,7 @@ CODE[106] = [ // Reconsideration
 ]
 
 CODE[107] = [ // Opposition Research
-	[ vm_opponent_loses_badges, ()=>(Math.ceil(opponent_badges()/2)) ],
+	[ vm_opponent_loses_buttons, ()=>(Math.ceil(opponent_buttons()/2)) ],
 	[ vm_return ],
 ]
 
@@ -2295,7 +2358,7 @@ CODE[118] = [ // Utah
 ]
 
 CODE[119] = [ // Montana
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
 ]
 
@@ -2318,7 +2381,7 @@ CODE[121] = [ // Texas
 ]
 
 CODE[122] = [ // Georgia
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
 ]
 
@@ -2360,7 +2423,7 @@ CODE[127] = [ // New York
 ]
 
 CODE[128] = [ // New Jersey
-	[ vm_receive_badges, 2 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
 ]
 // #endregion

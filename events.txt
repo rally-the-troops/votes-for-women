@@ -1,10 +1,10 @@
 # Support Cards
 
 CARD 1 - Seneca Falls Convention
-# Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region. Receive 2 :badge and add 2 :purple_or_yellow_cube in New York.
+# Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region. Receive 2 :button and add 2 :purple_or_yellow_cube in New York.
     add_campaigner 1 PURPLE NORTHEAST
     add_campaigner 1 YELLOW NORTHEAST
-    receive_badges 2
+    receive_buttons 2
     add_cubes 2 PURPLE_OR_YELLOW us_states("New York")
 
 CARD 2 - Property Rights for Women
@@ -13,27 +13,31 @@ CARD 2 - Property Rights for Women
     todo
 
 CARD 3 - Frances Willard
-# Add 1 :congressional_marker in Congress and receive 2 :badge.
+# Add 1 :congressional_marker in Congress and receive 2 :button.
     add_congress 1
-    receive_badges 2
+    receive_buttons 2
 
 CARD 4 - A Vindication of the Rights of Woman
 # Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
     draw_2_play_1_event
 
 CARD 5 - Union Victory
-# Playable if *The Civil War* is in effect. Roll :d6. On a roll of 3-6, receive two :badge and move *The Civil War* to the discard pile.
+# Playable if *The Civil War* is in effect. Roll :d6. On a roll of 3-6, receive two :button and move *The Civil War* to the discard pile.
     requires_persistent find_card("The Civil War")
-    roll_success 1 D6
-    receive_badges 2
-    discard_persistent find_card("The Civil War")
+    roll 1 D6
+    if (game.vm.die >= 3)
+        receive_buttons 2
+        discard_persistent find_card("The Civil War")
+    endif
 
 CARD 6 - Fifteenth Amendment
 # Playable if *The Civil War* is not in effect. Roll :d6. On a roll of 3-6, add 2 :congressional_marker in Congress and add 8 :purple_or_yellow_cube anywhere, no more than 2 per state.
     requires_not_persistent find_card("The Civil War")
-    roll_success 1 D6
-    add_congress 2
-    add_cubes_limit 8 PURPLE_OR_YELLOW anywhere() 2
+    roll 1 D6
+    if (game.vm.die >= 3)
+        add_congress 2
+        add_cubes_limit 8 PURPLE_OR_YELLOW anywhere() 2
+    endif
 
 CARD 7 - Reconstruction
 # Playable if *The Civil War* is not in effect and the *Fifteenth Amendment* is in effect.
@@ -48,18 +52,18 @@ CARD 8 - Petition to Congress
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 9 - Lucy Stone
-# Receive 1 :badge and add 1 :purple_or_yellow_cube in one state of each region.
-    receive_badges 1
+# Receive 1 :button and add 1 :purple_or_yellow_cube in one state of each region.
+    receive_buttons 1
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 10 - Susan B. Anthony Indicted
-# Receive 1 :badge and add 1 :purple_or_yellow_cube in one state of each region.
-    receive_badges 1
+# Receive 1 :button and add 1 :purple_or_yellow_cube in one state of each region.
+    receive_buttons 1
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 11 - Anna Dickinson
-# Receive 1 :badge and add 1 :purple_or_yellow_cube in one state of each region.
-    receive_badges 1
+# Receive 1 :button and add 1 :purple_or_yellow_cube in one state of each region.
+    receive_buttons 1
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 12 - Frederick Douglass
@@ -71,8 +75,8 @@ CARD 13 - Frances Harper
 # Roll :d8. Add that number :purple_or_yellow_cube in the Atlantic & Appalachia region, no more than 1 per state.
 
 CARD 14 - The Union Signal
-# Receive 1 :badge and add 1 :purple_or_yellow_cube in one state of each region.
-    receive_badges 1
+# Receive 1 :button and add 1 :purple_or_yellow_cube in one state of each region.
+    receive_buttons 1
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 15 - Sojourner Truth
@@ -92,34 +96,36 @@ CARD 17 - Women to the Polls
 CARD 18 - National Woman’s Rights Convention
 # Playable if *The Civil War* is not in effect. Add 1 :congressional_marker in Congress and 1 :purple_or_yellow_cube in one state of each region.
     add_congress 1
-    receive_badges 1
+    receive_buttons 1
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 19 - National American Woman Suffrage Association
-# Add 1 :purple_campaigner in the Atlantic & Appalachia region. Receive 3 :badge.
+# Add 1 :purple_campaigner in the Atlantic & Appalachia region. Receive 3 :button.
     add_campaigner 1 PURPLE ATLANTIC_APPALACHIA
-    receive_badges 3
+    receive_buttons 3
 
 CARD 20 - Jeannette Rankin
 # Roll :d6. On a roll of 3-6, add 1 :congressional_marker in Congress and 4 :purple_or_yellow_cube in Montana and 2 :purple_or_yellow_cube in each other state in the Plains region.
-    roll_success 1 D6
-    add_congress 1
-    add_cubes 4 PURPLE_OR_YELLOW us_states("Montana")
-    add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states_except(PLAINS, us_states("Montana"))
+    roll 1 D6
+    if (game.vm.die >= 3)
+        add_congress 1
+        add_cubes 4 PURPLE_OR_YELLOW us_states("Montana")
+        add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states_except(PLAINS, us_states("Montana"))
+    endif
 
 CARD 21 - Ida B. Wells-Barnett
-# Receive 2 :badge. Add 2 :purple_or_yellow_cube in Illinois and 1 :purple_or_yellow_cube in each other state in the Midwest region.
-    receive_badges 2
+# Receive 2 :button. Add 2 :purple_or_yellow_cube in Illinois and 1 :purple_or_yellow_cube in each other state in the Midwest region.
+    receive_buttons 2
     add_cubes 2 PURPLE_OR_YELLOW us_states("Illinois")
     add_cubes_in_each_of 1 PURPLE_OR_YELLOW region_us_states_except(MIDWEST, us_states("Illinois"))
 
 CARD 22 - The Club Movement
-# Receive 4 :badge.
-    receive_badges 4
+# Receive 4 :button.
+    receive_buttons 4
 
 CARD 23 - Equality League of Self-Supporting Women
-# Receive 2 :badge. Add 1 :purple_or_yellow_cube in one state of each region.
-    receive_badges 2
+# Receive 2 :button. Add 1 :purple_or_yellow_cube in one state of each region.
+    receive_buttons 2
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 24 - Emmeline Pankhurst
@@ -133,8 +139,8 @@ CARD 25 - “Debate Us, You Cowards!”
     remove_cubes_limit (game.vm.die) RED anywhere() 2
 
 CARD 26 - Carrie Chapman Catt
-# Receive 2 :badge. Add 1 :purple_or_yellow_cube in one state of each region.
-    receive_badges 2
+# Receive 2 :button. Add 1 :purple_or_yellow_cube in one state of each region.
+    receive_buttons 2
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 27 - Alice Paul & Lucy Burns
@@ -143,9 +149,9 @@ CARD 27 - Alice Paul & Lucy Burns
     remove_cubes_limit (game.vm.die) RED anywhere() 2
 
 CARD 28 - Inez Milholland
-# Add 1 :congressional_marker in Congress. Receive 2 :badge and add 1 :purple_or_yellow_cube in one state of each region.
+# Add 1 :congressional_marker in Congress. Receive 2 :button and add 1 :purple_or_yellow_cube in one state of each region.
     add_congress 1
-    receive_badges 2
+    receive_buttons 2
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 29 - Farmers for Suffrage
@@ -162,8 +168,8 @@ CARD 31 - Helen Keller
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 32 - Maria de Lopez
-# Recieve 2 :badge. Add 2 :purple_or_yellow_cube in each of California, Nevada and Arizona.
-    receive_badges 2
+# Recieve 2 :button. Add 2 :purple_or_yellow_cube in each of California, Nevada and Arizona.
+    receive_buttons 2
     add_cubes_in_each_of 2 PURPLE_OR_YELLOW us_states("California", "Nevada", "Arizona")
 
 CARD 33 - Marie Louise Bottineau Baldwin
@@ -176,16 +182,16 @@ CARD 34 - The West’s Awakening
     add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states(WEST)
 
 CARD 35 - Southern Strategy
-# Receive 2 :badge. Add 2 :purple_or_yellow_cube in each state in the South region. Select and place in front of you 1 available Strategy card.
-    receive_badges 2
+# Receive 2 :button. Add 2 :purple_or_yellow_cube in each state in the South region. Select and place in front of you 1 available Strategy card.
+    receive_buttons 2
     add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states(SOUTH)
     select_strategy_card
 
 CARD 36 - Women’s Trade Union League
-# Add 1 :yellow_campaigner in the Atlantic & Appalachia region. Add 1 :congressional_marker in Congress and receive 2 :badge.
+# Add 1 :yellow_campaigner in the Atlantic & Appalachia region. Add 1 :congressional_marker in Congress and receive 2 :button.
     add_cubes_in_each_of 1 YELLOW region_us_states(ATLANTIC_APPALACHIA)
     add_congress 1
-    receive_badges 2
+    receive_buttons 2
 
 CARD 37 - The Young Woman Citizen
 # Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
@@ -193,12 +199,14 @@ CARD 37 - The Young Woman Citizen
 
 CARD 38 - 1918 Midterm Elections
 # Roll :d6. On a roll of 3-6, add 3 :congressional_marker in Congress.
-    roll_success 1 D6
-    add_congress 3
+    roll 1 D6
+    if (game.vm.die >= 3)
+        add_congress 3
+    endif
 
 CARD 39 - Woodrow Wilson
-# Spend 4 :badge to select and place in front of you 1 available Strategy card.
-    spend_badges 4
+# Spend 4 :button to select and place in front of you 1 available Strategy card.
+    spend_buttons 4
     select_strategy_card
 
 CARD 40 - Maud Wood Park
@@ -231,7 +239,7 @@ CARD 45 - Women and World War I
     add_cubes_limit 10 PURPLE_OR_YELLOW anywhere() 2
 
 CARD 46 - Eighteenth Amendment
-# Roll :d6. On a roll of 3-6, add 1 congressional_marker in Congress and receive 2 :badge.
+# Roll :d6. On a roll of 3-6, add 1 congressional_marker in Congress and receive 2 :button.
     persistent REST_OF_GAME
     todo
 
@@ -251,9 +259,9 @@ CARD 49 - Mary Church Terrell
     add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 50 - Tea Parties for Suffrage
-# Add 1 :congressional_marker in Congress and receive 4 :badge
+# Add 1 :congressional_marker in Congress and receive 4 :button
     add_congress 1
-    receive_badges 4
+    receive_buttons 4
 
 CARD 51 - Dr. Mabel Ping-Hua Lee
 # Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
@@ -268,9 +276,9 @@ CARD 52 - Miss Febb Wins the Last Vote
 # Opposition Cards
 
 CARD 53 - The Patriarchy
-# Add 1 :red_campaigner in the South region. Receive 4 :badge. Add 1 :red_cube in each state in the Northeast region, the Atlantic & Appalachia region, the South region and the Midwest region.
+# Add 1 :red_campaigner in the South region. Receive 4 :button. Add 1 :red_cube in each state in the Northeast region, the Atlantic & Appalachia region, the South region and the Midwest region.
     add_campaigner 1 RED SOUTH
-    receive_badges 4
+    receive_buttons 4
     add_cubes_in_each_of 1 RED region_us_states(NORTHEAST, ATLANTIC_APPALACHIA, SOUTH, MIDWEST)
 
 CARD 54 - The Civil War
@@ -280,10 +288,10 @@ CARD 54 - The Civil War
     todo
 
 CARD 55 - 15th Divides Suffragists
-# Playable if *Fifteenth Amendment* is in effect. Remove all :purple_cube in up to 4 states. The Suffragist player loses 2 :badge.
+# Playable if *Fifteenth Amendment* is in effect. Remove all :purple_cube in up to 4 states. The Suffragist player loses 2 :button.
     requires_persistent find_card("Fifteenth Amendment")
     remove_all_cubes_up_to PURPLE 4
-    opponent_loses_badges 2
+    opponent_loses_buttons 2
 
 CARD 56 - Senator Joseph Brown
 # Remove 1 :congressional_marker from Congress and add 2 :red_cube in Georgia.
@@ -292,21 +300,27 @@ CARD 56 - Senator Joseph Brown
 
 CARD 57 - Minor v. Happersett
 # Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in Missouri.
-    roll_success 1 D6
-    remove_congress 1
-    add_cubes 2 RED us_states("Missouri")
+    roll 1 D6
+    if (game.vm.die >= 3)
+        remove_congress 1
+        add_cubes 2 RED us_states("Missouri")
+    endif
 
 CARD 58 - Senate Rejects Suffrage Amendment
-# Roll :d6. On a roll of 3-6, receive 1 :badge and remove 1 :congressional_marker from Congress.
-    roll_success 1 D6
-    receive_badges 1
-    remove_congress 1
+# Roll :d6. On a roll of 3-6, receive 1 :button and remove 1 :congressional_marker from Congress.
+    roll 1 D6
+    if (game.vm.die >= 3)
+        receive_buttons 1
+        remove_congress 1
+    endif
 
 CARD 59 - South Dakota Rejects Suffrage
 # Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in South Dakota.
-    roll_success 1 D6
-    remove_congress 1
-    add_cubes 2 RED us_states("South Dakota")
+    roll 1 D6
+    if (game.vm.die >= 3)
+        remove_congress 1
+        add_cubes 2 RED us_states("South Dakota")
+    endif
 
 CARD 60 - Gerrymandering
 # Remove all :yellow_cube in up to 2 states.
@@ -343,7 +357,7 @@ CARD 67 - Southern “Hospitality”
     add_cubes_in_each_of 1 RED us_states("Virginia", "North Carolina", "South Carolina", "Georgia", "Tennessee")
 
 CARD 68 - Beer Brewers
-# Playable if Eighteenth Amendment is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
+# Playable if *Eighteenth Amendment* is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
     requires_not_persistent find_card("Eighteenth Amendment")
     persistent REST_OF_TURN
     todo
@@ -358,9 +372,9 @@ CARD 70 - Old Dixie
     add_cubes_in_each_of 1 RED us_states("Louisiana", "Mississippi", "Alabama", "Georgia", "Florida")
 
 CARD 71 - NAOWS Forms
-# Add 1 :red_campaigner in the Northeast region. Receive 2 :badge.
+# Add 1 :red_campaigner in the Northeast region. Receive 2 :button.
     add_campaigner 1 NORTHEAST
-    receive_badges 2
+    receive_buttons 2
 
 CARD 72 - Woman and the Republic
 # Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
@@ -389,12 +403,12 @@ CARD 77 - Emma Goldman
     add_cubes_limit (game.vm.die) RED anywhere() 1
 
 CARD 78 - The Great 1906 San Francisco Earthquake
-# Remove all :yellow_cube and :purple_cube from California. The Suffragist player loses 1 :badge.
+# Remove all :yellow_cube and :purple_cube from California. The Suffragist player loses 1 :button.
     remove_all_cubes PURPLE_OR_YELLOW us_states("California")
-    opponent_loses_badges 1
+    opponent_loses_buttons 1
 
 CARD 79 - A Threat to the Ideal of Womanhood
-# For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
+# For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event.
     persistent REST_OF_TURN
     todo
 
@@ -408,9 +422,9 @@ CARD 81 - Conservative Opposition
     todo
 
 CARD 82 - The SSWSC
-# Playable if *Southern Strategy* is in effect. Receive 2 :badge and add 6 :red_cube in the South region, no more than 2 per state.
+# Playable if *Southern Strategy* is in effect. Receive 2 :button and add 6 :red_cube in the South region, no more than 2 per state.
     requires_persistent find_card("Southern Strategy")
-    receive_badges 2
+    receive_buttons 2
     add_cubes_limit 6 RED region_us_states(SOUTH) 2
 
 CARD 83 - Western Saloons Push Suffrage Veto
@@ -420,15 +434,15 @@ CARD 83 - Western Saloons Push Suffrage Veto
     add_cubes_in_each_of 1 RED us_states("New Mexico", "Nevada", "Utah")
 
 CARD 84 - Transcontinental Railroad
-# Move each :red_campaigner to any region(s) without paying any :badge and then take a Campaigning action.
+# Move each :red_campaigner to any region(s) without paying any :button and then take a Campaigning action.
     move_each_campaigner_free RED
     campaigning_action
 
 CARD 85 - White Supremacy and the Suffrage Movement
-# Playable if *Southern Strategy* is in effect. Remove all :yellow_cube in up to 4 states. The Suffragist player loses 2 :badge.
+# Playable if *Southern Strategy* is in effect. Remove all :yellow_cube in up to 4 states. The Suffragist player loses 2 :button.
     requires_persistent find_card("Southern Strategy")
     remove_all_cubes_up_to YELLOW 4
-    opponent_loses_badges 2
+    opponent_loses_buttons 2
 
 CARD 86 - Senator John Weeks
 # Remove 1 :congressional_marker from Congress and add 2 :red_cube in New Hampshire.
@@ -441,13 +455,13 @@ CARD 87 - Senator “Cotton Ed” Smith
     add_cubes 2 RED us_states("South Carolina")
 
 CARD 88 - War in Europe
-# Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to take a Campaigning action.
+# Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action.
     remove_congress 1
     persistent REST_OF_TURN
     todo
 
 CARD 89 - 1918 Pandemic
-# Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :badge in order to play a card as an event.
+# Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event.
     remove_congress 1
     persistent REST_OF_TURN
     todo
@@ -503,13 +517,13 @@ CARD 99 - Anti-Suffrage Riots
     support_discard_2_random_draw_2
 
 CARD 100 - American Constitutional League
-# Spend 4 :badge to select, and place in front of you, 1 available Strategy card.
-    spend_badges 4
+# Spend 4 :button to select, and place in front of you, 1 available Strategy card.
+    spend_buttons 4
     select_strategy_card
 
 CARD 101 - The Woman Patriot
-# Receive 3 :badge.
-    receive_badges 3
+# Receive 3 :button.
+    receive_buttons 3
 
 CARD 102 - Governor Clement’s Veto
 # Replace 1 :green_check in a state with 1 :red_x.
@@ -528,8 +542,8 @@ CARD 104 - Senator William Borah
 # Strategy Cards
 
 CARD 105 - Efficient Organizing
-# Receive 5 :badge.
-    receive_badges 5
+# Receive 5 :button.
+    receive_buttons 5
 
 CARD 106 - Reconsideration
 # Replace 1 :red_x with 2 :purple_or_yellow_cube or 1 :green_check with 2 :red_cube.
@@ -540,8 +554,8 @@ CARD 106 - Reconsideration
     endif
 
 CARD 107 - Opposition Research
-# Your opponent must lose half (rounded up) of their :badge.
-    opponent_loses_badges (Math.ceil(opponent_badges()/2))
+# Your opponent must lose half (rounded up) of their :button.
+    opponent_loses_buttons (Math.ceil(opponent_buttons()/2))
 
 CARD 108 - Change In Plans
 # Look at your opponent’s hand. Your opponent must discard 1 card of your choice that does not have a :yellow_campaigner / :purple_campaigner / :red_campaigner on it. Your opponent then draws 1 replacement card from their Draw Deck.
@@ -579,7 +593,7 @@ CARD 113 - Eye on the Future
     todo
 
 CARD 114 - Transportation
-# Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :badge and then take a Campaigning action.
+# Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :button and then take a Campaigning action.
     if (game.active === SUF)
         move_each_campaigner_free PURPLE_OR_YELLOW
     else
@@ -614,8 +628,8 @@ CARD 118 - Utah
     endif
 
 CARD 119 - Montana
-# Receive 2 :badge.
-    receive_badges 2
+# Receive 2 :button.
+    receive_buttons 2
 
 CARD 120 - Kansas
 # Add 6 :purple_or_yellow_cube or 6 :red_cube in the Plains region, no more than 2 per state.
@@ -634,8 +648,8 @@ CARD 121 - Texas
     endif
 
 CARD 122 - Georgia
-# Receive 2 :badge.
-    receive_badges 2
+# Receive 2 :button.
+    receive_buttons 2
 
 CARD 123 - Illinois
 # Add 6 :purple_or_yellow_cube or 6 :red_cube in the Midwest region, no more than 2 per state.
@@ -670,5 +684,5 @@ CARD 127 - New York
     endif
 
 CARD 128 - New Jersey
-# Receive 2 :badge.
-    receive_badges 2
+# Receive 2 :button.
+    receive_buttons 2

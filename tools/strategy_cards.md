@@ -1,11 +1,11 @@
 ## Efficient Organizing
-Receive 5 :badge.
+Receive 5 :button.
 
 ## Reconsideration
 Replace 1 :red_x with 2 :purple_or_yellow_cube or 1 :green_check with 2 :red_cube.
 
 ## Opposition Research
-Your opponent must lose half (rounded up) of their :badge.
+Your opponent must lose half (rounded up) of their :button.
 
 ## Change In Plans
 Look at your opponent’s hand. Your opponent must discard 1 card of your choice that does not have a :yellow_campaigner / :purple_campaigner / :red_campaigner on it. Your opponent then draws 1 replacement card from their Draw Deck.
@@ -26,7 +26,7 @@ Add 1 :purple_or_yellow_cube or 1 :red_cube per state in any one region.
 Playable if it is Turn 5 or Turn 6. Look through your Draw Deck and select 1 card and play for its event immediately. Then reshuffle your Draw Deck.
 
 ## Transportation
-Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :badge and then take a Campaigning action.
+Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :button and then take a Campaigning action.
 
 ## Counter Strat
 Remove one card that is “in effect for the remainder of the turn” and place it in the appropriate discard pile.
