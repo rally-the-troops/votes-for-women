@@ -73,7 +73,7 @@ Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its
 Remove 6 :purple_or_yellow_cube from anywhere, no more than 2 per state.
 
 ## Xenophobia
-Remove all from any 1 :purple_cube state. Remove all :yellow_cube from any 1 state.
+Remove all :purple_cube from any 1 state. Remove all :yellow_cube from any 1 state.
 
 ## “O Save Us Senators, From Ourselves”
 Add 1 :red_cube in one state of each region.
