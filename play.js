@@ -508,9 +508,6 @@ function on_update() { // eslint-disable-line no-unused-vars
 		ui.us_states[i].classList.toggle("action", is_us_state_action(i))
 	}
 
-
-	// ui.pieces.replaceChildren()
-
 	for (let i = 0; i < ui.support_campaigner.length; ++i) {
 		// TODO Cleanup
 		let campaigner_region = view.support_campaigner[i]
@@ -524,8 +521,17 @@ function on_update() { // eslint-disable-line no-unused-vars
 		}
 	}
 	for (let i = 0; i < ui.opposition_campaigner.length; ++i) {
-		// TODO
+		// TODO Cleanup
 		ui.opposition_campaigner[i].classList.toggle("hide", !view.opposition_campaigner[i])
+		let campaigner_region = view.opposition_campaigner[i]
+		if (campaigner_region) {
+			ui.pieces.appendChild(ui.opposition_campaigner[i])
+			let [x, y] = REGIONS_LAYOUT[campaigner_region]
+			ui.opposition_campaigner[i].style.left = x - 30 + (15 * i) + "px"
+			ui.opposition_campaigner[i].style.top = y - 10 + "px"
+		} else {
+			ui.opposition_campaigner[i].remove()
+		}
 	}
 
 
@@ -538,6 +544,8 @@ function on_update() { // eslint-disable-line no-unused-vars
 	action_button("next", "Next")
 	action_button("purple", "Purple")
 	action_button("yellow", "Yellow")
+	action_button("roll", "Roll")
+	action_button("reroll", "Re-roll")
 	action_button("end_event", "End Event")
 
     action_button("skip", "Skip")
