@@ -2,12 +2,9 @@
 
 CARD 1 - Seneca Falls Convention
 # Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region. Receive 2 :button and add 2 :purple_or_yellow_cube in New York.
-    prompt "Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region."
     add_campaigner PURPLE NORTHEAST
     add_campaigner YELLOW NORTHEAST
-    prompt "Receive 2 :button."
     receive_buttons 2
-    prompt "Add 2 :purple_or_yellow_cube in New York."
     add_cubes 2 PURPLE_OR_YELLOW us_states("New York")
 
 CARD 2 - Property Rights for Women
@@ -28,7 +25,7 @@ CARD 5 - Union Victory
 # Playable if *The Civil War* is in effect. Roll :d6. On a roll of 3-6, receive two :button and move *The Civil War* to the discard pile.
     requires_persistent find_card("The Civil War")
     roll 1 D6
-    if (game.vm.die >= 3)
+    if (game.vm.roll >= 3)
         receive_buttons 2
         discard_persistent find_card("The Civil War")
     endif
@@ -37,7 +34,7 @@ CARD 6 - Fifteenth Amendment
 # Playable if *The Civil War* is not in effect. Roll :d6. On a roll of 3-6, add 2 :congressional_marker in Congress and add 8 :purple_or_yellow_cube anywhere, no more than 2 per state.
     requires_not_persistent find_card("The Civil War")
     roll 1 D6
-    if (game.vm.die >= 3)
+    if (game.vm.roll >= 3)
         add_congress 2
         add_cubes_limit 8 PURPLE_OR_YELLOW anywhere() 2
     endif
@@ -61,9 +58,7 @@ CARD 9 - Lucy Stone
 
 CARD 10 - Susan B. Anthony Indicted
 # Receive 1 :button and add 1 :purple_or_yellow_cube in one state of each region.
-    prompt "Receive 1 :button."
     receive_buttons 1
-    prompt "Add 1 :purple_or_yellow_cube in one state of each region."
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 11 - Anna Dickinson
@@ -74,10 +69,12 @@ CARD 11 - Anna Dickinson
 CARD 12 - Frederick Douglass
 # Roll :d8. Add that number :purple_or_yellow_cube in the Northeast region, no more than 1 per state.
     roll 1 D8
-    add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW region_us_states(NORTHEAST) 1
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW region_us_states(NORTHEAST) 1
 
 CARD 13 - Frances Harper
 # Roll :d8. Add that number :purple_or_yellow_cube in the Atlantic & Appalachia region, no more than 1 per state.
+    roll 1 D8
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW region_us_states(ATLANTIC_APPALACHIA) 1
 
 CARD 14 - The Union Signal
 # Receive 1 :button and add 1 :purple_or_yellow_cube in one state of each region.
@@ -87,12 +84,12 @@ CARD 14 - The Union Signal
 CARD 15 - Sojourner Truth
 # Roll :d8. Add that number :purple_or_yellow_cube in the Midwest region, no more than 1 per state.
     roll 1 D8
-    add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW region_us_states(MIDWEST) 1
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW region_us_states(MIDWEST) 1
 
 CARD 16 - Pioneer Women
 # Roll :d8. Add that number :purple_or_yellow_cube in the Plains region, no more than 1 per state.
     roll 1 D8
-    add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW region_us_states(PLAINS) 1
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW region_us_states(PLAINS) 1
 
 CARD 17 - Women to the Polls
 # Add 2 :purple_or_yellow_cube in each of New Jersey, Pennsylvania and Delaware.
@@ -100,9 +97,7 @@ CARD 17 - Women to the Polls
 
 CARD 18 - National Woman’s Rights Convention
 # Playable if *The Civil War* is not in effect. Add 1 :congressional_marker in Congress and 1 :purple_or_yellow_cube in one state of each region.
-    prompt "Add 1 :congressional_marker in Congress."
     add_congress 1
-    prompt "Add 1 :purple_or_yellow_cube in one state of each region."
     add_cubes_in_one_state_of_each_region 1 PURPLE_OR_YELLOW
 
 CARD 19 - National American Woman Suffrage Association
@@ -113,7 +108,7 @@ CARD 19 - National American Woman Suffrage Association
 CARD 20 - Jeannette Rankin
 # Roll :d6. On a roll of 3-6, add 1 :congressional_marker in Congress and 4 :purple_or_yellow_cube in Montana and 2 :purple_or_yellow_cube in each other state in the Plains region.
     roll 1 D6
-    if (game.vm.die >= 3)
+    if (game.vm.roll >= 3)
         add_congress 1
         add_cubes 4 PURPLE_OR_YELLOW us_states("Montana")
         add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states_except(PLAINS, us_states("Montana"))
@@ -137,12 +132,12 @@ CARD 23 - Equality League of Self-Supporting Women
 CARD 24 - Emmeline Pankhurst
 # Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D6
-    add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 1
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 1
 
 CARD 25 - “Debate Us, You Cowards!”
 # Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.
     roll 2 D6
-    remove_cubes_limit (game.vm.die) RED anywhere() 2
+    remove_cubes_limit (game.vm.roll) RED anywhere() 2
 
 CARD 26 - Carrie Chapman Catt
 # Receive 2 :button. Add 1 :purple_or_yellow_cube in one state of each region.
@@ -152,7 +147,7 @@ CARD 26 - Carrie Chapman Catt
 CARD 27 - Alice Paul & Lucy Burns
 # Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.
     roll 2 D6
-    remove_cubes_limit (game.vm.die) RED anywhere() 2
+    remove_cubes_limit (game.vm.roll) RED anywhere() 2
 
 CARD 28 - Inez Milholland
 # Add 1 :congressional_marker in Congress. Receive 2 :button and add 1 :purple_or_yellow_cube in one state of each region.
@@ -171,7 +166,7 @@ CARD 30 - Zitkala-Ša
 CARD 31 - Helen Keller
 # Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D6
-    add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 2
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 32 - Maria de Lopez
 # Recieve 2 :button. Add 2 :purple_or_yellow_cube in each of California, Nevada and Arizona.
@@ -206,7 +201,7 @@ CARD 37 - The Young Woman Citizen
 CARD 38 - 1918 Midterm Elections
 # Roll :d6. On a roll of 3-6, add 3 :congressional_marker in Congress.
     roll 1 D6
-    if (game.vm.die >= 3)
+    if (game.vm.roll >= 3)
         add_congress 3
     endif
 
@@ -252,17 +247,17 @@ CARD 46 - Eighteenth Amendment
 CARD 47 - Mary McLeod Bethune
 # Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
     roll 2 D8
-    remove_cubes_limit (game.vm.die) RED anywhere() 2
+    remove_cubes_limit (game.vm.roll) RED anywhere() 2
 
 CARD 48 - Make a Home Run for Suffrage
 # Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
     roll 2 D8
-    remove_cubes_limit (game.vm.die) RED anywhere() 2
+    remove_cubes_limit (game.vm.roll) RED anywhere() 2
 
 CARD 49 - Mary Church Terrell
 # Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D8
-    add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 2
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 50 - Tea Parties for Suffrage
 # Add 1 :congressional_marker in Congress and receive 4 :button
@@ -272,7 +267,7 @@ CARD 50 - Tea Parties for Suffrage
 CARD 51 - Dr. Mabel Ping-Hua Lee
 # Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D8
-    add_cubes_limit (game.vm.die) PURPLE_OR_YELLOW anywhere() 2
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 52 - Miss Febb Wins the Last Vote
 # The Suffragist player wins all ties during Final Voting.
@@ -307,7 +302,7 @@ CARD 56 - Senator Joseph Brown
 CARD 57 - Minor v. Happersett
 # Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in Missouri.
     roll 1 D6
-    if (game.vm.die >= 3)
+    if (game.vm.roll >= 3)
         remove_congress 1
         add_cubes 2 RED us_states("Missouri")
     endif
@@ -315,7 +310,7 @@ CARD 57 - Minor v. Happersett
 CARD 58 - Senate Rejects Suffrage Amendment
 # Roll :d6. On a roll of 3-6, receive 1 :button and remove 1 :congressional_marker from Congress.
     roll 1 D6
-    if (game.vm.die >= 3)
+    if (game.vm.roll >= 3)
         receive_buttons 1
         remove_congress 1
     endif
@@ -323,7 +318,7 @@ CARD 58 - Senate Rejects Suffrage Amendment
 CARD 59 - South Dakota Rejects Suffrage
 # Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in South Dakota.
     roll 1 D6
-    if (game.vm.die >= 3)
+    if (game.vm.roll >= 3)
         remove_congress 1
         add_cubes 2 RED us_states("South Dakota")
     endif
@@ -334,7 +329,6 @@ CARD 60 - Gerrymandering
 
 CARD 61 - Border States
 # Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri.
-    prompt "Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri."
     add_cubes_in_each_of 1 RED us_states("Delaware", "Maryland", "West Virginia", "Kentucky", "Missouri")
 
 CARD 62 - Horace Greeley
@@ -348,12 +342,12 @@ CARD 63 - New York Newspapers
 CARD 64 - Senator George Vest
 # Remove 1 :congressional_marker from Congress and add 2 :red_cube in Missouri.
     remove_congress 1
-    add_cubes 2 us_states("Missouri")
+    add_cubes 2 RED us_states("Missouri")
 
 CARD 65 - Catharine Beecher
 # Roll :d4. Add that number :red_cube anywhere, no more than 1 per state.
     roll 1 D4
-    add_cubes_limit (game.vm.die) RED anywhere() 1
+    add_cubes_limit (game.vm.roll) RED anywhere() 1
 
 CARD 66 - Progress, Not Politics
 # Draw 6 cards from your Draw Deck. Place any number of the 6 cards on the top of your Draw Deck and the rest at the bottom of your Draw Deck.
@@ -376,7 +370,6 @@ CARD 69 - Southern Resentment
 
 CARD 70 - Old Dixie
 # Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida.
-    prompt "Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida."
     add_cubes_in_each_of 1 RED us_states("Louisiana", "Mississippi", "Alabama", "Georgia", "Florida")
 
 CARD 71 - NAOWS Forms
@@ -408,7 +401,7 @@ CARD 76 - “O Save Us Senators, From Ourselves”
 CARD 77 - Emma Goldman
 # Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
     roll 1 D6
-    add_cubes_limit (game.vm.die) RED anywhere() 1
+    add_cubes_limit (game.vm.roll) RED anywhere() 1
 
 CARD 78 - The Great 1906 San Francisco Earthquake
 # Remove all :yellow_cube and :purple_cube from California. The Suffragist player loses 1 :button.
@@ -496,24 +489,24 @@ CARD 94 - Southern Women’s Rejection League
 # Playable if *Southern Strategy* is in effect. Roll :d8. Add that number :red_cube in the South region, no more than 2 per state.
     requires_persistent find_card("Southern Strategy")
     roll 1 D8
-    add_cubes_limit (game.vm.die) RED region_us_states(SOUTH) 2
+    add_cubes_limit (game.vm.roll) RED region_us_states(SOUTH) 2
 
 CARD 95 - United Daughters of the Confederacy
 # Playable if *Southern Strategy* is in effect. Roll :d8. Add that number :red_cube in the South region, no more than 2 per state.
     requires_persistent find_card("Southern Strategy")
     roll 1 D8
-    add_cubes_limit (game.vm.die) RED region_us_states(SOUTH) 2
+    add_cubes_limit (game.vm.roll) RED region_us_states(SOUTH) 2
 
 CARD 96 - Cheers to “No on Suffrage”
 # Playable if *Eighteenth Amendment* is not in effect. Roll :d8. Add that number :red_cube anywhere, no more than 2 per state.
     requires_persistent find_card("Eighteenth Amendment")
     roll 1 D8
-    add_cubes_limit (game.vm.die) RED anywhere() 2
+    add_cubes_limit (game.vm.roll) RED anywhere() 2
 
 CARD 97 - The Unnecessary Privilege
 # Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
     roll 1 D6
-    add_cubes_limit (game.vm.die) RED anywhere() 1
+    add_cubes_limit (game.vm.roll) RED anywhere() 1
 
 CARD 98 - Voter Suppression
 # The Opposition player rolls :d8 instead of :d6 during Final Voting.
