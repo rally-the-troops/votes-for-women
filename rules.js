@@ -59,6 +59,15 @@ const COLOR_CODE = {
 	[RED_X]: "RX",
 }
 
+const COLOR_NAMES = {
+	[PURPLE]: "Purple",
+	[YELLOW]: "Yellow",
+	[PURPLE_OR_YELLOW]: "Purple or Yellow",
+	[RED]: "Red",
+	[GREEN_CHECK]: "Green Check",
+	[RED_X]: "Red X",
+}
+
 const {	CARDS } = require("./cards.js")
 const {	US_STATES } = require("./data.js")
 
@@ -159,10 +168,10 @@ function us_states(...args) {
 	return args.map(find_us_state).sort()
 }
 
-function region_us_states(region) {
+function region_us_states(...args) {
 	const indexes = []
 	US_STATES.forEach((element, index) => {
-		if (element && element.region === region) indexes.push(index)
+		if (element && args.includes(element.region)) indexes.push(index)
 	})
 	return indexes
 }
@@ -316,7 +325,6 @@ function setup_game() {
 	game.opposition_hand.push(first_opposition_card)
 
 	for (let c = first_strategy_card; c <= last_strategy_card; ++c) {
-		console.log("PUSH", c)
 		game.strategy_deck.push(c)
 	}
 	for (let c = first_states_card; c <= last_states_card; ++c)
@@ -649,16 +657,20 @@ function end_play_card(c) {
 states.operations_phase = {
 	inactive: "Play a Card.",
 	prompt() {
-		view.prompt = "Operations: Play a Card."
+		let can_play_hand = false
+		let can_play_claimed = false
 
 		if (!game.has_played_hand) {
 			for (let c of player_hand()) {
-				if (can_play_event(c))
+				if (can_play_event(c)) {
 					gen_action("card_event", c)
+					can_play_hand = true
+				}
 				if (has_player_active_campaigners()) {
 					gen_action("card_campaigning", c)
 					gen_action("card_organizing", c)
 					gen_action("card_lobbying", c)
+					can_play_hand = true
 				}
 			}
 		}
@@ -666,9 +678,23 @@ states.operations_phase = {
 		if (!game.has_played_claimed) {
 			// only one claimed can be played per turn
 			for (let c of player_claimed()) {
-				gen_action("card_event", c)
+				if (can_play_event(c)) {
+					gen_action("card_event", c)
+					can_play_claimed = true
+				}
 			}
 		}
+
+		if (can_play_hand && can_play_claimed) {
+			view.prompt = "Operations: Play a card from Hand or Claimed card (optionally)."
+		} else if (can_play_hand) {
+			view.prompt = "Operations: Play a card from Hand."
+		} else if (can_play_claimed) {
+			view.prompt = "Operations: Play a Claimed card (optionally)."
+		} else {
+			view.prompt = "Operations: Done."
+		}
+
 		if (game.has_played_hand)
 			gen_action("done")
 	},
@@ -790,7 +816,6 @@ function goto_play_event(c) {
 
 function end_event() {
 	let c = game.vm.fp
-	console.log('end_event', c)
 	game.vm = null
 	end_play_card(c)
 }
@@ -995,6 +1020,7 @@ function vm_add_cubes_in_one_state_of_each_region() {
 function vm_add_cubes_per_state_in_any_one_region() {
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
+	game.vm.us_states = anywhere()
 	game.vm.per_state_in_any_one_region = true
 	goto_vm_add_cubes()
 }
@@ -1274,9 +1300,9 @@ states.vm_switch = {
 }
 
 states.vm_add_campaigner = {
-	inactive: "add a campaigner",
+	inactive: "add a Campaigner",
 	prompt() {
-		event_prompt()
+		event_prompt("Add a Campaigner")
 		gen_action_region(game.vm.region)
 	},
 	region(r) {
@@ -1286,20 +1312,33 @@ states.vm_add_campaigner = {
 	}
 }
 
+function increase_player_buttons(count=1) {
+	log(`+${pluralize(count, 'button')}.`)
+	if (game.active === SUF) {
+		game.support_buttons += count
+	} else {
+		game.opposition_buttons += count
+	}
+}
+
+function decrease_player_buttons(count=1) {
+	log(`-${pluralize(count, 'button')}.`)
+	if (game.active === SUF) {
+		game.support_buttons -= count
+	} else {
+		game.opposition_buttons -= count
+	}
+}
+
 states.vm_receive_buttons = {
 	inactive: "receive buttons",
 	prompt() {
-		event_prompt()
+		event_prompt(`Receive ${pluralize(game.vm.count, 'button')}`)
 		gen_action("next")
 	},
 	next() {
 		push_undo()
-		log(`+${pluralize(game.vm.count, 'button')}.`)
-		if (game.active === SUF) {
-			game.support_buttons += game.vm.count
-		} else {
-			game.opposition_buttons += game.vm.count
-		}
+		increase_player_buttons(game.vm.count)
 		vm_next()
 	}
 }
@@ -1307,17 +1346,12 @@ states.vm_receive_buttons = {
 states.vm_spend_buttons = {
 	inactive: "spend buttons",
 	prompt() {
-		event_prompt()
+		event_prompt(`Spend ${pluralize(game.vm.count, 'button')}`)
 		gen_action("next")
 	},
 	next() {
 		push_undo()
-		log(`-${pluralize(game.vm.count, 'button')}.`)
-		if (game.active === SUF) {
-			game.support_buttons -= game.vm.count
-		} else {
-			game.opposition_buttons -= game.vm.count
-		}
+		decrease_player_buttons(game.vm.count)
 		vm_next()
 	}
 }
@@ -1335,11 +1369,17 @@ function goto_vm_add_cubes() {
 states.vm_add_cubes = {
 	inactive: "add a cube",
 	prompt() {
-		event_prompt()
+		if (!game.vm.cube_color) {
+			event_prompt("Choose a cube to add.")
+		} else {
+			event_prompt(`Add a ${COLOR_NAMES[game.vm.cube_color]} cube.`)
+		}
+
 		if (game.vm.cubes === PURPLE_OR_YELLOW) {
 			gen_action("purple")
 			gen_action("yellow")
 		}
+
 		if (game.vm.cube_color) {
 			for (let s of game.vm.us_states)
 				gen_action_us_state(s)
@@ -1362,10 +1402,18 @@ states.vm_add_cubes = {
 					set_delete(game.vm.us_states, other)
 		}
 
+		if (game.vm.per_state_in_any_one_region) {
+			// TODO only need to do this the first time
+			// XXX does set_deletion work while iterating?
+			for (let other of game.vm.us_states)
+				if (us_state_region(s) !== us_state_region(other))
+					set_delete(game.vm.us_states, other)
+		}
+
 		if (game.vm.limit) {
 			if (map_get(game.vm.added, s) === game.vm.limit)
 				set_delete(game.vm.us_states, s)
-			if (game.vm.added.length === game.vm.count)
+			if (map_count(game.vm.added) === game.vm.count)
 				vm_next()
 		} else {
 			if (map_get(game.vm.added, s) === game.vm.count)
@@ -1380,7 +1428,7 @@ states.vm_add_cubes = {
 states.vm_add_congress = {
 	inactive: "add a congressional marker",
 	prompt() {
-		event_prompt()
+		event_prompt(`Add ${pluralize(game.vm.count, 'congressional marker')}.`)
 		gen_action("congress")
 	},
 	congress() {
@@ -1398,7 +1446,7 @@ states.vm_add_congress = {
 states.vm_remove_congress = {
 	inactive: "remove a congressional marker",
 	prompt() {
-		event_prompt()
+		event_prompt(`Remove ${pluralize(game.vm.count, 'congressional marker')}.`)
 		gen_action("congress")
 	},
 	congress() {
@@ -1408,268 +1456,51 @@ states.vm_remove_congress = {
 	}
 }
 
-function can_vm_place() {
-	for (let s of game.vm.spaces)
-		if (can_place_cube(s, game.vm.removed))
-			return true
-	return false
-}
-
-function goto_vm_place() {
-	if (can_vm_place(game.vm.removed))
-		game.state = "vm_place"
-	else
-		vm_next()
-}
-
-states.vm_place = {
-	inactive: "place a cube",
-	prompt() {
-		event_prompt()
-		if (game.vm.upto)
-			view.actions.skip = 1
-		for (let s of game.vm.spaces)
-			if (can_place_cube(s, game.vm.removed))
-				gen_action_space(s)
-	},
-	space(s) {
-		push_undo()
-		place_cube(s, game.vm.removed)
-		if (game.active === SUF)
-			log("Placed RC in S" + s + ".")
-		else
-			log("Placed BC in S" + s + ".")
-		if (--game.vm.count === 0 || !can_vm_place(game.vm.removed))
-			vm_next()
-	},
-	skip() {
-		push_undo()
-		vm_next()
-	},
-}
-
-function can_vm_place_disc() {
-	for (let s of game.vm.spaces)
-		if (can_place_disc(s))
-			return true
-	return false
-}
-
-function goto_vm_place_disc() {
-	if (can_vm_place_disc()) {
-		if (find_available_disc() < 0)
-			game.state = "vm_move_disc"
-		else
-			game.state = "vm_place_disc"
-	} else {
-		vm_next()
+function roll_ndx(n, x, color="B", prefix="Rolled") {
+	clear_undo()
+	let result = 0
+	let summary = []
+	for (let i = 0; i < n; ++i) {
+		let roll = random(x) + 1
+		result += roll
+		summary.push(color + roll)
 	}
+	log(prefix + " " + summary.join(" "))
+	return result
 }
 
-states.vm_move_disc = {
-	inactive: "place a disc",
+function goto_vm_roll_dice() {
+	game.state = "vm_roll"
+}
+
+states.vm_roll = {
+	inactive: "roll dice",
 	prompt() {
-		event_prompt("Remove a disc to place it elsewhere.")
-		if (game.vm.upto)
-			view.actions.skip = 1
-		if (game.active === SUF)
-			for (let p = first_commune_disc; p <= last_commune_disc; ++p)
-				gen_action_piece(p)
-		else
-			for (let p = first_versailles_disc; p <= last_versailles_disc; ++p)
-				gen_action_piece(p)
-	},
-	piece(p) {
-		push_undo()
-		let s = game.pieces[p]
-		if (game.active === SUF)
-			log("Moved RD from S" + s + ".")
-		else
-			log("Moved BD from S" + s + ".")
-		remove_piece(p)
-		game.state = "vm_place_disc"
-	},
-	skip() {
-		push_undo()
-		vm_next()
-	},
-}
-
-states.vm_place_disc = {
-	inactive: "place a disc",
-	prompt() {
-		event_prompt()
-		if (game.vm.upto)
-			view.actions.skip = 1
-		for (let s of game.vm.spaces)
-			if (can_place_disc(s))
-				gen_action_space(s)
-	},
-	space(s) {
-		push_undo()
-		if (game.active === SUF)
-			log("Placed RD in S" + s + ".")
-		else
-			log("Placed BD in S" + s + ".")
-		place_disc(s)
-		vm_next()
-	},
-	skip() {
-		push_undo()
-		vm_next()
-	},
-}
-
-function can_vm_replace() {
-	for (let s of game.vm.spaces)
-		if (can_replace_cube(s))
-			return true
-	return false
-}
-
-function goto_vm_replace() {
-	if (can_vm_replace())
-		game.state = "vm_replace"
-	else
-		vm_next()
-}
-
-states.vm_replace = {
-	inactive: "replace a cube",
-	prompt() {
-		event_prompt()
-		if (game.vm.upto)
-			view.actions.skip = 1
-		for (let s of game.vm.spaces)
-			if (can_replace_cube(s))
-				for_each_enemy_cube(s, gen_action_piece)
-	},
-	piece(p) {
-		push_undo()
-		let s = game.pieces[p]
-		replace_cube(p)
-		log("Replaced " + piece_abbr(p) + " in S" + s + ".")
-		if (--game.vm.count === 0 || !can_vm_replace())
-			vm_next()
-	},
-	skip() {
-		push_undo()
-		vm_next()
-	},
-}
-
-function can_vm_remove() {
-	for (let s of game.vm.spaces)
-		if (can_remove_cube(s))
-			return true
-	return false
-}
-
-function goto_vm_remove() {
-	if (can_vm_remove())
-		game.state = "vm_remove"
-	else
-		vm_next()
-}
-
-states.vm_remove = {
-	inactive: "remove a cube",
-	prompt() {
-		event_prompt()
-		if (game.vm.upto)
-			view.actions.skip = 1
-		for (let s of game.vm.spaces)
-			if (can_remove_cube(s))
-				for_each_enemy_cube(s, gen_action_piece)
-	},
-	piece(p) {
-		push_undo()
-		let s = game.pieces[p]
-		if (game.active === SUF)
-			log("Removed BC from S" + s + ".")
-		else
-			log("Removed RC from S" + s + ".")
-		remove_piece(p)
-		if (--game.vm.count === 0 || !can_vm_remove())
-			vm_next()
-	},
-	skip() {
-		push_undo()
-		vm_next()
-	},
-}
-
-states.vm_remove_own = {
-	inactive: "remove a cube",
-	prompt() {
-		event_prompt()
-		for (let s of game.vm.spaces)
-			for_each_friendly_cube(s, gen_action_piece)
-	},
-	piece(p) {
-		push_undo()
-		let s = game.pieces[p]
-		if (game.active === SUF)
-			log("Removed RC from S" + s + ".")
-		else
-			log("Removed BC from S" + s + ".")
-		remove_piece(p)
-		vm_next()
-	},
-}
-
-function can_vm_move() {
-	let from = false
-	let to = false
-	for (let s of game.vm.a)
-		if (!game.vm.b.includes(s) && has_friendly_cube(s))
-			from = true
-	for (let s of game.vm.b)
-		if (count_friendly_cubes(s) < 4)
-			to = true
-	return from && to
-}
-
-function goto_vm_move() {
-	game.who = -1
-	if (can_vm_move())
-		game.state = "vm_move"
-	else
-		vm_next()
-}
-
-states.vm_move = {
-	inactive: "move a cube",
-	prompt() {
-		event_prompt()
-		view.actions.skip = 1
-		if (game.who < 0) {
-			for (let s of game.vm.a)
-				if (!game.vm.b.includes(s))
-					for_each_friendly_cube(s, gen_action_piece)
+		if (game.vm.count === 1) {
+			event_prompt("Roll a die")
 		} else {
-			game.selected_cube = game.who
-			for (let s of game.vm.b)
-				if (count_friendly_cubes(s) < 4)
-					gen_action_space(s)
+			event_prompt("Roll dice")
+		}
+		if (!game.vm.roll) {
+			gen_action("roll")
+		} else {
+			if (player_buttons() > 0)
+				gen_action("reroll")
+			gen_action("done")
 		}
 	},
-	piece(p) {
-		push_undo()
-		game.who = p
+	roll() {
+		// TODO effects
+		game.vm.roll = roll_ndx(game.vm.count, game.vm.d)
 	},
-	space(s) {
-		let from = game.pieces[game.who]
-		move_piece(game.who, s)
-		log("Moved " + piece_abbr(game.who) + " from S" + from + " to S" + s + ".")
-		game.who = -1
-		if (--game.vm.count === 0 || !can_vm_move())
-			vm_next()
+	reroll() {
+		decrease_player_buttons(1)
+		// TODO effects
+		game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "B", "Re-rolled")
 	},
-	skip() {
-		push_undo()
+	done() {
 		vm_next()
-	},
+	}
 }
 
 // #endregion
@@ -1998,18 +1829,22 @@ function map_for_each(map, f) {
 		f(map[i], map[i+1])
 }
 
+function map_count(map) {
+	let result = 0
+	for (let i = 0; i < map.length; i += 2)
+		result += map[i+1]
+	return result
+}
+
 // #endregion
 
 // #region GENERATED EVENT CODE
 const CODE = []
 
 CODE[1] = [ // Seneca Falls Convention
-	[ vm_prompt, "Add 1 :purple_campaigner and 1 :yellow_campaigner in the Northeast region." ],
 	[ vm_add_campaigner, PURPLE, NORTHEAST ],
 	[ vm_add_campaigner, YELLOW, NORTHEAST ],
-	[ vm_prompt, "Receive 2 :button." ],
 	[ vm_receive_buttons, 2 ],
-	[ vm_prompt, "Add 2 :purple_or_yellow_cube in New York." ],
 	[ vm_add_cubes, 2, PURPLE_OR_YELLOW, us_states("New York") ],
 	[ vm_return ],
 ]
@@ -2034,7 +1869,7 @@ CODE[4] = [ // A Vindication of the Rights of Woman
 CODE[5] = [ // Union Victory
 	[ vm_requires_persistent, find_card("The Civil War") ],
 	[ vm_roll, 1, D6 ],
-	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_receive_buttons, 2 ],
 	[ vm_discard_persistent, find_card("The Civil War") ],
 	[ vm_endif ],
@@ -2044,7 +1879,7 @@ CODE[5] = [ // Union Victory
 CODE[6] = [ // Fifteenth Amendment
 	[ vm_requires_not_persistent, find_card("The Civil War") ],
 	[ vm_roll, 1, D6 ],
-	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 2 ],
 	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_endif ],
@@ -2071,9 +1906,7 @@ CODE[9] = [ // Lucy Stone
 ]
 
 CODE[10] = [ // Susan B. Anthony Indicted
-	[ vm_prompt, "Receive 1 :button." ],
 	[ vm_receive_buttons, 1 ],
-	[ vm_prompt, "Add 1 :purple_or_yellow_cube in one state of each region." ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -2086,11 +1919,13 @@ CODE[11] = [ // Anna Dickinson
 
 CODE[12] = [ // Frederick Douglass
 	[ vm_roll, 1, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, region_us_states(NORTHEAST), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, region_us_states(NORTHEAST), 1 ],
 	[ vm_return ],
 ]
 
 CODE[13] = [ // Frances Harper
+	[ vm_roll, 1, D8 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, region_us_states(ATLANTIC_APPALACHIA), 1 ],
 	[ vm_return ],
 ]
 
@@ -2102,13 +1937,13 @@ CODE[14] = [ // The Union Signal
 
 CODE[15] = [ // Sojourner Truth
 	[ vm_roll, 1, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, region_us_states(MIDWEST), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, region_us_states(MIDWEST), 1 ],
 	[ vm_return ],
 ]
 
 CODE[16] = [ // Pioneer Women
 	[ vm_roll, 1, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, region_us_states(PLAINS), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, region_us_states(PLAINS), 1 ],
 	[ vm_return ],
 ]
 
@@ -2118,9 +1953,7 @@ CODE[17] = [ // Women to the Polls
 ]
 
 CODE[18] = [ // National Woman’s Rights Convention
-	[ vm_prompt, "Add 1 :congressional_marker in Congress." ],
 	[ vm_add_congress, 1 ],
-	[ vm_prompt, "Add 1 :purple_or_yellow_cube in one state of each region." ],
 	[ vm_add_cubes_in_one_state_of_each_region, 1, PURPLE_OR_YELLOW ],
 	[ vm_return ],
 ]
@@ -2133,7 +1966,7 @@ CODE[19] = [ // National American Woman Suffrage Association
 
 CODE[20] = [ // Jeannette Rankin
 	[ vm_roll, 1, D6 ],
-	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 1 ],
 	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, us_states("Montana") ],
 	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states_except(PLAINS, us_states("Montana")) ],
@@ -2161,13 +1994,13 @@ CODE[23] = [ // Equality League of Self-Supporting Women
 
 CODE[24] = [ // Emmeline Pankhurst
 	[ vm_roll, 2, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, anywhere(), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 1 ],
 	[ vm_return ],
 ]
 
 CODE[25] = [ // “Debate Us, You Cowards!”
 	[ vm_roll, 2, D6 ],
-	[ vm_remove_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
@@ -2179,7 +2012,7 @@ CODE[26] = [ // Carrie Chapman Catt
 
 CODE[27] = [ // Alice Paul & Lucy Burns
 	[ vm_roll, 2, D6 ],
-	[ vm_remove_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
@@ -2202,7 +2035,7 @@ CODE[30] = [ // Zitkala-Ša
 
 CODE[31] = [ // Helen Keller
 	[ vm_roll, 2, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
@@ -2244,7 +2077,7 @@ CODE[37] = [ // The Young Woman Citizen
 
 CODE[38] = [ // 1918 Midterm Elections
 	[ vm_roll, 1, D6 ],
-	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 3 ],
 	[ vm_endif ],
 	[ vm_return ],
@@ -2299,19 +2132,19 @@ CODE[46] = [ // Eighteenth Amendment
 
 CODE[47] = [ // Mary McLeod Bethune
 	[ vm_roll, 2, D8 ],
-	[ vm_remove_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
 CODE[48] = [ // Make a Home Run for Suffrage
 	[ vm_roll, 2, D8 ],
-	[ vm_remove_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
 CODE[49] = [ // Mary Church Terrell
 	[ vm_roll, 2, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
@@ -2323,7 +2156,7 @@ CODE[50] = [ // Tea Parties for Suffrage
 
 CODE[51] = [ // Dr. Mabel Ping-Hua Lee
 	[ vm_roll, 2, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
@@ -2362,7 +2195,7 @@ CODE[56] = [ // Senator Joseph Brown
 
 CODE[57] = [ // Minor v. Happersett
 	[ vm_roll, 1, D6 ],
-	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_remove_congress, 1 ],
 	[ vm_add_cubes, 2, RED, us_states("Missouri") ],
 	[ vm_endif ],
@@ -2371,7 +2204,7 @@ CODE[57] = [ // Minor v. Happersett
 
 CODE[58] = [ // Senate Rejects Suffrage Amendment
 	[ vm_roll, 1, D6 ],
-	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_receive_buttons, 1 ],
 	[ vm_remove_congress, 1 ],
 	[ vm_endif ],
@@ -2380,7 +2213,7 @@ CODE[58] = [ // Senate Rejects Suffrage Amendment
 
 CODE[59] = [ // South Dakota Rejects Suffrage
 	[ vm_roll, 1, D6 ],
-	[ vm_if, ()=>(game.vm.die >= 3) ],
+	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_remove_congress, 1 ],
 	[ vm_add_cubes, 2, RED, us_states("South Dakota") ],
 	[ vm_endif ],
@@ -2393,7 +2226,6 @@ CODE[60] = [ // Gerrymandering
 ]
 
 CODE[61] = [ // Border States
-	[ vm_prompt, "Add 1 :red_cube in each of Delaware, Maryland, West Virginia, Kentucky and Missouri." ],
 	[ vm_add_cubes_in_each_of, 1, RED, us_states("Delaware", "Maryland", "West Virginia", "Kentucky", "Missouri") ],
 	[ vm_return ],
 ]
@@ -2410,13 +2242,13 @@ CODE[63] = [ // New York Newspapers
 
 CODE[64] = [ // Senator George Vest
 	[ vm_remove_congress, 1 ],
-	[ vm_add_cubes, 2, us_states("Missouri") ],
+	[ vm_add_cubes, 2, RED, us_states("Missouri") ],
 	[ vm_return ],
 ]
 
 CODE[65] = [ // Catharine Beecher
 	[ vm_roll, 1, D4 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 1 ],
 	[ vm_return ],
 ]
 
@@ -2444,7 +2276,6 @@ CODE[69] = [ // Southern Resentment
 ]
 
 CODE[70] = [ // Old Dixie
-	[ vm_prompt, "Add 1 :red_cube in each of Louisiana, Mississippi, Alabama, Georgia and Florida." ],
 	[ vm_add_cubes_in_each_of, 1, RED, us_states("Louisiana", "Mississippi", "Alabama", "Georgia", "Florida") ],
 	[ vm_return ],
 ]
@@ -2483,7 +2314,7 @@ CODE[76] = [ // “O Save Us Senators, From Ourselves”
 
 CODE[77] = [ // Emma Goldman
 	[ vm_roll, 1, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 1 ],
 	[ vm_return ],
 ]
 
@@ -2588,27 +2419,27 @@ CODE[93] = [ // Red Scare
 CODE[94] = [ // Southern Women’s Rejection League
 	[ vm_requires_persistent, find_card("Southern Strategy") ],
 	[ vm_roll, 1, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, region_us_states(SOUTH), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[95] = [ // United Daughters of the Confederacy
 	[ vm_requires_persistent, find_card("Southern Strategy") ],
 	[ vm_roll, 1, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, region_us_states(SOUTH), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[96] = [ // Cheers to “No on Suffrage”
 	[ vm_requires_persistent, find_card("Eighteenth Amendment") ],
 	[ vm_roll, 1, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
 CODE[97] = [ // The Unnecessary Privilege
 	[ vm_roll, 1, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.die), RED, anywhere(), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 1 ],
 	[ vm_return ],
 ]
 
