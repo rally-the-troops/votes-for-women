@@ -305,11 +305,12 @@ function create(t, p, ...c) {
 }
 
 function create_campaigner(color, i) {
-	return create("div", {
+	let e = create("div", {
 		className: `piece ${color}`,
 		my_campaigner: i,
-		onmousedown: on_click_campaigner
 	})
+	e.addEventListener("click", on_click_campaigner)
+	return e
 }
 
 function build_user_interface() {
@@ -322,21 +323,21 @@ function build_user_interface() {
 		if (r) REGIONS_LAYOUT.push(LAYOUT[r])
 	}
 
-	ui.congress_box.onmousedown = on_click_congress
+	ui.congress_box.addEventListener("click", on_click_congress)
 	for (let c = 1; c <= 6; ++c) {
 		elt = ui.congress[c] = create("div", {
 			className: "piece congress",
 			style: `left:${10 + (c-1) * 42}px;top:5px;`,
-			onmousedown: on_click_congress
 		})
+		elt.addEventListener("click", on_click_congress)
 	}
 
     for (let c = 1; c <= card_count; ++c) {
 		elt = ui.cards[c] = create("div", {
 			className: `card card_${c}`,
 			my_card: c,
-			onmousedown: on_click_card
 		})
+		elt.addEventListener("click", on_click_card)
 	}
 
 	for (let r = 1; r <= region_count; ++r) {
