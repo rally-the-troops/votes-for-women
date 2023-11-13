@@ -24,6 +24,13 @@ const REGION_NAMES = [
     "Northeast"
 ]
 
+const PURPLE = 1
+const YELLOW = 2
+const PURPLE_OR_YELLOW = 3
+const RED = 4
+const GREEN_CHECK = 5
+const RED_X = 6
+
 const region_count = 6
 const us_states_count = region_count * 8
 const card_count = 128
@@ -40,6 +47,7 @@ let ui = {
 	pieces: document.getElementById("pieces"),
 	support_campaigner: [],
 	opposition_campaigner: [],
+	cubes: [],
     cards: [ null ],
 	us_states: [ null ],
 	regions: [ null ],
@@ -105,6 +113,57 @@ const LAYOUT = {
 
 const US_STATES_LAYOUT = [ null ]
 const REGIONS_LAYOUT = [ null ]
+
+// bits
+
+// RED cubes (6 bits), YELLOW cubes (7 bits), PURPLE cubes (7 bits), RED_X (1 bit), GREEN_CHECK (1 bit),
+const GREEN_CHECK_SHIFT = 0
+const GREEN_CHECK_MASK = 1 << GREEN_CHECK_SHIFT
+
+const RED_X_SHIFT = 1
+const RED_X_MASK = 1 << RED_X_SHIFT
+
+const PURPLE_SHIFT = 2
+const PURPLE_MASK = 127 << PURPLE_SHIFT
+
+const YELLOW_SHIFT = 9
+const YELLOW_MASK = 127 << YELLOW_SHIFT
+
+const RED_SHIFT = 16
+const RED_MASK = 63 << RED_SHIFT
+
+function is_green_check(u) {
+	return (view.us_states[u] & GREEN_CHECK_MASK) === GREEN_CHECK_MASK
+}
+
+function is_red_x(u) {
+	return (view.us_states[u] & RED_X_MASK) === RED_X_MASK
+}
+
+function purple_cubes(u) {
+	return (view.us_states[u] & PURPLE_MASK) >> PURPLE_SHIFT
+}
+
+function yellow_cubes(u) {
+	return (view.us_states[u] & YELLOW_MASK) >> YELLOW_SHIFT
+}
+
+function red_cubes(u) {
+	return (view.us_states[u] & RED_MASK) >> RED_SHIFT
+}
+
+function support_cubes(u) {
+	return purple_cubes(u) + yellow_cubes(u)
+}
+
+function color_cubes(cube, u) {
+	if (cube === PURPLE)
+		return purple_cubes(u)
+	else if (cube === YELLOW)
+		return yellow_cubes(u)
+	else
+		return red_cubes(u)
+}
 
 // CARD MENU
 
@@ -368,6 +427,16 @@ function build_user_interface() {
 		create_campaigner('red1', 1),
 		create_campaigner('red2', 2),
 	]
+
+	for (let i = 0; i < 190; ++i) {
+		// XXX do we need to set the color here?
+		// let color = (i < 65) ? "purple" : (i < 130) ? "yellow" : "red"
+		elt = ui.cubes[i] = create("div", {
+			className: `piece cube`,
+			onmousedown: on_click_cube,
+		})
+		document.getElementById("pieces").appendChild(elt)
+	}
 }
 
 function on_focus_card_tip(card_number) { // eslint-disable-line no-unused-vars
@@ -433,6 +502,27 @@ function opposition_info() {
 	return `${pluralize(view.opposition_buttons, 'button')}, ${pluralize(view.opposition_hand, 'card')} in hand`
 }
 
+function layout_cubes(list, xorig, yorig) {
+	const dx = 12
+	const dy = 8
+	if (list.length > 0) {
+		let ncol = Math.round(Math.sqrt(list.length))
+		let nrow = Math.ceil(list.length / ncol)
+		function place_cube(row, col, e, z) {
+			let x = xorig - (row * dx - col * dx) - 10 + (nrow-ncol) * 6
+			let y = yorig - (row * dy + col * dy) - 13 + (nrow-1) * 8
+			e.style.left = x + "px"
+			e.style.top = y + "px"
+			e.style.zIndex = z
+		}
+		let z = 50
+		let i = 0
+		for (let row = 0; row < nrow; ++row)
+			for (let col = 0; col < ncol && i < list.length; ++col)
+				place_cube(row, col, list[list.length-(++i)], z--)
+	}
+}
+
 function on_update() { // eslint-disable-line no-unused-vars
     console.log("VIEW", view)
 
@@ -485,6 +575,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 	for (let c of view.out_of_play)
 		document.getElementById("out_of_play").appendChild(ui.cards[c])
 
+	// TODO Replace with stacked cards
 	for (let id of ['persistent_turn', 'persistent_game', 'persistent_ballot']) {
 		document.getElementById(id).replaceChildren()
 		for (let c of view[id] || []) {
@@ -523,7 +614,6 @@ function on_update() { // eslint-disable-line no-unused-vars
 	}
 	for (let i = 0; i < ui.opposition_campaigner.length; ++i) {
 		// TODO Cleanup
-		ui.opposition_campaigner[i].classList.toggle("hide", !view.opposition_campaigner[i])
 		let campaigner_region = view.opposition_campaigner[i]
 		if (campaigner_region) {
 			ui.pieces.appendChild(ui.opposition_campaigner[i])
@@ -533,6 +623,54 @@ function on_update() { // eslint-disable-line no-unused-vars
 		} else {
 			ui.opposition_campaigner[i].remove()
 		}
+	}
+
+	let ci = 0
+	for (let i = 1; i < ui.us_states.length; ++i) {
+		// TODO Cleanup
+		if (view.us_states[i]) {
+			let state_cubes = []
+			let cube = null
+			console.log("US_STATE", i, purple_cubes(i), yellow_cubes(i), red_cubes(i), is_green_check(i), is_red_x(i))
+			for (let c = 0; c < purple_cubes(i); ++c) {
+				cube = ui.cubes[ci++]
+				// TODO track both state and color
+				cube.my_us_state = i
+				cube.my_cube = PURPLE
+				cube.classList.add("purple")
+				cube.classList.remove("yellow", "red")
+				state_cubes.push(cube)
+				ui.pieces.appendChild(cube)
+				console.log("add purple", cube)
+			}
+			for (let c = 0; c < yellow_cubes(i); ++c) {
+				cube = ui.cubes[ci++]
+				cube.my_us_state = i
+				cube.my_cube = YELLOW
+				cube.classList.add("yellow")
+				cube.classList.remove("purple", "red")
+				state_cubes.push(cube)
+				ui.pieces.appendChild(cube)
+				console.log("add yellow", cube)
+			}
+			for (let c = 0; c < red_cubes(i); ++c) {
+				cube = ui.cubes[ci++]
+				cube.my_us_state = i
+				cube.my_cube = RED
+				cube.classList.add("red")
+				cube.classList.remove("purple", "yellow")
+				state_cubes.push(cube)
+				ui.pieces.appendChild(cube)
+				console.log("add red", cube)
+			}
+			let [x, y] = US_STATES_LAYOUT[i]
+			layout_cubes(state_cubes, x, y)
+		}
+	}
+
+	// remove remaining unused cubes from DOM
+	for (let i = ci; i < ui.cubes.length; ++i) {
+		ui.cubes[i].remove()
 	}
 
 

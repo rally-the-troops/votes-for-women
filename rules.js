@@ -202,8 +202,114 @@ function add_campaigner(campaigner_color, region) {
 	log(`Placed ${COLOR_CODE[campaigner_color]}R in R${region}`)
 }
 
+// RED cubes (6 bits), YELLOW cubes (7 bits), PURPLE cubes (7 bits), RED_X (1 bit), GREEN_CHECK (1 bit),
+const GREEN_CHECK_SHIFT = 0
+const GREEN_CHECK_MASK = 1 << GREEN_CHECK_SHIFT
+
+const RED_X_SHIFT = 1
+const RED_X_MASK = 1 << RED_X_SHIFT
+
+const PURPLE_SHIFT = 2
+const PURPLE_MASK = 127 << PURPLE_SHIFT
+
+const YELLOW_SHIFT = 9
+const YELLOW_MASK = 127 << YELLOW_SHIFT
+
+const RED_SHIFT = 16
+const RED_MASK = 63 << RED_SHIFT
+
+function is_green_check(u) {
+	return (game.us_states[u] & GREEN_CHECK_MASK) === GREEN_CHECK_MASK
+}
+
+function set_green_check(u) {
+	game.us_states[u] |= GREEN_CHECK_MASK
+}
+
+function clear_green_check(u) {
+	game.us_states[u] &= ~GREEN_CHECK_MASK
+}
+
+function is_red_x(u) {
+	return (game.us_states[u] & RED_X_MASK) === RED_X_MASK
+}
+
+function set_red_x(u) {
+	game.us_states[u] |= RED_X_MASK
+}
+
+function clear_red_x(u) {
+	game.us_states[u] &= ~RED_X_MASK
+}
+
+function purple_cubes(u) {
+	return (game.us_states[u] & PURPLE_MASK) >> PURPLE_SHIFT
+}
+
+function set_purple_cubes(u, x) {
+	game.us_states[u] = (game.us_states[u] & ~PURPLE_MASK) | (x << PURPLE_SHIFT)
+}
+
+function yellow_cubes(u) {
+	return (game.us_states[u] & YELLOW_MASK) >> YELLOW_SHIFT
+}
+
+function set_yellow_cubes(u, x) {
+	game.us_states[u] = (game.us_states[u] & ~YELLOW_MASK) | (x << YELLOW_SHIFT)
+}
+
+function red_cubes(u) {
+	return (game.us_states[u] & RED_MASK) >> RED_SHIFT
+}
+
+function set_red_cubes(u, x) {
+	game.us_states[u] = (game.us_states[u] & ~RED_MASK) | (x << RED_SHIFT)
+}
+
+function support_cubes(u) {
+	return purple_cubes(u) + yellow_cubes(u)
+}
+
+function color_cubes(cube, u) {
+	if (cube === PURPLE)
+		return purple_cubes(u)
+	else if (cube === YELLOW)
+		return yellow_cubes(u)
+	else
+		return red_cubes(u)
+}
+
+function set_color_cubes(cube, u, x) {
+	if (cube === PURPLE)
+		set_purple_cubes(u, x)
+	else if (cube === YELLOW)
+		set_yellow_cubes(u, x)
+	else
+		set_red_cubes(u, x)
+}
+
 function add_cube(cube, us_state) {
 	log(`Added ${COLOR_CODE[cube]}C in S${us_state}`)
+
+	if ((cube === RED && support_cubes(us_state) > 0) || (cube !== RED && red_cubes(us_state) > 0))
+		throw new Error("Can't add cube when opponent still has cubes there")
+
+	if (is_green_check(us_state) || is_red_x(us_state))
+		throw new Error("Can't add cube with green_check / red_x")
+
+	set_color_cubes(cube, us_state, color_cubes(cube, us_state) + 1)
+}
+
+function remove_cube(cube, us_state) {
+	log(`Removed ${COLOR_CODE[cube]}C from S${us_state}`)
+
+	if ((cube === PURPLE && !purple_cubes(us_state)) || (cube === YELLOW && !yellow_cubes(us_state)) || (cube === RED && !red_cubes(us_state)))
+		throw new Error("Can't remove cube that aint there")
+
+	if (is_green_check(us_state) || is_red_x(us_state))
+		throw new Error("Can't remove cube in us_state with green_check / red_x")
+
+	set_color_cubes(cube, us_state, color_cubes(cube, us_state) - 1)
 }
 
 // #endregion
@@ -285,6 +391,7 @@ exports.setup = function (seed, _scenario, _options) {
 		round: 0,
 		congress: 0,
 		us_states: new Array(us_states_count).fill(0),
+		nineteenth_amendment: 0,
 
 		strategy_deck: [],
 		strategy_draw: [],
@@ -379,7 +486,8 @@ exports.view = function(state, player) {
 		turn: game.turn,
 		round: game.round,
 		congress: game.congress,
-		states: game.states,
+		us_states: game.us_states,
+		nineteenth_amendment: game.nineteenth_amendment,
 
 		strategy_deck: game.strategy_deck.length,
 		strategy_draw: game.strategy_draw,
@@ -460,7 +568,7 @@ function goto_planning_phase() {
 states.planning_phase = {
 	inactive: "do Planning.",
 	prompt() {
-		view.prompt = "Planning."
+		view.prompt = "Planning. Draw cards."
 		gen_action("draw")
 	},
 	draw() {
@@ -1380,6 +1488,7 @@ states.vm_add_cubes = {
 			gen_action("yellow")
 		}
 
+		// TODO remove cube if opponent has any cubes here
 		if (game.vm.cube_color) {
 			for (let s of game.vm.us_states)
 				gen_action_us_state(s)
@@ -1393,6 +1502,7 @@ states.vm_add_cubes = {
 	},
 	us_state(s) {
 		push_undo()
+		// TODO remove cube if opponent has any cubes here
 		add_cube(game.vm.cube_color, s)
 		map_incr(game.vm.added, s, 1)
 
