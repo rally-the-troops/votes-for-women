@@ -270,6 +270,20 @@ function support_cubes(u) {
 	return purple_cubes(u) + yellow_cubes(u)
 }
 
+function player_cubes(u) {
+	if (game.active === SUF)
+		return support_cubes(u)
+	else
+		return red_cubes(u)
+}
+
+function opponent_cubes(u) {
+	if (game.active === SUF)
+		return red_cubes(u)
+	else
+		return support_cubes(u)
+}
+
 function color_cubes(cube, u) {
 	if (cube === PURPLE)
 		return purple_cubes(u)
@@ -335,6 +349,18 @@ function gen_action_region(r) {
 
 function gen_action_us_state(s) {
 	gen_action("us_state", s)
+}
+
+function gen_action_purple_cube(s) {
+	gen_action("purple_cube", s)
+}
+
+function gen_action_yellow_cube(s) {
+	gen_action("yellow_cube", s)
+}
+
+function gen_action_red_cube(s) {
+	gen_action("red_cube", s)
 }
 
 exports.action = function (state, player, action, arg) {
@@ -1255,102 +1281,6 @@ function vm_support_discard_2_random_draw_2() {
 	vm_next()
 }
 
-
-// XXX Placeholders from RFOP
-
-// function vm_ops() {
-// 	goto_operations(vm_operand(1), vm_operand_spaces(2))
-// }
-
-// function vm_operand_spaces(x) {
-// 	let s = vm_operand(x)
-// 	if (typeof s === "number")
-// 		return [ s ]
-// 	return s
-// }
-
-// function vm_remove_up_to() {
-// 	game.vm.upto = 1
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.spaces = vm_operand_spaces(2)
-// 	goto_vm_remove()
-// }
-
-// function vm_remove() {
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.spaces = vm_operand_spaces(2)
-// 	goto_vm_remove()
-// }
-
-// function vm_remove_own() {
-// 	game.vm.spaces = vm_operand_spaces(1)
-// 	game.state = "vm_remove_own"
-// }
-
-// function vm_replace_up_to() {
-// 	game.vm.upto = 1
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.spaces = vm_operand_spaces(2)
-// 	game.state = "vm_replace"
-// 	goto_vm_replace()
-// }
-
-// function vm_replace_different() {
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.spaces = vm_operand_spaces(2).slice() // make a copy for safe mutation
-// 	game.state = "vm_replace_different"
-// }
-
-// function vm_replace() {
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.spaces = vm_operand_spaces(2)
-// 	goto_vm_replace()
-// }
-
-// function vm_place_removed_up_to() {
-// 	game.vm.removed = 1
-// 	game.vm.upto = 1
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.spaces = vm_operand_spaces(2)
-// 	goto_vm_place()
-// }
-
-// function vm_place_up_to() {
-// 	game.vm.upto = 1
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.spaces = vm_operand_spaces(2)
-// 	goto_vm_place()
-// }
-
-// function vm_place() {
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.spaces = vm_operand_spaces(2)
-// 	goto_vm_place()
-// }
-
-// function vm_may_place_disc() {
-// 	game.vm.upto = 1
-// 	game.vm.count = 1
-// 	game.vm.spaces = vm_operand_spaces(1)
-// 	game.state = "vm_place_disc"
-// 	goto_vm_place_disc()
-// }
-
-// function vm_place_disc() {
-// 	game.vm.count = 1
-// 	game.vm.spaces = vm_operand_spaces(1)
-// 	goto_vm_place_disc()
-// }
-
-// function vm_move_up_to() {
-// 	game.vm.count = vm_operand(1)
-// 	game.vm.a = vm_operand_spaces(2)
-// 	game.vm.b = vm_operand_spaces(3)
-// 	goto_vm_move()
-// }
-
-// #endregion
-
 // #region EVENT STATES
 
 states.vm_switch = {
@@ -1477,21 +1407,39 @@ function goto_vm_add_cubes() {
 states.vm_add_cubes = {
 	inactive: "add a cube",
 	prompt() {
-		if (!game.vm.cube_color) {
-			event_prompt("Choose a cube to add.")
-		} else {
-			event_prompt(`Add a ${COLOR_NAMES[game.vm.cube_color]} cube.`)
-		}
-
 		if (game.vm.cubes === PURPLE_OR_YELLOW) {
 			gen_action("purple")
 			gen_action("yellow")
 		}
 
 		// TODO remove cube if opponent has any cubes here
-		if (game.vm.cube_color) {
-			for (let s of game.vm.us_states)
+		let has_opponent_cubes = false
+		for (let s of game.vm.us_states) {
+			if (opponent_cubes(s)) {
+				has_opponent_cubes = true
+				if (game.active === SUF) {
+					gen_action_red_cube(s)
+				} else {
+					if (purple_cubes(s))
+						gen_action_purple_cube(s)
+					if (yellow_cubes(s))
+						gen_action_yellow_cube(s)
+				}
+			} else if (game.vm.cube_color) {
 				gen_action_us_state(s)
+			}
+		}
+
+		if (!game.vm.cube_color) {
+			if (!has_opponent_cubes)
+				event_prompt("Choose a cube to add.")
+			else
+				event_prompt("Choose a cube to add or remove an Opponent's cube.")
+		} else {
+			if (!has_opponent_cubes)
+				event_prompt(`Add a ${COLOR_NAMES[game.vm.cube_color]} cube.`)
+			else
+				event_prompt(`Add a ${COLOR_NAMES[game.vm.cube_color]} cube or remove an Opponent's cube.`)
 		}
 	},
 	purple() {
@@ -1500,39 +1448,59 @@ states.vm_add_cubes = {
 	yellow() {
 		game.vm.cube_color = YELLOW
 	},
+	purple_cube(s) {
+		push_undo()
+		remove_cube(PURPLE, s)
+		after_add_cube(s)
+	},
+	yellow_cube(s) {
+		push_undo()
+		remove_cube(YELLOW, s)
+		after_add_cube(s)
+	},
+	red_cube(s) {
+		push_undo()
+		remove_cube(RED, s)
+		after_add_cube(s)
+	},
 	us_state(s) {
 		push_undo()
 		// TODO remove cube if opponent has any cubes here
 		add_cube(game.vm.cube_color, s)
-		map_incr(game.vm.added, s, 1)
-
-		if (game.vm.in_one_state_of_each_region) {
-			for (let other of region_us_states(us_state_region(s)))
-				if (s !== other)
-					set_delete(game.vm.us_states, other)
-		}
-
-		if (game.vm.per_state_in_any_one_region) {
-			// TODO only need to do this the first time
-			// XXX does set_deletion work while iterating?
-			for (let other of game.vm.us_states)
-				if (us_state_region(s) !== us_state_region(other))
-					set_delete(game.vm.us_states, other)
-		}
-
-		if (game.vm.limit) {
-			if (map_get(game.vm.added, s) === game.vm.limit)
-				set_delete(game.vm.us_states, s)
-			if (map_count(game.vm.added) === game.vm.count)
-				vm_next()
-		} else {
-			if (map_get(game.vm.added, s) === game.vm.count)
-				set_delete(game.vm.us_states, s)
-		}
-
-		if (!game.vm.us_states.length)
-			vm_next()
+		after_add_cube(s)
 	}
+}
+
+// XXX pick a better name
+function after_add_cube(us_state) {
+	map_incr(game.vm.added, us_state, 1)
+
+	if (game.vm.in_one_state_of_each_region) {
+		for (let other of region_us_states(us_state_region(us_state)))
+			if (us_state !== other)
+				set_delete(game.vm.us_states, other)
+	}
+
+	if (game.vm.per_state_in_any_one_region) {
+		// TODO only need to do this the first time
+		// XXX does set_deletion work while iterating?
+		for (let other of game.vm.us_states)
+			if (us_state_region(us_state) !== us_state_region(other))
+				set_delete(game.vm.us_states, other)
+	}
+
+	if (game.vm.limit) {
+		if (map_get(game.vm.added, us_state) === game.vm.limit)
+			set_delete(game.vm.us_states, us_state)
+		if (map_count(game.vm.added) === game.vm.count)
+			vm_next()
+	} else {
+		if (map_get(game.vm.added, us_state) === game.vm.count)
+			set_delete(game.vm.us_states, us_state)
+	}
+
+	if (!game.vm.us_states.length)
+		vm_next()
 }
 
 states.vm_add_congress = {

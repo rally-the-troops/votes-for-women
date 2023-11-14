@@ -7,13 +7,6 @@ const OPP = 1
 const SUF_NAME = "Suffragist"
 const OPP_NAME = "Opposition"
 
-const WEST = 1
-const PLAINS = 2
-const SOUTH = 3
-const MIDWEST = 4
-const ATLANTIC_APPALACHIA = 5
-const NORTHEAST = 6
-
 const REGION_NAMES = [
     null,
     "West",
@@ -152,19 +145,6 @@ function red_cubes(u) {
 	return (view.us_states[u] & RED_MASK) >> RED_SHIFT
 }
 
-function support_cubes(u) {
-	return purple_cubes(u) + yellow_cubes(u)
-}
-
-function color_cubes(cube, u) {
-	if (cube === PURPLE)
-		return purple_cubes(u)
-	else if (cube === YELLOW)
-		return yellow_cubes(u)
-	else
-		return red_cubes(u)
-}
-
 // CARD MENU
 
 var card_action_menu = Array.from(document.getElementById("popup").querySelectorAll("li[data-action]")).map(e => e.dataset.action)
@@ -271,6 +251,24 @@ function is_us_state_action(i) {
 	return false
 }
 
+function is_purple_cube_action(i) {
+	if (view.actions && view.actions.purple_cube && view.actions.purple_cube.includes(i))
+		return true
+	return false
+}
+
+function is_yellow_cube_action(i) {
+	if (view.actions && view.actions.yellow_cube && view.actions.yellow_cube.includes(i))
+		return true
+	return false
+}
+
+function is_red_cube_action(i) {
+	if (view.actions && view.actions.red_cube && view.actions.red_cube.includes(i))
+		return true
+	return false
+}
+
 function is_space_action(i) {
 	if (view.actions && view.actions.space && view.actions.space.includes(i))
 		return true
@@ -349,8 +347,12 @@ function on_click_space(evt) {
 
 function on_click_cube(evt) {
 	if (evt.button === 0) {
-		console.log("piece", evt.target.my_cube)
-		if (send_action('piece', evt.target.my_cube))
+		console.log("cube", evt.target.my_cube, evt.target.my_us_state)
+		if (evt.target.my_cube === PURPLE && send_action('purple_cube', evt.target.my_us_state))
+			evt.stopPropagation()
+		if (evt.target.my_cube === YELLOW && send_action('yellow_cube', evt.target.my_us_state))
+			evt.stopPropagation()
+		if (evt.target.my_cube === RED && send_action('red_cube', evt.target.my_us_state))
 			evt.stopPropagation()
 	}
 	hide_popup_menu()
@@ -631,7 +633,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 		if (view.us_states[i]) {
 			let state_cubes = []
 			let cube = null
-			console.log("US_STATE", i, purple_cubes(i), yellow_cubes(i), red_cubes(i), is_green_check(i), is_red_x(i))
+			// console.log("US_STATE", i, purple_cubes(i), yellow_cubes(i), red_cubes(i), is_green_check(i), is_red_x(i))
 			for (let c = 0; c < purple_cubes(i); ++c) {
 				cube = ui.cubes[ci++]
 				// TODO track both state and color
@@ -639,9 +641,9 @@ function on_update() { // eslint-disable-line no-unused-vars
 				cube.my_cube = PURPLE
 				cube.classList.add("purple")
 				cube.classList.remove("yellow", "red")
+				cube.classList.toggle("action", is_purple_cube_action(i))
 				state_cubes.push(cube)
 				ui.pieces.appendChild(cube)
-				console.log("add purple", cube)
 			}
 			for (let c = 0; c < yellow_cubes(i); ++c) {
 				cube = ui.cubes[ci++]
@@ -649,9 +651,9 @@ function on_update() { // eslint-disable-line no-unused-vars
 				cube.my_cube = YELLOW
 				cube.classList.add("yellow")
 				cube.classList.remove("purple", "red")
+				cube.classList.toggle("action", is_yellow_cube_action(i))
 				state_cubes.push(cube)
 				ui.pieces.appendChild(cube)
-				console.log("add yellow", cube)
 			}
 			for (let c = 0; c < red_cubes(i); ++c) {
 				cube = ui.cubes[ci++]
@@ -659,9 +661,9 @@ function on_update() { // eslint-disable-line no-unused-vars
 				cube.my_cube = RED
 				cube.classList.add("red")
 				cube.classList.remove("purple", "yellow")
+				cube.classList.toggle("action", is_red_cube_action(i))
 				state_cubes.push(cube)
 				ui.pieces.appendChild(cube)
-				console.log("add red", cube)
 			}
 			let [x, y] = US_STATES_LAYOUT[i]
 			layout_cubes(state_cubes, x, y)
