@@ -23,27 +23,28 @@ CARD 4 - A Vindication of the Rights of Woman
 
 CARD 5 - Union Victory
 # Playable if *The Civil War* is in effect. Roll :d6. On a roll of 3-6, receive two :button and move *The Civil War* to the discard pile.
-    requires_persistent find_card("The Civil War")
+    requires_persistent REST_OF_TURN find_card("The Civil War")
     roll 1 D6
     if (game.vm.roll >= 3)
         receive_buttons 2
-        discard_persistent find_card("The Civil War")
+        discard_persistent REST_OF_TURN find_card("The Civil War")
     endif
 
 CARD 6 - Fifteenth Amendment
 # Playable if *The Civil War* is not in effect. Roll :d6. On a roll of 3-6, add 2 :congressional_marker in Congress and add 8 :purple_or_yellow_cube anywhere, no more than 2 per state.
-    requires_not_persistent find_card("The Civil War")
+    requires_not_persistent REST_OF_TURN find_card("The Civil War")
     roll 1 D6
     if (game.vm.roll >= 3)
         add_congress 2
         add_cubes_limit 8 PURPLE_OR_YELLOW anywhere() 2
+        persistent REST_OF_GAME
     endif
 
 CARD 7 - Reconstruction
 # Playable if *The Civil War* is not in effect and the *Fifteenth Amendment* is in effect.
 # Add 1 :purple_or_yellow_cube in each of Virginia, North Carolina, South Carolina, Georgia, Florida, Alabama, Mississippi, Tennessee, Arkansas, Louisiana and Texas.
-    requires_not_persistent find_card("The Civil War")
-    requires_persistent find_card("Fifteenth Amendment")
+    requires_not_persistent REST_OF_TURN find_card("The Civil War")
+    requires_persistent REST_OF_GAME find_card("Fifteenth Amendment")
     add_cubes_in_each_of 1 PURPLE_OR_YELLOW us_states("Virginia", "North Carolina", "South Carolina", "Georgia", "Florida", "Alabama", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Texas")
 
 CARD 8 - Petition to Congress
@@ -187,6 +188,7 @@ CARD 35 - Southern Strategy
     receive_buttons 2
     add_cubes_in_each_of 2 PURPLE_OR_YELLOW region_us_states(SOUTH)
     select_strategy_card
+    persistent REST_OF_GAME
 
 CARD 36 - Women’s Trade Union League
 # Add 1 :yellow_campaigner in the Atlantic & Appalachia region. Add 1 :congressional_marker in Congress and receive 2 :button.
@@ -236,13 +238,17 @@ CARD 44 - Victory Map
 
 CARD 45 - Women and World War I
 # Playable if *War in Europe* is in effect. Add 10 :purple_or_yellow_cube anywhere, no more than 2 per state.
-    requires_persistent find_card("War in Europe")
+    requires_persistent REST_OF_TURN find_card("War in Europe")
     add_cubes_limit 10 PURPLE_OR_YELLOW anywhere() 2
 
 CARD 46 - Eighteenth Amendment
 # Roll :d6. On a roll of 3-6, add 1 congressional_marker in Congress and receive 2 :button.
-    persistent REST_OF_GAME
-    todo
+    roll 1 D6
+    if (game.vm.roll >= 3)
+        add_congress 1
+        receive_buttons 2
+        persistent REST_OF_GAME
+    endif
 
 CARD 47 - Mary McLeod Bethune
 # Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
@@ -285,12 +291,13 @@ CARD 53 - The Patriarchy
 CARD 54 - The Civil War
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions.
     remove_congress 1
-    persistent REST_OF_TURN
+    prompt "For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions."
     todo
+    persistent REST_OF_TURN
 
 CARD 55 - 15th Divides Suffragists
 # Playable if *Fifteenth Amendment* is in effect. Remove all :purple_cube in up to 4 states. The Suffragist player loses 2 :button.
-    requires_persistent find_card("Fifteenth Amendment")
+    requires_persistent REST_OF_GAME find_card("Fifteenth Amendment")
     remove_all_cubes_up_to PURPLE 4
     opponent_loses_buttons 2
 
@@ -359,13 +366,14 @@ CARD 67 - Southern “Hospitality”
 
 CARD 68 - Beer Brewers
 # Playable if *Eighteenth Amendment* is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
-    requires_not_persistent find_card("Eighteenth Amendment")
-    persistent REST_OF_TURN
+    requires_not_persistent REST_OF_GAME find_card("Eighteenth Amendment")
+    prompt "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action."
     todo
+    persistent REST_OF_TURN
 
 CARD 69 - Southern Resentment
 # Playable if *Fifteenth Amendment* is in effect. Add 1 :red_cube in each of Texas, Louisiana, Arkansas, Mississippi and Alabama.
-    requires_persistent find_card("Fifteenth Amendment")
+    requires_persistent REST_OF_GAME find_card("Fifteenth Amendment")
     add_cubes_in_each_of 1 RED us_states("Texas", "Louisiana", "Arkansas", "Mississippi", "Alabama")
 
 CARD 70 - Old Dixie
@@ -410,8 +418,9 @@ CARD 78 - The Great 1906 San Francisco Earthquake
 
 CARD 79 - A Threat to the Ideal of Womanhood
 # For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event.
-    persistent REST_OF_TURN
+    prompt "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event."
     todo
+    persistent REST_OF_TURN
 
 CARD 80 - “Unwarranted, Unnecessary & Dangerous Interference”
 # Add 1 :red_cube in one state of each region.
@@ -419,18 +428,19 @@ CARD 80 - “Unwarranted, Unnecessary & Dangerous Interference”
 
 CARD 81 - Conservative Opposition
 # For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
-    persistent REST_OF_TURN
+    prompt "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action."
     todo
+    persistent REST_OF_TURN
 
 CARD 82 - The SSWSC
 # Playable if *Southern Strategy* is in effect. Receive 2 :button and add 6 :red_cube in the South region, no more than 2 per state.
-    requires_persistent find_card("Southern Strategy")
+    requires_persistent REST_OF_GAME find_card("Southern Strategy")
     receive_buttons 2
     add_cubes_limit 6 RED region_us_states(SOUTH) 2
 
 CARD 83 - Western Saloons Push Suffrage Veto
 # Playable if *Eighteenth Amendment* is not in effect. Place 2 :red_cube in Arizona and 1 :red_cube in each of New Mexico, Nevada and Utah.
-    requires_not_persistent find_card("Eighteenth Amendment")
+    requires_not_persistent REST_OF_GAME find_card("Eighteenth Amendment")
     add_cubes 2 RED us_states("Arizona")
     add_cubes_in_each_of 1 RED us_states("New Mexico", "Nevada", "Utah")
 
@@ -441,7 +451,7 @@ CARD 84 - Transcontinental Railroad
 
 CARD 85 - White Supremacy and the Suffrage Movement
 # Playable if *Southern Strategy* is in effect. Remove all :yellow_cube in up to 4 states. The Suffragist player loses 2 :button.
-    requires_persistent find_card("Southern Strategy")
+    requires_persistent REST_OF_GAME find_card("Southern Strategy")
     remove_all_cubes_up_to YELLOW 4
     opponent_loses_buttons 2
 
@@ -458,14 +468,16 @@ CARD 87 - Senator “Cotton Ed” Smith
 CARD 88 - War in Europe
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action.
     remove_congress 1
-    persistent REST_OF_TURN
+    prompt "For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action."
     todo
+    persistent REST_OF_TURN
 
 CARD 89 - 1918 Pandemic
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event.
     remove_congress 1
-    persistent REST_OF_TURN
+    prompt "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event."
     todo
+    persistent REST_OF_TURN
 
 CARD 90 - The Business of Being a Woman
 # Draw 2 cards from your Draw Deck. Discard 1 card and play the other card for its event immediately.
@@ -477,9 +489,10 @@ CARD 91 - The Eden Sphinx
 
 CARD 92 - Big Liquor’s Big Money
 # Playable if *Eighteenth Amendment* is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
-    requires_not_persistent find_card("Eighteenth Amendment")
-    persistent REST_OF_TURN
+    requires_not_persistent REST_OF_GAME find_card("Eighteenth Amendment")
+    prompt "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action."
     todo
+    persistent REST_OF_TURN
 
 CARD 93 - Red Scare
 # Remove all :purple_cube in up to 2 states.
@@ -487,19 +500,19 @@ CARD 93 - Red Scare
 
 CARD 94 - Southern Women’s Rejection League
 # Playable if *Southern Strategy* is in effect. Roll :d8. Add that number :red_cube in the South region, no more than 2 per state.
-    requires_persistent find_card("Southern Strategy")
+    requires_persistent REST_OF_GAME find_card("Southern Strategy")
     roll 1 D8
     add_cubes_limit (game.vm.roll) RED region_us_states(SOUTH) 2
 
 CARD 95 - United Daughters of the Confederacy
 # Playable if *Southern Strategy* is in effect. Roll :d8. Add that number :red_cube in the South region, no more than 2 per state.
-    requires_persistent find_card("Southern Strategy")
+    requires_persistent REST_OF_GAME find_card("Southern Strategy")
     roll 1 D8
     add_cubes_limit (game.vm.roll) RED region_us_states(SOUTH) 2
 
 CARD 96 - Cheers to “No on Suffrage”
 # Playable if *Eighteenth Amendment* is not in effect. Roll :d8. Add that number :red_cube anywhere, no more than 2 per state.
-    requires_persistent find_card("Eighteenth Amendment")
+    requires_persistent REST_OF_GAME find_card("Eighteenth Amendment")
     roll 1 D8
     add_cubes_limit (game.vm.roll) RED anywhere() 2
 
