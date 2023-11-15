@@ -71,6 +71,14 @@ const COLOR_NAMES = {
 const {	CARDS } = require("./cards.js")
 const {	US_STATES } = require("./data.js")
 
+function opponent_name() {
+	if (game.active === SUF) {
+		return OPP
+	} else {
+		SUF
+	}
+}
+
 // #region CARD & HAND FUNCTIONS
 
 function is_support_card(c) {
@@ -289,6 +297,8 @@ function color_cubes(cube, u) {
 		return purple_cubes(u)
 	else if (cube === YELLOW)
 		return yellow_cubes(u)
+	else if (cube === PURPLE_OR_YELLOW)
+		return purple_cubes(u) + yellow_cubes(u)
 	else
 		return red_cubes(u)
 }
@@ -300,6 +310,10 @@ function set_color_cubes(cube, u, x) {
 		set_yellow_cubes(u, x)
 	else
 		set_red_cubes(u, x)
+}
+
+function us_states_with_color_cubes(us_states, cube) {
+	return us_states.filter( x => color_cubes(cube, x) > 0 )
 }
 
 function add_cube(cube, us_state) {
@@ -594,7 +608,7 @@ function goto_planning_phase() {
 states.planning_phase = {
 	inactive: "do Planning.",
 	prompt() {
-		view.prompt = "Planning. Draw cards."
+		view.prompt = "Planning: Draw cards."
 		gen_action("draw")
 	},
 	draw() {
@@ -735,7 +749,7 @@ function can_play_event(c) {
 		return false
 
 	// Playable if *Fifteenth Amendment* is in effect
-	if ([55, 69].includes(c) && !game.persistent_game.includes(FIFTEENTH_AMENDMENT))
+	if ([7, 55, 69].includes(c) && !game.persistent_game.includes(FIFTEENTH_AMENDMENT))
 		return false
 
 	// Playable if *Eighteenth Amendment* is not in effect
@@ -770,19 +784,20 @@ function remove_claimed_card(c) {
 	game.out_of_play.push(c)
 }
 
-function discard_card_from_hand(c) {
+function discard_card_from_hand(c, is_persistent) {
 	array_remove_item(player_hand(), c)
-	player_discard().push(c)
+	if (!is_persistent)
+		player_discard().push(c)
 }
 
-function end_play_card(c) {
+function end_play_card(c, is_persistent) {
 	clear_undo()
 	if (is_player_claimed_card(c)) {
 		game.has_played_claimed = 1
 		remove_claimed_card(c)
 	} else {
 		game.has_played_hand = 1
-		discard_card_from_hand(c)
+		discard_card_from_hand(c, is_persistent)
 	}
 	game.selected_card = 0
 	game.state = "operations_phase"
@@ -950,8 +965,9 @@ function goto_play_event(c) {
 
 function end_event() {
 	let c = game.vm.fp
+	let is_persistent = game.vm.persistent
 	game.vm = null
-	end_play_card(c)
+	end_play_card(c, is_persistent)
 }
 
 function goto_vm(proc) {
@@ -1115,9 +1131,7 @@ function vm_spend_buttons() {
 
 function vm_opponent_loses_buttons() {
 	game.vm.count = vm_operand(1)
-	if (opponent_buttons() < game.vm.count)
-		throw Error("ASSERT: Insufficient buttons")
-	goto_vm_opponent_loses_buttons()
+	game.state = "vm_opponent_loses_buttons"
 }
 
 function vm_add_cubes() {
@@ -1159,23 +1173,27 @@ function vm_add_cubes_per_state_in_any_one_region() {
 	goto_vm_add_cubes()
 }
 
+// # Remove 6 :purple_or_yellow_cube from anywhere, no more than 2 per state. DONE
 function vm_remove_cubes_limit() {
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
-	game.vm.us_states = vm_operand(3)
+	game.vm.us_states = us_states_with_color_cubes(vm_operand(3), game.vm.cubes)
 	game.vm.limit = vm_operand(4)
 	goto_vm_remove_cubes()
 }
 
+// Remove all :yellow_cube and :purple_cube from California. DONE
 function vm_remove_all_cubes() {
 	game.vm.cubes = vm_operand(1)
-	game.vm.us_states = vm_operand(2)
+	game.vm.us_states = us_states_with_color_cubes(vm_operand(2), game.vm.cubes)
 	game.vm.all = true
 	goto_vm_remove_cubes()
 }
 
+// Remove all :purple_cube from any 1 state. DONE
 function vm_remove_all_cubes_up_to() {
 	game.vm.cubes = vm_operand(1)
+	game.vm.us_states = us_states_with_color_cubes(anywhere(), game.vm.cubes)
 	game.vm.limit = vm_operand(2)
 	game.vm.all = true
 	goto_vm_remove_cubes()
@@ -1227,29 +1245,67 @@ function vm_select_us_state() {
 
 function vm_persistent() {
 	let type = vm_operand(1)
-	// TODO
-	log(`TODO Persistent Card type ${type}`)
+	switch (type) {
+		case REST_OF_TURN:
+			log("Card in Effect for the Rest of the Turn.")
+			game.persistent_turn.push(game.vm.fp)
+			break
+		case REST_OF_GAME:
+			log("Card in Effect for the Rest of the Game.")
+			game.persistent_game.push(game.vm.fp)
+			break
+		case BALLOT_BOX:
+			log("Card in Effect for Final Voting.")
+			game.persistent_ballot.push(game.vm.fp)
+			break
+	}
+	game.vm.persistent = 1
 	vm_next()
 }
 
 function vm_requires_persistent() {
-	let card = vm_operand(1)
-	// TODO
-	log(`TODO ASSERT Persistent Card ${card}`)
+	let type = vm_operand(1)
+	let card = vm_operand(2)
+
+	if (type === REST_OF_TURN && !game.persistent_turn.includes(card))
+		throw Error(`ASSERT: Card ${card} not in persistent_turn`)
+	if (type === REST_OF_GAME && !game.persistent_game.includes(card))
+		throw Error(`ASSERT: Card ${card} not in persistent_game`)
+	if (type == BALLOT_BOX && !game.persistent_ballot.includes(card))
+		throw Error(`ASSERT: Card ${card} not in persistent_ballot`)
+
 	vm_next()
 }
 
 function vm_requires_not_persistent() {
-	let card = vm_operand(1)
-	// TODO
-	log(`TODO ASSERT NOT Persistent Card ${card}`)
+	let type = vm_operand(1)
+	let card = vm_operand(2)
+
+	if (type === REST_OF_TURN && game.persistent_turn.includes(card))
+		throw Error(`ASSERT: Card ${card} not expected in persistent_turn`)
+	if (type === REST_OF_GAME && game.persistent_game.includes(card))
+		throw Error(`ASSERT: Card ${card} not expected in persistent_game`)
+	if (type === BALLOT_BOX && game.persistent_ballot.includes(card))
+		throw Error(`ASSERT: Card ${card} not expected in persistent_ballot`)
+
 	vm_next()
 }
 
 function vm_discard_persistent() {
 	let card = vm_operand(1)
-	// TODO
-	log(`TODO Discard Persistent Card ${card}`)
+	let type = vm_operand(1)
+
+	if (type !== REST_OF_TURN)
+		throw Error(`ASSERT: discard_persistent only supported for REST_OF_TURN`)
+
+	if (game.persistent_turn.includes(card)) {
+		log(`C${card} discarded.`)
+		array_remove_item(game.persistent_turn, card)
+		player_discard().push(card)
+	} else {
+		log(`C${card} not in effect.`)
+	}
+
 	vm_next()
 }
 
@@ -1368,6 +1424,15 @@ function decrease_player_buttons(count=1) {
 	}
 }
 
+function decrease_opponent_buttons(count=1) {
+	log(`${opponent_name()} -${pluralize(count, 'button')}.`)
+	if (game.active === SUF) {
+		game.opposition_buttons = Math.max(game.opposition_buttons - count, 0)
+	} else {
+		game.support_buttons = Math.max(game.support_buttons - count, 0)
+	}
+}
+
 states.vm_receive_buttons = {
 	inactive: "receive buttons",
 	prompt() {
@@ -1394,6 +1459,19 @@ states.vm_spend_buttons = {
 	}
 }
 
+states.vm_opponent_loses_buttons = {
+	inactive: "make you lose buttons",
+	prompt() {
+		event_prompt(`Opponent loses ${pluralize(game.vm.count, 'button')}`)
+		gen_action("next")
+	},
+	next() {
+		push_undo()
+		decrease_opponent_buttons(game.vm.count)
+		vm_next()
+	}
+}
+
 function goto_vm_add_cubes() {
 	game.state = "vm_add_cubes"
 	if (game.vm.cubes === PURPLE_OR_YELLOW) {
@@ -1412,7 +1490,6 @@ states.vm_add_cubes = {
 			gen_action("yellow")
 		}
 
-		// TODO remove cube if opponent has any cubes here
 		let has_opponent_cubes = false
 		for (let s of game.vm.us_states) {
 			if (opponent_cubes(s)) {
@@ -1465,7 +1542,6 @@ states.vm_add_cubes = {
 	},
 	us_state(s) {
 		push_undo()
-		// TODO remove cube if opponent has any cubes here
 		add_cube(game.vm.cube_color, s)
 		after_add_cube(s)
 	}
@@ -1493,10 +1569,69 @@ function after_add_cube(us_state) {
 		if (map_get(game.vm.added, us_state) === game.vm.limit)
 			set_delete(game.vm.us_states, us_state)
 		if (map_count(game.vm.added) === game.vm.count)
-			vm_next()
+			return vm_next()
 	} else {
 		if (map_get(game.vm.added, us_state) === game.vm.count)
 			set_delete(game.vm.us_states, us_state)
+	}
+
+	if (!game.vm.us_states.length)
+		vm_next()
+}
+
+function goto_vm_remove_cubes() {
+	game.state = "vm_remove_cubes"
+	game.vm.removed = []
+}
+
+states.vm_remove_cubes = {
+	inactive: "remove a cube",
+	prompt() {
+		event_prompt(`Remove a ${COLOR_NAMES[game.vm.cubes]} cube.`)
+
+		for (let s of game.vm.us_states) {
+			if ((game.vm.cubes === PURPLE || game.vm.cubes === PURPLE_OR_YELLOW) && purple_cubes(s))
+				gen_action_purple_cube(s)
+			if ((game.vm.cubes === YELLOW || game.vm.cubes === PURPLE_OR_YELLOW) && yellow_cubes(s))
+				gen_action_yellow_cube(s)
+			if (game.vm.cubes === RED && red_cubes(s))
+				gen_action_red_cube(s)
+		}
+	},
+	purple_cube(s) {
+		push_undo()
+		remove_cube(PURPLE, s)
+		after_remove_cube(s)
+	},
+	yellow_cube(s) {
+		push_undo()
+		remove_cube(YELLOW, s)
+		after_remove_cube(s)
+	},
+	red_cube(s) {
+		push_undo()
+		remove_cube(RED, s)
+		after_remove_cube(s)
+	}
+}
+
+// XXX pick a better name
+function after_remove_cube(us_state) {
+	map_incr(game.vm.removed, us_state, 1)
+
+	if (game.vm.all) {
+		if (!color_cubes(game.vm.cube, us_state)) {
+			set_delete(game.vm.us_states, us_state)
+
+			if (game.vm.limit && map_key_count(game.vm.removed) === game.vm.limit)
+				return vm_next()
+		}
+	} else {
+		if (!color_cubes(game.vm.cube, us_state) || map_get(game.vm.removed, us_state) === game.vm.limit)
+			set_delete(game.vm.us_states, us_state)
+
+		if (map_count(game.vm.removed) === game.vm.count)
+			return vm_next()
 	}
 
 	if (!game.vm.us_states.length)
@@ -1914,6 +2049,10 @@ function map_count(map) {
 	return result
 }
 
+function map_key_count(map) {
+	return map.length >> 1
+}
+
 // #endregion
 
 // #region GENERATED EVENT CODE
@@ -1945,28 +2084,29 @@ CODE[4] = [ // A Vindication of the Rights of Woman
 ]
 
 CODE[5] = [ // Union Victory
-	[ vm_requires_persistent, find_card("The Civil War") ],
+	[ vm_requires_persistent, REST_OF_TURN, find_card("The Civil War") ],
 	[ vm_roll, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_receive_buttons, 2 ],
-	[ vm_discard_persistent, find_card("The Civil War") ],
+	[ vm_discard_persistent, REST_OF_TURN, find_card("The Civil War") ],
 	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[6] = [ // Fifteenth Amendment
-	[ vm_requires_not_persistent, find_card("The Civil War") ],
+	[ vm_requires_not_persistent, REST_OF_TURN, find_card("The Civil War") ],
 	[ vm_roll, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 2 ],
 	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_persistent, REST_OF_GAME ],
 	[ vm_endif ],
 	[ vm_return ],
 ]
 
 CODE[7] = [ // Reconstruction
-	[ vm_requires_not_persistent, find_card("The Civil War") ],
-	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
+	[ vm_requires_not_persistent, REST_OF_TURN, find_card("The Civil War") ],
+	[ vm_requires_persistent, REST_OF_GAME, find_card("Fifteenth Amendment") ],
 	[ vm_add_cubes_in_each_of, 1, PURPLE_OR_YELLOW, us_states("Virginia", "North Carolina", "South Carolina", "Georgia", "Florida", "Alabama", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Texas") ],
 	[ vm_return ],
 ]
@@ -2138,6 +2278,7 @@ CODE[35] = [ // Southern Strategy
 	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states(SOUTH) ],
 	[ vm_select_strategy_card ],
+	[ vm_persistent, REST_OF_GAME ],
 	[ vm_return ],
 ]
 
@@ -2197,14 +2338,18 @@ CODE[44] = [ // Victory Map
 ]
 
 CODE[45] = [ // Women and World War I
-	[ vm_requires_persistent, find_card("War in Europe") ],
+	[ vm_requires_persistent, REST_OF_TURN, find_card("War in Europe") ],
 	[ vm_add_cubes_limit, 10, PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
 CODE[46] = [ // Eighteenth Amendment
+	[ vm_roll, 1, D6 ],
+	[ vm_if, ()=>(game.vm.roll >= 3) ],
+	[ vm_add_congress, 1 ],
+	[ vm_receive_buttons, 2 ],
 	[ vm_persistent, REST_OF_GAME ],
-	[ vm_todo ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
@@ -2253,13 +2398,14 @@ CODE[53] = [ // The Patriarchy
 
 CODE[54] = [ // The Civil War
 	[ vm_remove_congress, 1 ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_prompt, "For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions." ],
 	[ vm_todo ],
+	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
 
 CODE[55] = [ // 15th Divides Suffragists
-	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
+	[ vm_requires_persistent, REST_OF_GAME, find_card("Fifteenth Amendment") ],
 	[ vm_remove_all_cubes_up_to, PURPLE, 4 ],
 	[ vm_opponent_loses_buttons, 2 ],
 	[ vm_return ],
@@ -2341,14 +2487,15 @@ CODE[67] = [ // Southern “Hospitality”
 ]
 
 CODE[68] = [ // Beer Brewers
-	[ vm_requires_not_persistent, find_card("Eighteenth Amendment") ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
+	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
 	[ vm_todo ],
+	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
 
 CODE[69] = [ // Southern Resentment
-	[ vm_requires_persistent, find_card("Fifteenth Amendment") ],
+	[ vm_requires_persistent, REST_OF_GAME, find_card("Fifteenth Amendment") ],
 	[ vm_add_cubes_in_each_of, 1, RED, us_states("Texas", "Louisiana", "Arkansas", "Mississippi", "Alabama") ],
 	[ vm_return ],
 ]
@@ -2403,8 +2550,9 @@ CODE[78] = [ // The Great 1906 San Francisco Earthquake
 ]
 
 CODE[79] = [ // A Threat to the Ideal of Womanhood
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event." ],
 	[ vm_todo ],
+	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
 
@@ -2414,20 +2562,21 @@ CODE[80] = [ // “Unwarranted, Unnecessary & Dangerous Interference”
 ]
 
 CODE[81] = [ // Conservative Opposition
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
 	[ vm_todo ],
+	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
 
 CODE[82] = [ // The SSWSC
-	[ vm_requires_persistent, find_card("Southern Strategy") ],
+	[ vm_requires_persistent, REST_OF_GAME, find_card("Southern Strategy") ],
 	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_limit, 6, RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[83] = [ // Western Saloons Push Suffrage Veto
-	[ vm_requires_not_persistent, find_card("Eighteenth Amendment") ],
+	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
 	[ vm_add_cubes, 2, RED, us_states("Arizona") ],
 	[ vm_add_cubes_in_each_of, 1, RED, us_states("New Mexico", "Nevada", "Utah") ],
 	[ vm_return ],
@@ -2440,7 +2589,7 @@ CODE[84] = [ // Transcontinental Railroad
 ]
 
 CODE[85] = [ // White Supremacy and the Suffrage Movement
-	[ vm_requires_persistent, find_card("Southern Strategy") ],
+	[ vm_requires_persistent, REST_OF_GAME, find_card("Southern Strategy") ],
 	[ vm_remove_all_cubes_up_to, YELLOW, 4 ],
 	[ vm_opponent_loses_buttons, 2 ],
 	[ vm_return ],
@@ -2460,15 +2609,17 @@ CODE[87] = [ // Senator “Cotton Ed” Smith
 
 CODE[88] = [ // War in Europe
 	[ vm_remove_congress, 1 ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action." ],
 	[ vm_todo ],
+	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
 
 CODE[89] = [ // 1918 Pandemic
 	[ vm_remove_congress, 1 ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event." ],
 	[ vm_todo ],
+	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
 
@@ -2483,9 +2634,10 @@ CODE[91] = [ // The Eden Sphinx
 ]
 
 CODE[92] = [ // Big Liquor’s Big Money
-	[ vm_requires_not_persistent, find_card("Eighteenth Amendment") ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
+	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
 	[ vm_todo ],
+	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
 
@@ -2495,21 +2647,21 @@ CODE[93] = [ // Red Scare
 ]
 
 CODE[94] = [ // Southern Women’s Rejection League
-	[ vm_requires_persistent, find_card("Southern Strategy") ],
+	[ vm_requires_persistent, REST_OF_GAME, find_card("Southern Strategy") ],
 	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[95] = [ // United Daughters of the Confederacy
-	[ vm_requires_persistent, find_card("Southern Strategy") ],
+	[ vm_requires_persistent, REST_OF_GAME, find_card("Southern Strategy") ],
 	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, region_us_states(SOUTH), 2 ],
 	[ vm_return ],
 ]
 
 CODE[96] = [ // Cheers to “No on Suffrage”
-	[ vm_requires_persistent, find_card("Eighteenth Amendment") ],
+	[ vm_requires_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
 	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
 	[ vm_return ],
