@@ -911,23 +911,25 @@ states.cleanup_phase = {
 	}
 }
 
-function cleanup_persistent_turn_cards() {
-	// any cards in the “Cards in Effect for the Rest of the Turn box” are placed in the appropriate discard pile.
-	for (let c of game.persistent_turn) {
-		if (is_support_card(c)) {
-			game.support_discard.push(c)
-		} else if (is_opposition_card(c)) {
-			game.opposition_discard.push(c)
-		} else {
-			throw Error(`Unexpected card ${c} on persistent_turn`)
-		}
+function discard_persistent_card(cards, c) {
+	log(`C${c} discarded.`)
+	array_remove_item(cards, c)
+	if (is_support_card(c)) {
+		game.support_discard.push(c)
+	} else if (is_opposition_card(c)) {
+		game.opposition_discard.push(c)
+	} else {
+		throw Error(`Unexpected card type ${c}`)
 	}
-	game.persistent_turn = []
 }
 
 function end_cleanup_phase() {
 	if (game.turn < 6) {
-		cleanup_persistent_turn_cards()
+		// any cards in the “Cards in Effect for the Rest of the Turn box”
+		// are placed in the appropriate discard pile.
+		for (let c of game.persistent_turn) {
+			discard_persistent_card(game.persistent_turn, c)
+		}
 
 		if (game.support_hand.length !== 1)
 			throw Error("ASSERT game.support_hand.length === 1")
@@ -938,19 +940,30 @@ function end_cleanup_phase() {
 		return
 	}
 
-	// TODO
 	// At the end of Turn 6, if the Nineteenth
 	// Amendment has not been sent to the states for
 	// ratification, the game ends in an Opposition victory.
+	if (!game.nineteenth_amendment) {
+		goto_game_over(OPP, "Opposition wins.")
+		return
+	}
+
 	// If the Nineteenth Amendment has been sent to the
 	// states for ratification but neither player has won
 	// the necessary number of states for victory, the game
-	// advances to Final Voting. Any cards in the “Cards
-	// in Effect for the Rest of the Turn box” and “Cards in
-	// Effect for the Rest of the Game box” are placed in
-	// the appropriate discard pile.
+	// advances to Final Voting.
 
-	goto_game_over(OPP, "Opposition wins.")
+	// Any cards in the “Cards in Effect for the Rest of the Turn box”
+	// and “Cards in Effect for the Rest of the Game box” are placed in
+	// the appropriate discard pile.
+	for (let c of game.persistent_turn) {
+		discard_persistent_card(game.persistent_turn, c)
+	}
+	for (let c of game.persistent_game) {
+		discard_persistent_card(game.persistent_game, c)
+	}
+
+	// TODO goto final voting
 }
 
 // #endregion
@@ -1290,17 +1303,17 @@ function vm_requires_not_persistent() {
 	vm_next()
 }
 
+
+
 function vm_discard_persistent() {
-	let card = vm_operand(1)
 	let type = vm_operand(1)
+	let card = vm_operand(2)
 
 	if (type !== REST_OF_TURN)
 		throw Error(`ASSERT: discard_persistent only supported for REST_OF_TURN`)
 
 	if (game.persistent_turn.includes(card)) {
-		log(`C${card} discarded.`)
-		array_remove_item(game.persistent_turn, card)
-		player_discard().push(card)
+		discard_persistent_card(game.persistent_turn, card)
 	} else {
 		log(`C${card} not in effect.`)
 	}
@@ -1479,6 +1492,18 @@ function goto_vm_add_cubes() {
 		game.vm.cube_color = game.vm.cubes
 	}
 	game.vm.added = []
+
+	// If a state has already ratified or rejected the Nineteenth Amendment –
+	// and therefore has a V or X in the state – cubes may not be added to that state.
+	if (game.nineteenth_amendment) {
+		for (let s of game.vm.us_states) {
+			if (is_green_check(s) || is_red_x(s))
+				set_delete(game.vm.us_states, s)
+		}
+	}
+
+	if (!game.vm.us_states.length)
+		vm_next()
 }
 
 states.vm_add_cubes = {
@@ -1546,8 +1571,24 @@ states.vm_add_cubes = {
 	}
 }
 
+function claim_states_card(us_state) {
+	for (let c of game.states_draw) {
+		if (US_STATES[us_state].name === CARDS[c].name) {
+			array_remove_item(game.states_draw, c)
+			player_claimed().push(c)
+			log(`Claimed C${c}.`)
+			return
+		}
+	}
+}
+
 // XXX pick a better name
 function after_add_cube(us_state) {
+	// claim state cards when 4 cubes have been added
+	if (player_cubes(us_state) === 4) {
+		claim_states_card(us_state)
+	}
+
 	map_incr(game.vm.added, us_state, 1)
 
 	if (game.vm.in_one_state_of_each_region) {
