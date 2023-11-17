@@ -849,22 +849,22 @@ states.operations_phase = {
 	},
 	card_event(c) {
 		push_undo()
-		log(`Played C${c} as Event`)
+		log(`C${c} - Event`)
 		goto_play_event(c)
 	},
 	card_campaigning(c) {
 		push_undo()
-		log(`Played C${c} for Campaigning Action`)
+		log(`C${c} - Campaigning Action`)
 		end_play_card(c)
 	},
 	card_organizing(c) {
 		push_undo()
-		log(`Played C${c} for Organizing Action`)
+		log(`C${c} - Organizing Action`)
 		end_play_card(c)
 	},
 	card_lobbying(c) {
 		push_undo()
-		log(`Played C${c} for Lobbying Action`)
+		log(`C${c} - Lobbying Action`)
 		end_play_card(c)
 	},
 	done() {
@@ -958,7 +958,6 @@ function end_cleanup_phase() {
 // #region EVENTS GENERIC
 
 function goto_play_event(c) {
-	// update_presence_and_control()
 	game.selected_card = c
 	goto_vm(c)
 }
@@ -1557,9 +1556,8 @@ function after_add_cube(us_state) {
 				set_delete(game.vm.us_states, other)
 	}
 
-	if (game.vm.per_state_in_any_one_region) {
-		// TODO only need to do this the first time
-		// XXX does set_deletion work while iterating?
+	if (game.vm.per_state_in_any_one_region && map_get(game.vm.added, us_state) === 1) {
+		// only need to do this for the the first cube in the state
 		for (let other of game.vm.us_states)
 			if (us_state_region(us_state) !== us_state_region(other))
 				set_delete(game.vm.us_states, other)
@@ -1689,10 +1687,12 @@ function goto_vm_roll_dice() {
 states.vm_roll = {
 	inactive: "roll dice",
 	prompt() {
-		if (game.vm.count === 1) {
-			event_prompt("Roll a die")
+		if (game.vm.roll) {
+			event_prompt(`You rolled ${game.vm.roll}.`)
+		} else if (game.vm.count === 1) {
+			event_prompt("Roll a die.")
 		} else {
-			event_prompt("Roll dice")
+			event_prompt("Roll dice.")
 		}
 		if (!game.vm.roll) {
 			gen_action("roll")
@@ -1703,12 +1703,12 @@ states.vm_roll = {
 		}
 	},
 	roll() {
-		// TODO effects
+		// TODO effects of persistent cards
 		game.vm.roll = roll_ndx(game.vm.count, game.vm.d)
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		// TODO effects
+		// TODO effects of persistent cards
 		game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "B", "Re-rolled")
 	},
 	done() {
