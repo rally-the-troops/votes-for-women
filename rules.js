@@ -864,16 +864,18 @@ states.operations_phase = {
 	card_campaigning(c) {
 		push_undo()
 		log(`C${c} - Campaigning Action`)
+		log("TODO")
 		end_play_card(c)
 	},
 	card_organizing(c) {
 		push_undo()
 		log(`C${c} - Organizing Action`)
-		end_play_card(c)
+		goto_play_organizing(c)
 	},
 	card_lobbying(c) {
 		push_undo()
 		log(`C${c} - Lobbying Action`)
+		log("TODO")
 		end_play_card(c)
 	},
 	done() {
@@ -973,6 +975,31 @@ function end_cleanup_phase() {
 	}
 
 	// TODO goto final voting
+}
+
+// #endregion
+
+// #region NON-EVENT CARD ACTIONS
+
+function goto_play_organizing(c) {
+	game.played_card = c
+	game.state = 'play_organizing'
+}
+
+states.play_organizing = {
+	inactive: "receive buttons",
+	prompt() {
+		let count = count_player_active_campaigners()
+		view.prompt = `Organizing: Receive ${pluralize(count, 'button')}`
+		gen_action("next")
+	},
+	next() {
+		push_undo()
+		let count = count_player_active_campaigners()
+		if (count)
+			increase_player_buttons(count)
+		end_play_card(game.played_card)
+	}
 }
 
 // #endregion
@@ -1357,6 +1384,8 @@ function vm_support_discard_2_random_draw_2() {
 	log("TODO support_discard_2_random_draw_2")
 	vm_next()
 }
+
+// #endregion
 
 // #region EVENT STATES
 
