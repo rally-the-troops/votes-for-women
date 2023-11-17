@@ -75,7 +75,7 @@ function opponent_name() {
 	if (game.active === SUF) {
 		return OPP
 	} else {
-		SUF
+		return SUF
 	}
 }
 
