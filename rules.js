@@ -425,7 +425,7 @@ exports.setup = function (seed, _scenario, _options) {
 		active: null,
 		state: null,
 
-		selected_card: 0,
+		played_card: 0,
 
 		turn: 0,
 		round: 0,
@@ -521,7 +521,7 @@ exports.view = function(state, player) {
 		prompt: null,
 		actions: null,
 
-		selected_card: game.selected_card,
+		played_card: game.played_card,
 
 		turn: game.turn,
 		round: game.round,
@@ -689,11 +689,20 @@ states.strategy_phase = {
 	supersede() {
 		log(`Opposition superseded.`)
 		game.opposition_buttons -= (game.support_committed + 1)
-		game.state = 'strategy_phase_select_strategy_card'
+		game.state = 'select_strategy_card'
 	}
 }
 
-states.strategy_phase_select_strategy_card = {
+function claim_strategy_card(c) {
+	log(`${game.active} selected C${c}.`)
+
+	array_remove_item(game.strategy_draw, c)
+	player_claimed().push(c)
+	if (game.strategy_deck.length)
+		game.strategy_draw.push(draw_card(game.strategy_deck))
+}
+
+states.select_strategy_card = {
 	inactive: "select Strategy card.",
 	prompt() {
 		view.prompt = `Select Strategy card.`
@@ -701,13 +710,12 @@ states.strategy_phase_select_strategy_card = {
 			gen_action("card", c)
 	},
 	card(c) {
-		log(`${game.active} selected C${c}.`)
-
-		array_remove_item(game.strategy_draw, c)
-		player_claimed().push(c)
-		game.strategy_draw.push(draw_card(game.strategy_deck))
-
-		end_strategy_phase()
+		claim_strategy_card(c)
+		if (game.vm) {
+			vm_next()
+		} else {
+			end_strategy_phase()
+		}
 	}
 }
 
@@ -799,7 +807,7 @@ function end_play_card(c, is_persistent) {
 		game.has_played_hand = 1
 		discard_card_from_hand(c, is_persistent)
 	}
-	game.selected_card = 0
+	game.played_card = 0
 	game.state = "operations_phase"
 }
 
@@ -850,6 +858,7 @@ states.operations_phase = {
 	card_event(c) {
 		push_undo()
 		log(`C${c} - Event`)
+		log_br()
 		goto_play_event(c)
 	},
 	card_campaigning(c) {
@@ -971,7 +980,7 @@ function end_cleanup_phase() {
 // #region EVENTS GENERIC
 
 function goto_play_event(c) {
-	game.selected_card = c
+	game.played_card = c
 	goto_vm(c)
 }
 
@@ -1755,6 +1764,39 @@ states.vm_roll = {
 	done() {
 		vm_next()
 	}
+}
+
+function goto_vm_select_us_state() {
+	game.state = "vm_select_us_state"
+	delete game.vm.selected_us_state
+}
+
+states.vm_select_us_state = {
+	inactive: "select a state.",
+	prompt() {
+		if (!game.vm.selected_us_state) {
+			event_prompt("Select one state.")
+			for (let s of anywhere()) {
+				gen_action_us_state(s)
+			}
+		} else {
+			// TODO name
+			event_prompt(`Selected S${game.vm.selected_us_state}.`)
+			gen_action("done")
+		}
+	},
+	us_state(s) {
+		push_undo()
+		game.vm.selected_us_state = s
+	},
+	done() {
+		log(`Selected S${game.vm.selected_us_state}.`)
+		vm_next()
+	}
+}
+
+function goto_vm_select_strategy_card() {
+	game.state = "select_strategy_card"
 }
 
 // #endregion
