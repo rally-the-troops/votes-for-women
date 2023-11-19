@@ -370,6 +370,7 @@ function create_campaigner(color, i) {
 		className: `piece ${color}`,
 		my_campaigner: i,
 	})
+	// TODO use onmousedown and figure out why it didn't work on mobile
 	e.addEventListener("click", on_click_campaigner)
 	return e
 }
@@ -384,6 +385,7 @@ function build_user_interface() {
 		if (r) REGIONS_LAYOUT.push(LAYOUT[r])
 	}
 
+	// TODO use onmousedown and figure out why it didn't work on mobile
 	ui.congress_box.addEventListener("click", on_click_congress)
 	for (let c = 1; c <= 6; ++c) {
 		elt = ui.congress[c] = create("div", {
