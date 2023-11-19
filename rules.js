@@ -832,6 +832,15 @@ function end_play_card(c, is_persistent) {
 	game.state = "operations_phase"
 }
 
+function can_organize() {
+	return (game.active === SUF && game.support_buttons < MAX_SUPPORT_BUTTONS) || (game.active === OPP && game.opponent_buttons < MAX_OPPOSITION_BUTTONS)
+}
+
+function can_lobby() {
+	return !game.nineteenth_amendment && (
+		(game.active === SUF && game.congress < 6) || (game.active === OPP && game.congress > 0))
+}
+
 states.operations_phase = {
 	inactive: "Play a Card.",
 	prompt() {
@@ -846,8 +855,10 @@ states.operations_phase = {
 				}
 				if (has_player_active_campaigners()) {
 					gen_action("card_campaigning", c)
-					gen_action("card_organizing", c)
-					gen_action("card_lobbying", c)
+					if (can_organize())
+						gen_action("card_organizing", c)
+					if (can_lobby())
+						gen_action("card_lobbying", c)
 					can_play_hand = true
 				}
 			}
@@ -896,8 +907,7 @@ states.operations_phase = {
 	card_lobbying(c) {
 		push_undo()
 		log(`C${c} - Lobbying Action`)
-		log("TODO")
-		end_play_card(c)
+		goto_play_lobbying(c)
 	},
 	done() {
 		end_player_round()
@@ -1005,23 +1015,91 @@ function end_cleanup_phase() {
 function goto_play_organizing(c) {
 	game.played_card = c
 	game.state = 'play_organizing'
+	game.count = count_player_active_campaigners()
+
 }
 
 states.play_organizing = {
 	inactive: "receive buttons",
 	prompt() {
-		let count = count_player_active_campaigners()
-		view.prompt = `Organizing: Receive ${pluralize(count, 'button')}`
+		view.prompt = `Organizing: Receive ${pluralize(game.count, 'button')}`
 		gen_action("next")
 	},
 	next() {
 		push_undo()
-		let count = count_player_active_campaigners()
-		if (count)
-			increase_player_buttons(count)
+		if (game.count)
+			increase_player_buttons(game.count)
 		end_play_card(game.played_card)
 	}
 }
+
+const PROCESSIONS_FOR_SUFFRAGE = find_card("Processions for Suffrage")
+
+function goto_play_lobbying(c) {
+	game.played_card = c
+	game.state = 'play_lobbying'
+	game.count = count_player_active_campaigners()
+	// Processions for Suffrage modifier
+	if (game.persistent_turn.includes(PROCESSIONS_FOR_SUFFRAGE))
+		game.dice = D8
+	else
+		game.dice = D6
+}
+
+states.play_lobbying = {
+	inactive: "do Lobbying.",
+	prompt() {
+		view.prompt = `Lobbying: Roll ${game.count} d${game.dice}.`
+		gen_action("roll")
+	},
+	roll() {
+		game.count = roll_ndx_count_success(game.count, game.dice)
+		if (game.count > 0) {
+			if (game.active === SUF) {
+				game.state = "lobbying_add_congress"
+			} else {
+				game.state = "lobbying_remove_congress"
+			}
+		} else {
+			end_play_card(game.played_card)
+		}
+	}
+}
+
+// XXX similar to states.vm_add_congress, refactor?
+states.lobbying_add_congress = {
+	inactive: "add a Congressional marker",
+	prompt() {
+		view.prompt = `Lobbying: Add ${pluralize(game.count, 'Congressional marker')}.`
+		gen_action("congress")
+	},
+	congress() {
+		game.congress = Math.min(game.congress + game.count, 6)
+		log(`+${pluralize(game.count, 'Congressional marker')}.`)
+
+		// TODO Trigger Nineteenth Amendment
+		if (game.congress >= 6) {
+			game.nineteenth_amendment = 1
+		}
+		end_play_card(game.played_card)
+	}
+}
+
+// XXX similar to states.vm_remove_congress, refactor?
+states.lobbying_remove_congress = {
+	inactive: "remove a Congressional marker",
+	prompt() {
+		view.prompt = `Lobbying: Remove ${pluralize(game.count, 'Congressional marker')}.`
+		gen_action("congress")
+	},
+	congress() {
+		game.congress = Math.max(game.congress - game.count, 0)
+		log(`-${pluralize(game.count, 'Congressional marker')}.`)
+
+		end_play_card(game.played_card)
+	}
+}
+
 
 // #endregion
 
@@ -1737,14 +1815,14 @@ function after_remove_cube(us_state) {
 }
 
 states.vm_add_congress = {
-	inactive: "add a congressional marker",
+	inactive: "add a Congressional marker",
 	prompt() {
-		event_prompt(`Add ${pluralize(game.vm.count, 'congressional marker')}.`)
+		event_prompt(`Add ${pluralize(game.vm.count, 'Congressional marker')}.`)
 		gen_action("congress")
 	},
 	congress() {
 		game.congress = Math.min(game.congress + game.vm.count, 6)
-		log(`+${pluralize(game.vm.count, 'congressional marker')}.`)
+		log(`+${pluralize(game.vm.count, 'Congressional marker')}.`)
 
 		// TODO Trigger Nineteenth Amendment
 		if (game.congress >= 6) {
@@ -1757,12 +1835,13 @@ states.vm_add_congress = {
 states.vm_remove_congress = {
 	inactive: "remove a congressional marker",
 	prompt() {
-		event_prompt(`Remove ${pluralize(game.vm.count, 'congressional marker')}.`)
+		event_prompt(`Remove ${pluralize(game.vm.count, 'Congressional marker')}.`)
 		gen_action("congress")
 	},
 	congress() {
 		game.congress = Math.max(game.congress - game.vm.count, 0)
-		log(`-${pluralize(game.vm.count, 'congressional marker')}.`)
+		log(`-${pluralize(game.vm.count, 'Congressional marker')}.`)
+
 		vm_next()
 	}
 }
@@ -1774,6 +1853,22 @@ function roll_ndx(n, x, color="B", prefix="Rolled") {
 	for (let i = 0; i < n; ++i) {
 		let roll = random(x) + 1
 		result += roll
+		summary.push(color + roll)
+	}
+	log(prefix + " " + summary.join(" "))
+	return result
+}
+
+
+function roll_ndx_count_success(n, x, color="B", prefix="Rolled") {
+	clear_undo()
+	let result = 0
+	let summary = []
+	for (let i = 0; i < n; ++i) {
+		let roll = random(x) + 1
+		if (roll >= 6)
+			result += 1
+		// TODO color for success?
 		summary.push(color + roll)
 	}
 	log(prefix + " " + summary.join(" "))
