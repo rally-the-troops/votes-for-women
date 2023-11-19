@@ -18,6 +18,9 @@ const last_strategy_card = 116
 const first_states_card = 117
 const last_states_card = 128
 
+const MAX_SUPPORT_BUTTONS = 12
+const MAX_OPPOSITION_BUTTONS = 6
+
 const WEST = 1
 const PLAINS = 2
 const SOUTH = 3
@@ -248,6 +251,24 @@ function set_red_x(u) {
 
 function clear_red_x(u) {
 	game.us_states[u] &= ~RED_X_MASK
+}
+
+function count_green_checks() {
+	let result = 0
+	for (let s = 1; s <= us_states_count; ++s) {
+		if (is_green_check(s))
+			result += 1
+	}
+	return result
+}
+
+function count_red_xs() {
+	let result = 0
+	for (let s = 1; s <= us_states_count; ++s) {
+		if (is_red_x(s))
+			result += 1
+	}
+	return result
 }
 
 function purple_cubes(u) {
@@ -1459,18 +1480,18 @@ states.vm_add_campaigner = {
 function increase_player_buttons(count=1) {
 	log(`+${pluralize(count, 'button')}.`)
 	if (game.active === SUF) {
-		game.support_buttons += count
+		game.support_buttons = Math.min(game.support_buttons + count, MAX_SUPPORT_BUTTONS)
 	} else {
-		game.opposition_buttons += count
+		game.opposition_buttons = Math.min(game.opposition_buttons + count, MAX_OPPOSITION_BUTTONS)
 	}
 }
 
 function decrease_player_buttons(count=1) {
 	log(`-${pluralize(count, 'button')}.`)
 	if (game.active === SUF) {
-		game.support_buttons -= count
+		game.support_buttons = Math.max(game.support_buttons - count, 0)
 	} else {
-		game.opposition_buttons -= count
+		game.opposition_buttons = Math.max(game.opposition_buttons - count, 0)
 	}
 }
 
