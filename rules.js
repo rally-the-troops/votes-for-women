@@ -429,6 +429,7 @@ function goto_game_over(result, victory) {
 	game.victory = victory
 	log_br()
 	log(game.victory)
+	return true
 }
 
 const pluralize = (count, noun, suffix = 's') =>
@@ -865,7 +866,7 @@ states.operations_phase = {
 		}
 
 		if (!game.has_played_claimed) {
-			// only one claimed can be played per turn
+			// only one claimed card can be played per turn
 			for (let c of player_claimed()) {
 				if (can_play_event(c)) {
 					gen_action("card_event", c)
@@ -1066,6 +1067,61 @@ states.play_lobbying = {
 	}
 }
 
+const GREEN_CHECK_VICTORY = 36
+const RED_X_VICTORY = 13
+
+function ratify_nineteenth_amendment(us_state) {
+	log(`S${us_state} ratified the Nineteenth Amendment`)
+	game.us_states[us_state] = 0
+	set_green_check(us_state)
+}
+
+function reject_nineteenth_amendment(us_state) {
+	log(`S${us_state} rejected the Nineteenth Amendment`)
+	game.us_states[us_state] = 0
+	set_red_x(us_state)
+}
+
+function trigger_nineteenth_amendment() {
+	if (game.nineteenth_amendment)
+		throw Error("ASSERT: nineteenth_amendment already set")
+	log("Congress passed the Nineteenth Amendment")
+	game.nineteenth_amendment = 1
+	game.congress = 0
+
+	let green_check = 0
+	let red_x = 0
+
+	for (let s = 1; s <= us_states_count; ++s) {
+		if (support_cubes(s) >= 4) {
+			ratify_nineteenth_amendment(s)
+			green_check += 1
+			if (green_check >= GREEN_CHECK_VICTORY)
+				return goto_game_over(SUP, "Suffragist wins.")
+		} else if (opponent_cubes(s) >= 4) {
+			reject_nineteenth_amendment(s)
+			red_x += 1
+			if (red_x >= RED_X_VICTORY)
+				return goto_game_over(OPP, "Opposition wins.")
+		}
+	}
+	return false
+}
+
+function check_victory() {
+	if (!game.nineteenth_amendment)
+		return false
+	if (count_green_checks() >= GREEN_CHECK_VICTORY) {
+		goto_game_over(SUP, "Suffragist wins.")
+		return true
+	} else if (count_red_xs() >= RED_X_VICTORY) {
+		goto_game_over(OPP, "Opposition wins.")
+		return true
+	}
+	return false
+}
+
+
 // XXX similar to states.vm_add_congress, refactor?
 states.lobbying_add_congress = {
 	inactive: "add a Congressional marker",
@@ -1077,9 +1133,9 @@ states.lobbying_add_congress = {
 		game.congress = Math.min(game.congress + game.count, 6)
 		log(`+${pluralize(game.count, 'Congressional marker')}.`)
 
-		// TODO Trigger Nineteenth Amendment
 		if (game.congress >= 6) {
-			game.nineteenth_amendment = 1
+			if (trigger_nineteenth_amendment())
+				return
 		}
 		end_play_card(game.played_card)
 	}
@@ -1721,9 +1777,21 @@ function claim_states_card(us_state) {
 
 // XXX pick a better name
 function after_add_cube(us_state) {
-	// claim state cards when 4 cubes have been added
 	if (player_cubes(us_state) === 4) {
+		// claim state cards when 4 cubes have been added
 		claim_states_card(us_state)
+
+		if (game.nineteenth_amendment) {
+			// replace cubes with checks / Xs
+			if (game.active === SUF) {
+				ratify_nineteenth_amendment(us_state)
+			} else {
+				reject_nineteenth_amendment(us_state)
+			}
+
+			if (check_victory())
+				return
+		}
 	}
 
 	map_incr(game.vm.added, us_state, 1)
@@ -1824,9 +1892,9 @@ states.vm_add_congress = {
 		game.congress = Math.min(game.congress + game.vm.count, 6)
 		log(`+${pluralize(game.vm.count, 'Congressional marker')}.`)
 
-		// TODO Trigger Nineteenth Amendment
 		if (game.congress >= 6) {
-			game.nineteenth_amendment = 1
+			if (trigger_nineteenth_amendment())
+				return
 		}
 		vm_next()
 	}
