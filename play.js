@@ -618,7 +618,8 @@ function on_update() { // eslint-disable-line no-unused-vars
 			let [x, y] = REGIONS_LAYOUT[campaigner_region]
 			ui.support_campaigner[i].style.left = x - 30 + (15 * i) + "px"
 			ui.support_campaigner[i].style.top = y - 40 + "px"
-			ui.support_campaigner[i].classList.toggle("action", is_campaigner_action(i))
+			ui.support_campaigner[i].classList.toggle("action", is_campaigner_action(1 + i))
+			ui.support_campaigner[i].classList.toggle("selected", 1 + i === view.selected_campaigner)
 		} else {
 			ui.support_campaigner[i].remove()
 		}
@@ -632,6 +633,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 			ui.opposition_campaigner[i].style.left = x - 30 + (15 * i) + "px"
 			ui.opposition_campaigner[i].style.top = y - 10 + "px"
 			ui.opposition_campaigner[i].classList.toggle("action", is_campaigner_action(5 + i))
+			ui.opposition_campaigner[i].classList.toggle("selected", 5 + i === view.selected_campaigner)
 		} else {
 			ui.opposition_campaigner[i].remove()
 		}
@@ -684,7 +686,6 @@ function on_update() { // eslint-disable-line no-unused-vars
 	for (let i = ci; i < ui.cubes.length; ++i) {
 		ui.cubes[i].remove()
 	}
-
 
 	action_button("commit_1_button", "+1 Button")
 	action_button("defer", "Defer")

@@ -135,40 +135,6 @@ function opponent_buttons() {
 	}
 }
 
-// TODO unify campaigners from both players into one array
-
-function player_campaigners() {
-	if (game.active === SUF) {
-		return game.support_campaigner
-	} else {
-		return game.opposition_campaigner
-	}
-}
-
-function for_each_player_campaigner(fn) {
-	if (game.active === SUF) {
-		for (let c = 0; c <= 3; c++) {
-			let r = game.support_campaigner[c]
-			if (r)
-				fn(c + 1)
-		}
-	} else {
-		for (let c = 0; c <= 1; c++) {
-			let r = game.opposition_campaigner[c]
-			if (r)
-				fn(c + 5)
-		}
-	}
-}
-
-function campaigner_region(c) {
-	if (game.active === SUF) {
-		return game.support_campaigner[c - 1]
-	} else {
-		return game.opposition_campaigner[c - 5]
-	}
-}
-
 function player_claimed() {
 	if (game.active === SUF) {
 		return game.support_claimed
@@ -237,6 +203,49 @@ function add_campaigner(campaigner_color, region) {
 		throw Error("No free campaigners")
 	}
 	log(`Placed ${COLOR_CODE[campaigner_color]}R in R${region}`)
+}
+
+// TODO unify campaigners from both players into one array
+
+function player_campaigners() {
+	if (game.active === SUF) {
+		return game.support_campaigner
+	} else {
+		return game.opposition_campaigner
+	}
+}
+
+function for_each_player_campaigner(fn) {
+	if (game.active === SUF) {
+		for (let c = 0; c <= 3; c++) {
+			let r = game.support_campaigner[c]
+			if (r)
+				fn(c + 1)
+		}
+	} else {
+		for (let c = 0; c <= 1; c++) {
+			let r = game.opposition_campaigner[c]
+			if (r)
+				fn(c + 5)
+		}
+	}
+}
+
+function campaigner_region(c) {
+	if (game.active === SUF) {
+		return game.support_campaigner[c - 1]
+	} else {
+		return game.opposition_campaigner[c - 5]
+	}
+}
+
+function move_campaigner(c, region) {
+	log(`${campaigner_color_code(c)}R moved to R${region}.`)
+	if (game.active === SUF) {
+		game.support_campaigner[c - 1] = region
+	} else {
+		game.opposition_campaigner[c - 5] = region
+	}
 }
 
 // RED cubes (6 bits), YELLOW cubes (7 bits), PURPLE cubes (7 bits), RED_X (1 bit), GREEN_CHECK (1 bit),
@@ -575,6 +584,7 @@ exports.view = function(state, player) {
 		actions: null,
 
 		played_card: game.played_card,
+		selected_campaigner: game.selected_campaigner,
 
 		turn: game.turn,
 		round: game.round,
@@ -922,22 +932,25 @@ states.operations_phase = {
 		push_undo()
 		log(`C${c} - Event`)
 		log_br()
-		goto_play_event(c)
+		goto_event(c)
 	},
 	card_campaigning(c) {
 		push_undo()
-		log(`C${c} - Campaigning Action`)
-		goto_play_campaigning(c)
+		log(`C${c} - Campaigning`)
+		log_br()
+		goto_campaigning(c)
 	},
 	card_organizing(c) {
 		push_undo()
-		log(`C${c} - Organizing Action`)
-		goto_play_organizing(c)
+		log(`C${c} - Organizing`)
+		log_br()
+		goto_organizing(c)
 	},
 	card_lobbying(c) {
 		push_undo()
-		log(`C${c} - Lobbying Action`)
-		goto_play_lobbying(c)
+		log(`C${c} - Lobbying`)
+		log_br()
+		goto_lobbying(c)
 	},
 	done() {
 		end_player_round()
@@ -1042,23 +1055,23 @@ function end_cleanup_phase() {
 
 // #region NON-EVENT CARD ACTIONS
 
-function goto_play_campaigning(c) {
+function goto_campaigning(c) {
 	game.played_card = c
-	game.state = 'play_campaigning'
+	game.state = 'campaigning'
 	game.count = count_player_active_campaigners()
 	// TODO persistent events
 	game.dice = D4
 	game.roll = []
 }
 
-states.play_campaigning = {
+states.campaigning = {
 	inactive: "do Campaigning.",
 	prompt() {
 		if (!game.roll.length) {
 			view.prompt = `Campaigning: Roll ${game.count} d${game.dice}.`
 			gen_action("roll")
 		} else {
-			view.prompt = `Campaigning: You rolled ${game.roll}.`
+			view.prompt = `Campaigning: You rolled ${game.roll.join(", ")}.`
 			if (player_buttons() > 0)
 				gen_action("reroll")
 			gen_action("next")
@@ -1072,26 +1085,26 @@ states.play_campaigning = {
 		game.roll = roll_ndx_list(game.count, game.dice, "B", "Re-rolled")
 	},
 	next() {
-		// TODO
-		// initialize list of campaigners
-		// assign roll to list
-		// track
-		game.state = "play_campaigning_assign"
-		game.campaigning = {
-			dice_idx: 0,
-			assigned: [],
-			count: 0,
-			region: 0,
-			moved: false
-		}
+		goto_campaigning_assign()
 	}
 }
 
-states.play_campaigning_assign = {
+function goto_campaigning_assign() {
+	game.state = "campaigning_assign"
+	game.campaigning = {
+		dice_idx: 0,
+		assigned: [],
+		count: 0,
+		region: 0,
+		moved: false
+	}
+}
+
+states.campaigning_assign = {
 	inactive: "do Campaigning.",
 	prompt() {
 		let die = game.roll[game.campaigning.dice_idx]
-		view.prompt = `Campaigning: Assign a Campaigner to the ${die} die.`
+		view.prompt = `Campaigning: Assign ${die} to a Campaigner.`
 
 		for_each_player_campaigner(c => {
 			if (!set_has(game.campaigning.assigned, c))
@@ -1105,13 +1118,8 @@ states.play_campaigning_assign = {
 	},
 	campaigner(c) {
 		push_undo()
-		// TODO
 		let die = game.roll[game.campaigning.dice_idx]
 		goto_campaigning_add_cubes(c, die)
-
-		// if (game.campaigning.dice_idx < game.roll.length) {
-		// 	game.campaigning.dice_idx += 1
-		// }
 	},
 	done() {
 		delete game.selected_campaigner
@@ -1120,11 +1128,20 @@ states.play_campaigning_assign = {
 	}
 }
 
+function campaigner_color_code(c) {
+	if (c <= 2) {
+		return COLOR_CODE[PURPLE]
+	} else if (c <= 4) {
+		return COLOR_CODE[YELLOW]
+	} else {
+		return COLOR_CODE[RED]
+	}
+}
+
 function goto_campaigning_add_cubes(campaigner, die) {
 	game.selected_campaigner = campaigner
 	set_add(game.campaigning.assigned, campaigner)
-	// TODO campaigner color + region
-	log(`Assigned Campaigner ${campaigner} in X to die ${die}`)
+	log(`Assigned ${die} to ${campaigner_color_code(campaigner)}R in R${campaigner_region(campaigner)}.`)
 	game.campaigning.count = die
 	game.campaigning.added = 0
 	game.campaigning.moved = false
@@ -1133,10 +1150,10 @@ function goto_campaigning_add_cubes(campaigner, die) {
 	} else {
 		game.campaigning.cube_color = RED
 	}
-	game.state = "play_campaigning_add_cubes"
+	game.state = "campaigning_add_cubes"
 }
 
-states.play_campaigning_add_cubes = {
+states.campaigning_add_cubes = {
 	inactive: "do Campaigning.",
 	prompt() {
 		if (game.active === SUF) {
@@ -1145,8 +1162,10 @@ states.play_campaigning_add_cubes = {
 		}
 
 		let has_opponent_cubes = false
+		let can_move = false
 		if (!game.campaigning.added && player_buttons() > 0 && !game.campaigning.moved) {
 			gen_action("move")
+			can_move = true
 		}
 
 		for (let s of region_us_states(campaigner_region(game.selected_campaigner))) {
@@ -1166,22 +1185,22 @@ states.play_campaigning_add_cubes = {
 		}
 
 		if (!game.campaigning.cube_color) {
-			if (!has_opponent_cubes)
-				view.prompt = "Campaigning: Choose a cube to add."
-			else
-			view.prompt = "Campaigning: Choose a cube to add or remove an Opponent's cube."
+			view.prompt = "Campaigning: Choose a cube to add"
+			if (has_opponent_cubes)
+				view.prompt += " or remove an Opponent's cube"
 		} else {
-			if (!has_opponent_cubes)
-				view.prompt = `Campaigning: Add a ${COLOR_NAMES[game.campaigning.cube_color]} cube.`
-			else
-				view.prompt = `Campaigning: Add a ${COLOR_NAMES[game.campaigning.cube_color]} cube or remove an Opponent's cube.`
+			view.prompt = `Campaigning: Add a ${COLOR_NAMES[game.campaigning.cube_color]} cube`
+			if (has_opponent_cubes)
+				view.prompt += " or remove an Opponent's cube"
 		}
+		if (can_move) {
+			view.prompt += " or Move to another Region"
+		}
+		view.prompt += "."
 	},
 	move() {
-		decrease_player_buttons(1)
-		game.campaigning.moved = true
-		// TODO move
-		log("TODO move campaigner")
+		push_undo()
+		game.state = "campaigning_move"
 	},
 	purple() {
 		game.campaigning.cube_color = PURPLE
@@ -1221,21 +1240,47 @@ function after_campaigning_add_cube(us_state) {
 	game.campaigning.added += 1
 
 	if (game.campaigning.added === game.campaigning.count) {
+		delete game.selected_campaigner
 		if (game.campaigning.dice_idx < game.roll.length)
 			game.campaigning.dice_idx += 1
-		game.state = "play_campaigning_assign"
+		game.state = "campaigning_assign"
 	}
 }
 
+states.campaigning_move = {
+	inactive: "do Campaigning.",
+	prompt() {
+		let die = game.roll[game.campaigning.dice_idx]
+		view.prompt = `Campaigning: Select region to move the Campaigner to.`
 
-function goto_play_organizing(c) {
+		let current_region = campaigner_region(game.selected_campaigner)
+		for (let r = 1; r <= region_count; r++) {
+			if (r !== current_region)
+				gen_action_region(r)
+		}
+	},
+	region(r) {
+		push_undo()
+		decrease_player_buttons(1)
+		move_campaigner(game.selected_campaigner, r)
+		game.campaigning.moved = true
+		game.state = "campaigning_add_cubes"
+	},
+	done() {
+		delete game.selected_campaigner
+		delete game.campaigning
+		end_play_card(game.played_card)
+	}
+}
+
+function goto_organizing(c) {
 	game.played_card = c
-	game.state = 'play_organizing'
+	game.state = 'organizing'
 	game.count = count_player_active_campaigners()
 
 }
 
-states.play_organizing = {
+states.organizing = {
 	inactive: "receive buttons.",
 	prompt() {
 		view.prompt = `Organizing: Receive ${pluralize(game.count, 'button')}`
@@ -1251,9 +1296,9 @@ states.play_organizing = {
 
 const PROCESSIONS_FOR_SUFFRAGE = find_card("Processions for Suffrage")
 
-function goto_play_lobbying(c) {
+function goto_lobbying(c) {
 	game.played_card = c
-	game.state = 'play_lobbying'
+	game.state = 'lobbying'
 	game.count = count_player_active_campaigners()
 	// Processions for Suffrage modifier
 	if (game.persistent_turn.includes(PROCESSIONS_FOR_SUFFRAGE))
@@ -1262,7 +1307,7 @@ function goto_play_lobbying(c) {
 		game.dice = D6
 }
 
-states.play_lobbying = {
+states.lobbying = {
 	inactive: "do Lobbying.",
 	prompt() {
 		view.prompt = `Lobbying: Roll ${game.count} d${game.dice}.`
@@ -1376,7 +1421,7 @@ states.lobbying_remove_congress = {
 
 // #region EVENTS GENERIC
 
-function goto_play_event(c) {
+function goto_event(c) {
 	game.played_card = c
 	goto_vm(c)
 }
