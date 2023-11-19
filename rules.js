@@ -713,8 +713,7 @@ states.strategy_phase = {
 			gen_action("done")
 		} else {
 			view.prompt = `Strategy: Suffragist committed ${pluralize(game.support_committed, 'button')}.`
-			// TODO sensible actions when 0 buttons committed
-			gen_action("defer")
+			view.actions.defer = game.support_committed > 0
 			view.actions.match = game.opposition_buttons >= game.support_committed
 			view.actions.supersede = game.opposition_buttons > game.support_committed
 		}
