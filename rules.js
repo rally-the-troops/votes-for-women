@@ -135,11 +135,37 @@ function opponent_buttons() {
 	}
 }
 
+// TODO unify campaigners from both players into one array
+
 function player_campaigners() {
 	if (game.active === SUF) {
 		return game.support_campaigner
 	} else {
 		return game.opposition_campaigner
+	}
+}
+
+function for_each_player_campaigner(fn) {
+	if (game.active === SUF) {
+		for (let c = 0; c <= 3; c++) {
+			let r = game.support_campaigner[c]
+			if (r)
+				fn(c + 1)
+		}
+	} else {
+		for (let c = 0; c <= 1; c++) {
+			let r = game.opposition_campaigner[c]
+			if (r)
+				fn(c + 5)
+		}
+	}
+}
+
+function campaigner_region(c) {
+	if (game.active === SUF) {
+		return game.support_campaigner[c - 1]
+	} else {
+		return game.opposition_campaigner[c - 5]
 	}
 }
 
@@ -398,6 +424,10 @@ function gen_action_red_cube(s) {
 	gen_action("red_cube", s)
 }
 
+function gen_action_campaigner(c) {
+	gen_action("campaigner", c)
+}
+
 exports.action = function (state, player, action, arg) {
 	game = state
 	if (states[game.state] && action in states[game.state]) {
@@ -482,6 +512,7 @@ exports.setup = function (seed, _scenario, _options) {
 
 	log_h1("Votes for Women")
 	setup_game()
+	game.active = SUF
 	start_turn()
 	return game
 }
@@ -618,7 +649,6 @@ function start_turn() {
 	game.turn += 1
 	log_h1("Turn " + game.turn)
 
-	game.active = SUF
 	goto_planning_phase()
 }
 
@@ -683,6 +713,7 @@ states.strategy_phase = {
 			gen_action("done")
 		} else {
 			view.prompt = `Strategy: Suffragist committed ${pluralize(game.support_committed, 'button')}.`
+			// TODO sensible actions when 0 buttons committed
 			gen_action("defer")
 			view.actions.match = game.opposition_buttons >= game.support_committed
 			view.actions.supersede = game.opposition_buttons > game.support_committed
@@ -897,8 +928,7 @@ states.operations_phase = {
 	card_campaigning(c) {
 		push_undo()
 		log(`C${c} - Campaigning Action`)
-		log("TODO")
-		end_play_card(c)
+		goto_play_campaigning(c)
 	},
 	card_organizing(c) {
 		push_undo()
@@ -1013,6 +1043,192 @@ function end_cleanup_phase() {
 
 // #region NON-EVENT CARD ACTIONS
 
+function goto_play_campaigning(c) {
+	game.played_card = c
+	game.state = 'play_campaigning'
+	game.count = count_player_active_campaigners()
+	// TODO persistent events
+	game.dice = D4
+	game.roll = []
+}
+
+states.play_campaigning = {
+	inactive: "do Campaigning.",
+	prompt() {
+		if (!game.roll.length) {
+			view.prompt = `Campaigning: Roll ${game.count} d${game.dice}.`
+			gen_action("roll")
+		} else {
+			view.prompt = `Campaigning: You rolled ${game.roll}.`
+			if (player_buttons() > 0)
+				gen_action("reroll")
+			gen_action("next")
+		}
+	},
+	roll() {
+		game.roll = roll_ndx_list(game.count, game.dice)
+	},
+	reroll() {
+		decrease_player_buttons(1)
+		game.roll = roll_ndx_list(game.count, game.dice, "B", "Re-rolled")
+	},
+	next() {
+		// TODO
+		// initialize list of campaigners
+		// assign roll to list
+		// track
+		game.state = "play_campaigning_assign"
+		game.campaigning = {
+			dice_idx: 0,
+			assigned: [],
+			count: 0,
+			region: 0,
+			moved: false
+		}
+	}
+}
+
+states.play_campaigning_assign = {
+	inactive: "do Campaigning.",
+	prompt() {
+		let die = game.roll[game.campaigning.dice_idx]
+		view.prompt = `Campaigning: Assign a Campaigner to the ${die} die.`
+
+		for_each_player_campaigner(c => {
+			if (!set_has(game.campaigning.assigned, c))
+				gen_action_campaigner(c)
+		})
+
+		if (game.campaigning.assigned.length === game.count) {
+			view.prompt = `Campaigning: Done.`
+			gen_action("done")
+		}
+	},
+	campaigner(c) {
+		push_undo()
+		// TODO
+		let die = game.roll[game.campaigning.dice_idx]
+		goto_campaigning_add_cubes(c, die)
+
+		// if (game.campaigning.dice_idx < game.roll.length) {
+		// 	game.campaigning.dice_idx += 1
+		// }
+	},
+	done() {
+		delete game.selected_campaigner
+		delete game.campaigning
+		end_play_card(game.played_card)
+	}
+}
+
+function goto_campaigning_add_cubes(campaigner, die) {
+	game.selected_campaigner = campaigner
+	set_add(game.campaigning.assigned, campaigner)
+	// TODO campaigner color + region
+	log(`Assigned Campaigner ${campaigner} in X to die ${die}`)
+	game.campaigning.count = die
+	game.campaigning.added = 0
+	game.campaigning.moved = false
+	if (game.active === SUF) {
+		delete game.campaigning.cube_color
+	} else {
+		game.campaigning.cube_color = RED
+	}
+	game.state = "play_campaigning_add_cubes"
+}
+
+states.play_campaigning_add_cubes = {
+	inactive: "do Campaigning.",
+	prompt() {
+		if (game.active === SUF) {
+			gen_action("purple")
+			gen_action("yellow")
+		}
+
+		let has_opponent_cubes = false
+		if (!game.campaigning.added && player_buttons() > 0 && !game.campaigning.moved) {
+			gen_action("move")
+		}
+
+		for (let s of region_us_states(campaigner_region(game.selected_campaigner))) {
+			if (opponent_cubes(s)) {
+				has_opponent_cubes = true
+				if (game.active === SUF) {
+					gen_action_red_cube(s)
+				} else {
+					if (purple_cubes(s))
+						gen_action_purple_cube(s)
+					if (yellow_cubes(s))
+						gen_action_yellow_cube(s)
+				}
+			} else if (game.campaigning.cube_color) {
+				gen_action_us_state(s)
+			}
+		}
+
+		if (!game.campaigning.cube_color) {
+			if (!has_opponent_cubes)
+				view.prompt = "Campaigning: Choose a cube to add."
+			else
+			view.prompt = "Campaigning: Choose a cube to add or remove an Opponent's cube."
+		} else {
+			if (!has_opponent_cubes)
+				view.prompt = `Campaigning: Add a ${COLOR_NAMES[game.campaigning.cube_color]} cube.`
+			else
+				view.prompt = `Campaigning: Add a ${COLOR_NAMES[game.campaigning.cube_color]} cube or remove an Opponent's cube.`
+		}
+	},
+	move() {
+		decrease_player_buttons(1)
+		game.campaigning.moved = true
+		// TODO move
+		log("TODO move campaigner")
+	},
+	purple() {
+		game.campaigning.cube_color = PURPLE
+	},
+	yellow() {
+		game.campaigning.cube_color = YELLOW
+	},
+	purple_cube(s) {
+		push_undo()
+		remove_cube(PURPLE, s)
+		after_campaigning_add_cube(s)
+	},
+	yellow_cube(s) {
+		push_undo()
+		remove_cube(YELLOW, s)
+		after_campaigning_add_cube(s)
+	},
+	red_cube(s) {
+		push_undo()
+		remove_cube(RED, s)
+		after_campaigning_add_cube(s)
+	},
+	us_state(s) {
+		push_undo()
+		add_cube(game.campaigning.cube_color, s)
+		after_campaigning_add_cube(s)
+	}
+}
+
+function after_campaigning_add_cube(us_state) {
+	if (player_cubes(us_state) === 4) {
+		on_4th_cube(us_state)
+		if (check_victory())
+			return true
+	}
+
+	game.campaigning.added += 1
+
+	if (game.campaigning.added === game.campaigning.count) {
+		if (game.campaigning.dice_idx < game.roll.length)
+			game.campaigning.dice_idx += 1
+		game.state = "play_campaigning_assign"
+	}
+}
+
+
 function goto_play_organizing(c) {
 	game.played_card = c
 	game.state = 'play_organizing'
@@ -1021,7 +1237,7 @@ function goto_play_organizing(c) {
 }
 
 states.play_organizing = {
-	inactive: "receive buttons",
+	inactive: "receive buttons.",
 	prompt() {
 		view.prompt = `Organizing: Receive ${pluralize(game.count, 'button')}`
 		gen_action("next")
@@ -1097,7 +1313,7 @@ function trigger_nineteenth_amendment() {
 			ratify_nineteenth_amendment(s)
 			green_check += 1
 			if (green_check >= GREEN_CHECK_VICTORY)
-				return goto_game_over(SUP, "Suffragist wins.")
+				return goto_game_over(SUF, "Suffragist wins.")
 		} else if (opponent_cubes(s) >= 4) {
 			reject_nineteenth_amendment(s)
 			red_x += 1
@@ -1112,7 +1328,7 @@ function check_victory() {
 	if (!game.nineteenth_amendment)
 		return false
 	if (count_green_checks() >= GREEN_CHECK_VICTORY) {
-		goto_game_over(SUP, "Suffragist wins.")
+		goto_game_over(SUF, "Suffragist wins.")
 		return true
 	} else if (count_red_xs() >= RED_X_VICTORY) {
 		goto_game_over(OPP, "Opposition wins.")
@@ -1124,7 +1340,7 @@ function check_victory() {
 
 // XXX similar to states.vm_add_congress, refactor?
 states.lobbying_add_congress = {
-	inactive: "add a Congressional marker",
+	inactive: "add a Congressional marker.",
 	prompt() {
 		view.prompt = `Lobbying: Add ${pluralize(game.count, 'Congressional marker')}.`
 		gen_action("congress")
@@ -1143,7 +1359,7 @@ states.lobbying_add_congress = {
 
 // XXX similar to states.vm_remove_congress, refactor?
 states.lobbying_remove_congress = {
-	inactive: "remove a Congressional marker",
+	inactive: "remove a Congressional marker.",
 	prompt() {
 		view.prompt = `Lobbying: Remove ${pluralize(game.count, 'Congressional marker')}.`
 		gen_action("congress")
@@ -1230,7 +1446,7 @@ function vm_return() {
 }
 
 states.vm_return = {
-	inactive: "finish playing the event",
+	inactive: "finish playing the event.",
 	prompt() {
 		event_prompt("Done.")
 		view.actions.end_event = 1
@@ -1545,7 +1761,7 @@ function vm_support_discard_2_random_draw_2() {
 // #region EVENT STATES
 
 states.vm_switch = {
-	inactive: "choose an event option",
+	inactive: "choose an event option.",
 	prompt() {
 		event_prompt()
 		for (let choice of vm_operand(1))
@@ -1599,7 +1815,7 @@ states.vm_switch = {
 }
 
 states.vm_add_campaigner = {
-	inactive: "add a Campaigner",
+	inactive: "add a Campaigner.",
 	prompt() {
 		event_prompt("Add a Campaigner")
 		gen_action_region(game.vm.region)
@@ -1639,7 +1855,7 @@ function decrease_opponent_buttons(count=1) {
 }
 
 states.vm_receive_buttons = {
-	inactive: "receive buttons",
+	inactive: "receive buttons.",
 	prompt() {
 		event_prompt(`Receive ${pluralize(game.vm.count, 'button')}`)
 		gen_action("next")
@@ -1652,7 +1868,7 @@ states.vm_receive_buttons = {
 }
 
 states.vm_spend_buttons = {
-	inactive: "spend buttons",
+	inactive: "spend buttons.",
 	prompt() {
 		event_prompt(`Spend ${pluralize(game.vm.count, 'button')}`)
 		gen_action("next")
@@ -1665,7 +1881,7 @@ states.vm_spend_buttons = {
 }
 
 states.vm_opponent_loses_buttons = {
-	inactive: "make you lose buttons",
+	inactive: "make you lose buttons.",
 	prompt() {
 		event_prompt(`Opponent loses ${pluralize(game.vm.count, 'button')}`)
 		gen_action("next")
@@ -1700,7 +1916,7 @@ function goto_vm_add_cubes() {
 }
 
 states.vm_add_cubes = {
-	inactive: "add a cube",
+	inactive: "add a cube.",
 	prompt() {
 		if (game.vm.cubes === PURPLE_OR_YELLOW) {
 			gen_action("purple")
@@ -1745,22 +1961,22 @@ states.vm_add_cubes = {
 	purple_cube(s) {
 		push_undo()
 		remove_cube(PURPLE, s)
-		after_add_cube(s)
+		after_vm_add_cube(s)
 	},
 	yellow_cube(s) {
 		push_undo()
 		remove_cube(YELLOW, s)
-		after_add_cube(s)
+		after_vm_add_cube(s)
 	},
 	red_cube(s) {
 		push_undo()
 		remove_cube(RED, s)
-		after_add_cube(s)
+		after_vm_add_cube(s)
 	},
 	us_state(s) {
 		push_undo()
 		add_cube(game.vm.cube_color, s)
-		after_add_cube(s)
+		after_vm_add_cube(s)
 	}
 }
 
@@ -1775,23 +1991,26 @@ function claim_states_card(us_state) {
 	}
 }
 
-// XXX pick a better name
-function after_add_cube(us_state) {
-	if (player_cubes(us_state) === 4) {
-		// claim state cards when 4 cubes have been added
-		claim_states_card(us_state)
+function on_4th_cube(us_state) {
+	// claim state cards when 4 cubes have been added
+	claim_states_card(us_state)
 
-		if (game.nineteenth_amendment) {
-			// replace cubes with checks / Xs
-			if (game.active === SUF) {
-				ratify_nineteenth_amendment(us_state)
-			} else {
-				reject_nineteenth_amendment(us_state)
-			}
-
-			if (check_victory())
-				return
+	if (game.nineteenth_amendment) {
+		// replace cubes with checks / Xs
+		if (game.active === SUF) {
+			ratify_nineteenth_amendment(us_state)
+		} else {
+			reject_nineteenth_amendment(us_state)
 		}
+	}
+}
+
+// XXX pick a better name
+function after_vm_add_cube(us_state) {
+	if (player_cubes(us_state) === 4) {
+		on_4th_cube(us_state)
+		if (check_victory())
+			return true
 	}
 
 	map_incr(game.vm.added, us_state, 1)
@@ -1829,7 +2048,7 @@ function goto_vm_remove_cubes() {
 }
 
 states.vm_remove_cubes = {
-	inactive: "remove a cube",
+	inactive: "remove a cube.",
 	prompt() {
 		event_prompt(`Remove a ${COLOR_NAMES[game.vm.cubes]} cube.`)
 
@@ -1845,22 +2064,22 @@ states.vm_remove_cubes = {
 	purple_cube(s) {
 		push_undo()
 		remove_cube(PURPLE, s)
-		after_remove_cube(s)
+		after_vm_remove_cube(s)
 	},
 	yellow_cube(s) {
 		push_undo()
 		remove_cube(YELLOW, s)
-		after_remove_cube(s)
+		after_vm_remove_cube(s)
 	},
 	red_cube(s) {
 		push_undo()
 		remove_cube(RED, s)
-		after_remove_cube(s)
+		after_vm_remove_cube(s)
 	}
 }
 
 // XXX pick a better name
-function after_remove_cube(us_state) {
+function after_vm_remove_cube(us_state) {
 	map_incr(game.vm.removed, us_state, 1)
 
 	if (game.vm.all) {
@@ -1883,7 +2102,7 @@ function after_remove_cube(us_state) {
 }
 
 states.vm_add_congress = {
-	inactive: "add a Congressional marker",
+	inactive: "add a Congressional marker.",
 	prompt() {
 		event_prompt(`Add ${pluralize(game.vm.count, 'Congressional marker')}.`)
 		gen_action("congress")
@@ -1901,7 +2120,7 @@ states.vm_add_congress = {
 }
 
 states.vm_remove_congress = {
-	inactive: "remove a congressional marker",
+	inactive: "remove a congressional marker.",
 	prompt() {
 		event_prompt(`Remove ${pluralize(game.vm.count, 'Congressional marker')}.`)
 		gen_action("congress")
@@ -1927,6 +2146,18 @@ function roll_ndx(n, x, color="B", prefix="Rolled") {
 	return result
 }
 
+function roll_ndx_list(n, x, color="B", prefix="Rolled") {
+	clear_undo()
+	let result = []
+	let summary = []
+	for (let i = 0; i < n; ++i) {
+		let roll = random(x) + 1
+		result.push(roll)
+		summary.push(color + roll)
+	}
+	log(prefix + " " + summary.join(" "))
+	return result
+}
 
 function roll_ndx_count_success(n, x, color="B", prefix="Rolled") {
 	clear_undo()
@@ -1948,7 +2179,7 @@ function goto_vm_roll_dice() {
 }
 
 states.vm_roll = {
-	inactive: "roll dice",
+	inactive: "roll dice.",
 	prompt() {
 		if (game.vm.roll) {
 			event_prompt(`You rolled ${game.vm.roll}.`)

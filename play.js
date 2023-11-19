@@ -269,6 +269,12 @@ function is_red_cube_action(i) {
 	return false
 }
 
+function is_campaigner_action(i) {
+	if (view.actions && view.actions.campaigner && view.actions.campaigner.includes(i))
+		return true
+	return false
+}
+
 function is_space_action(i) {
 	if (view.actions && view.actions.space && view.actions.space.includes(i))
 		return true
@@ -428,8 +434,8 @@ function build_user_interface() {
 		create_campaigner('yellow2', 4)
 	]
 	ui.opposition_campaigner = [
-		create_campaigner('red1', 1),
-		create_campaigner('red2', 2),
+		create_campaigner('red1', 5),
+		create_campaigner('red2', 6),
 	]
 
 	for (let i = 0; i < 190; ++i) {
@@ -612,6 +618,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 			let [x, y] = REGIONS_LAYOUT[campaigner_region]
 			ui.support_campaigner[i].style.left = x - 30 + (15 * i) + "px"
 			ui.support_campaigner[i].style.top = y - 40 + "px"
+			ui.support_campaigner[i].classList.toggle("action", is_campaigner_action(i))
 		} else {
 			ui.support_campaigner[i].remove()
 		}
@@ -624,6 +631,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 			let [x, y] = REGIONS_LAYOUT[campaigner_region]
 			ui.opposition_campaigner[i].style.left = x - 30 + (15 * i) + "px"
 			ui.opposition_campaigner[i].style.top = y - 10 + "px"
+			ui.opposition_campaigner[i].classList.toggle("action", is_campaigner_action(5 + i))
 		} else {
 			ui.opposition_campaigner[i].remove()
 		}
@@ -685,6 +693,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 
     action_button("draw", "Draw")
 	action_button("next", "Next")
+	action_button("move", "Move")
 	action_button("purple", "Purple")
 	action_button("yellow", "Yellow")
 	action_button("roll", "Roll")
