@@ -10,7 +10,6 @@ CARD 1 - Seneca Falls Convention
 CARD 2 - Property Rights for Women
 # For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
     persistent REST_OF_TURN
-    todo
 
 CARD 3 - Frances Willard
 # Add 1 :congressional_marker in Congress and receive 2 :button.
@@ -177,7 +176,6 @@ CARD 32 - Maria de Lopez
 CARD 33 - Marie Louise Bottineau Baldwin
 # For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
     persistent REST_OF_TURN
-    todo
 
 CARD 34 - The West’s Awakening
 # Add 2 :purple_or_yellow_cube in each state in the West region.
@@ -224,12 +222,10 @@ CARD 41 - Voter Registration
 CARD 42 - Processions for Suffrage
 # For the remainder of the turn, roll :d8 instead of :d6 when taking a Lobbying action. For each 6, 7 or 8 rolled, add 1 :congressional_marker in Congress.
     persistent REST_OF_TURN
-    todo
 
 CARD 43 - Prison Tour Special
 # For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
     persistent REST_OF_TURN
-    todo
 
 CARD 44 - Victory Map
 # Add 1 :purple_or_yellow_cube in each state in the West and Plains regions. Add 1 :purple_or_yellow_cube in each of Texas, Arkansas, Illinois, Michigan, New York and Vermont.
@@ -368,7 +364,6 @@ CARD 68 - Beer Brewers
 # Playable if *Eighteenth Amendment* is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
     requires_not_persistent REST_OF_GAME find_card("Eighteenth Amendment")
     prompt "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action."
-    todo
     persistent REST_OF_TURN
 
 CARD 69 - Southern Resentment
@@ -429,7 +424,6 @@ CARD 80 - “Unwarranted, Unnecessary & Dangerous Interference”
 CARD 81 - Conservative Opposition
 # For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
     prompt "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action."
-    todo
     persistent REST_OF_TURN
 
 CARD 82 - The SSWSC
@@ -491,7 +485,6 @@ CARD 92 - Big Liquor’s Big Money
 # Playable if *Eighteenth Amendment* is not in effect. For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action.
     requires_not_persistent REST_OF_GAME find_card("Eighteenth Amendment")
     prompt "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action."
-    todo
     persistent REST_OF_TURN
 
 CARD 93 - Red Scare

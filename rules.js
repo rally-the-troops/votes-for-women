@@ -2246,12 +2246,10 @@ states.vm_roll = {
 		}
 	},
 	roll() {
-		// TODO effects of persistent cards
 		game.vm.roll = roll_ndx(game.vm.count, game.vm.d)
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		// TODO effects of persistent cards
 		game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "B", "Re-rolled")
 	},
 	done() {
@@ -2273,7 +2271,7 @@ states.vm_select_us_state = {
 				gen_action_us_state(s)
 			}
 		} else {
-			// TODO name
+			// TODO show state name
 			event_prompt(`Selected S${game.vm.selected_us_state}.`)
 			gen_action("done")
 		}
@@ -2644,7 +2642,6 @@ CODE[1] = [ // Seneca Falls Convention
 
 CODE[2] = [ // Property Rights for Women
 	[ vm_persistent, REST_OF_TURN ],
-	[ vm_todo ],
 	[ vm_return ],
 ]
 
@@ -2841,7 +2838,6 @@ CODE[32] = [ // Maria de Lopez
 
 CODE[33] = [ // Marie Louise Bottineau Baldwin
 	[ vm_persistent, REST_OF_TURN ],
-	[ vm_todo ],
 	[ vm_return ],
 ]
 
@@ -2897,13 +2893,11 @@ CODE[41] = [ // Voter Registration
 
 CODE[42] = [ // Processions for Suffrage
 	[ vm_persistent, REST_OF_TURN ],
-	[ vm_todo ],
 	[ vm_return ],
 ]
 
 CODE[43] = [ // Prison Tour Special
 	[ vm_persistent, REST_OF_TURN ],
-	[ vm_todo ],
 	[ vm_return ],
 ]
 
@@ -3065,7 +3059,6 @@ CODE[67] = [ // Southern “Hospitality”
 CODE[68] = [ // Beer Brewers
 	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
 	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
-	[ vm_todo ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
@@ -3139,7 +3132,6 @@ CODE[80] = [ // “Unwarranted, Unnecessary & Dangerous Interference”
 
 CODE[81] = [ // Conservative Opposition
 	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
-	[ vm_todo ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
@@ -3212,7 +3204,6 @@ CODE[91] = [ // The Eden Sphinx
 CODE[92] = [ // Big Liquor’s Big Money
 	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
 	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
-	[ vm_todo ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
