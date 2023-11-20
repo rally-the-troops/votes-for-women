@@ -1049,18 +1049,42 @@ function end_cleanup_phase() {
 	}
 
 	// TODO goto final voting
+	log("TODO Final Voting")
 }
 
 // #endregion
 
 // #region NON-EVENT CARD ACTIONS
 
+const SUPPORT_CAMPAIGNING_BOOST = [
+	find_card("Property Rights for Women"),
+	find_card("Marie Louise Bottineau Baldwin"),
+	find_card("Prison Tour Special")
+]
+const OPPOSITION_CAMPAIGNING_BOOST = [
+	find_card("Beer Brewers"),
+	find_card("Conservative Opposition"),
+	find_card("Big Liquor’s Big Money")
+]
+
+function has_campaigning_boost() {
+	for (let c of game.persistent_turn) {
+		if (game.active === SUF && SUPPORT_CAMPAIGNING_BOOST.includes(c))
+			return true
+		if (game.active === OPP && OPPOSITION_CAMPAIGNING_BOOST.includes(c))
+			return true
+	}
+	return false
+}
+
 function goto_campaigning(c) {
 	game.played_card = c
 	game.state = 'campaigning'
 	game.count = count_player_active_campaigners()
-	// TODO persistent events
-	game.dice = D4
+	if (has_campaigning_boost())
+		game.dice = D6
+	else
+		game.dice = D4
 	game.roll = []
 }
 
@@ -1274,12 +1298,15 @@ states.organizing = {
 
 const PROCESSIONS_FOR_SUFFRAGE = find_card("Processions for Suffrage")
 
+function has_lobbying_boost() {
+	return game.active === SUF && game.persistent_turn.includes(PROCESSIONS_FOR_SUFFRAGE)
+}
+
 function goto_lobbying(c) {
 	game.played_card = c
 	game.state = 'lobbying'
 	game.count = count_player_active_campaigners()
-	// Processions for Suffrage modifier
-	if (game.persistent_turn.includes(PROCESSIONS_FOR_SUFFRAGE))
+	if (has_lobbying_boost())
 		game.dice = D8
 	else
 		game.dice = D6
