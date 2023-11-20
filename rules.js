@@ -194,15 +194,15 @@ function free_campaigner(campaigners, color) {
 	return color !== YELLOW && index > 1 ? -1 : index
 }
 
-function add_campaigner(campaigner_color, region) {
+function add_campaigner(color, region) {
 	const campaigners = player_campaigners()
-	const index = free_campaigner(campaigners, campaigner_color)
+	const index = free_campaigner(campaigners, color)
 	if (index !== -1) {
 		campaigners[index] = region
 	} else {
 		throw Error("No free campaigners")
 	}
-	log(`Placed ${COLOR_CODE[campaigner_color]}R in R${region}`)
+	log(`Placed ${COLOR_CODE[color]}R in R${region}`)
 }
 
 // TODO unify campaigners from both players into one array
@@ -240,7 +240,7 @@ function campaigner_region(c) {
 }
 
 function move_campaigner(c, region) {
-	log(`${campaigner_color_code(c)}R moved to R${region}.`)
+	log(`${COLOR_CODE[campaigner_color(c)]}R moved to R${region}.`)
 	if (game.active === SUF) {
 		game.support_campaigner[c - 1] = region
 	} else {
@@ -1128,39 +1128,29 @@ states.campaigning_assign = {
 	}
 }
 
-function campaigner_color_code(c) {
+function campaigner_color(c) {
 	if (c <= 2) {
-		return COLOR_CODE[PURPLE]
+		return PURPLE
 	} else if (c <= 4) {
-		return COLOR_CODE[YELLOW]
+		return YELLOW
 	} else {
-		return COLOR_CODE[RED]
+		return RED
 	}
 }
 
 function goto_campaigning_add_cubes(campaigner, die) {
 	game.selected_campaigner = campaigner
 	set_add(game.campaigning.assigned, campaigner)
-	log(`Assigned ${die} to ${campaigner_color_code(campaigner)}R in R${campaigner_region(campaigner)}.`)
+	log(`Assigned ${die} to ${COLOR_CODE[campaigner_color(campaigner)]}R in R${campaigner_region(campaigner)}.`)
 	game.campaigning.count = die
 	game.campaigning.added = 0
 	game.campaigning.moved = false
-	if (game.active === SUF) {
-		delete game.campaigning.cube_color
-	} else {
-		game.campaigning.cube_color = RED
-	}
 	game.state = "campaigning_add_cubes"
 }
 
 states.campaigning_add_cubes = {
 	inactive: "do Campaigning.",
 	prompt() {
-		if (game.active === SUF) {
-			gen_action("purple")
-			gen_action("yellow")
-		}
-
 		let has_opponent_cubes = false
 		let can_move = false
 		if (!game.campaigning.added && player_buttons() > 0 && !game.campaigning.moved) {
@@ -1179,20 +1169,14 @@ states.campaigning_add_cubes = {
 					if (yellow_cubes(s))
 						gen_action_yellow_cube(s)
 				}
-			} else if (game.campaigning.cube_color) {
+			} else {
 				gen_action_us_state(s)
 			}
 		}
 
-		if (!game.campaigning.cube_color) {
-			view.prompt = "Campaigning: Choose a cube to add"
-			if (has_opponent_cubes)
-				view.prompt += " or remove an Opponent's cube"
-		} else {
-			view.prompt = `Campaigning: Add a ${COLOR_NAMES[game.campaigning.cube_color]} cube`
-			if (has_opponent_cubes)
-				view.prompt += " or remove an Opponent's cube"
-		}
+		view.prompt = `Campaigning: Add a ${COLOR_NAMES[campaigner_color(game.selected_campaigner)]} cube`
+		if (has_opponent_cubes)
+			view.prompt += " or remove an Opponent's cube"
 		if (can_move) {
 			view.prompt += " or Move to another Region"
 		}
@@ -1201,12 +1185,6 @@ states.campaigning_add_cubes = {
 	move() {
 		push_undo()
 		game.state = "campaigning_move"
-	},
-	purple() {
-		game.campaigning.cube_color = PURPLE
-	},
-	yellow() {
-		game.campaigning.cube_color = YELLOW
 	},
 	purple_cube(s) {
 		push_undo()
@@ -1225,7 +1203,7 @@ states.campaigning_add_cubes = {
 	},
 	us_state(s) {
 		push_undo()
-		add_cube(game.campaigning.cube_color, s)
+		add_cube(campaigner_color(game.selected_campaigner), s)
 		after_campaigning_add_cube(s)
 	}
 }
