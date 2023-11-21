@@ -1148,7 +1148,10 @@ states.campaigning_assign = {
 	done() {
 		delete game.selected_campaigner
 		delete game.campaigning
-		end_play_card(game.played_card)
+		if (game.vm)
+			vm_next()
+		else
+			end_play_card(game.played_card)
 	}
 }
 
@@ -1778,10 +1781,12 @@ function vm_discard_persistent() {
 }
 
 function vm_campaigning_action() {
-	// TODO
-	// ASSERT
-	log("TODO Campaigning Action")
-	vm_next()
+	if (has_player_active_campaigners()) {
+		log("Campaigning Action")
+		goto_campaigning(game.played_card)
+	} else {
+		vm_next()
+	}
 }
 
 function vm_todo() {
