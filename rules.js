@@ -1255,7 +1255,6 @@ function after_campaigning_add_cube(us_state) {
 states.campaigning_move = {
 	inactive: "do Campaigning.",
 	prompt() {
-		let die = game.roll[game.campaigning.dice_idx]
 		view.prompt = `Campaigning: Select region to move the Campaigner to.`
 
 		let current_region = campaigner_region(game.selected_campaigner)
