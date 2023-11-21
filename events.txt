@@ -440,7 +440,7 @@ CARD 83 - Western Saloons Push Suffrage Veto
 
 CARD 84 - Transcontinental Railroad
 # Move each :red_campaigner to any region(s) without paying any :button and then take a Campaigning action.
-    move_each_campaigner_free RED
+    move_each_player_campaigner_free
     campaigning_action
 
 CARD 85 - White Supremacy and the Suffrage Movement
@@ -601,11 +601,7 @@ CARD 113 - Eye on the Future
 
 CARD 114 - Transportation
 # Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :button and then take a Campaigning action.
-    if (game.active === SUF)
-        move_each_campaigner_free PURPLE_OR_YELLOW
-    else
-        move_each_campaigner_free RED
-    endif
+    move_each_player_campaigner_free
     campaigning_action
 
 CARD 115 - Counter Strat

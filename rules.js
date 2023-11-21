@@ -1701,9 +1701,14 @@ function vm_roll() {
 	goto_vm_roll_dice()
 }
 
-function vm_move_each_campaigner_free() {
-	game.vm.campaigner = vm_operand(1)
-	goto_vm_move_each_campaigner_free()
+function vm_move_each_player_campaigner_free() {
+	if (has_player_active_campaigners()) {
+		game.vm.moved = []
+		game.state = "move_each_player_campaigner_free"
+		game.selected_campaigner = 0
+	} else {
+		vm_next()
+	}
 }
 
 function vm_select_strategy_card() {
@@ -2294,6 +2299,43 @@ states.vm_select_us_state = {
 function goto_vm_select_strategy_card() {
 	game.state = "select_strategy_card"
 }
+
+states.move_each_player_campaigner_free = {
+	inactive: "move a campaigner.",
+	prompt() {
+		if (!game.selected_campaigner) {
+			event_prompt("Select a Campaigner.")
+
+			for_each_player_campaigner(c => {
+				if (!set_has(game.vm.moved, c))
+					gen_action_campaigner(c)
+			})
+		} else {
+			event_prompt("Select region to move the Campaigner to.")
+			let current_region = campaigner_region(game.selected_campaigner)
+			for (let r = 1; r <= region_count; r++) {
+				if (r !== current_region)
+					gen_action_region(r)
+			}
+		}
+	},
+	campaigner(c) {
+		push_undo()
+		game.selected_campaigner = c
+	},
+	region(r) {
+		push_undo()
+		move_campaigner(game.selected_campaigner, r)
+		set_add(game.vm.moved, game.selected_campaigner)
+		game.selected_campaigner = 0
+
+		if (game.vm.moved.length === count_player_active_campaigners()) {
+			delete game.selected_campaigner
+			vm_next()
+		}
+	}
+}
+
 
 // #endregion
 
@@ -3156,7 +3198,7 @@ CODE[83] = [ // Western Saloons Push Suffrage Veto
 ]
 
 CODE[84] = [ // Transcontinental Railroad
-	[ vm_move_each_campaigner_free, RED ],
+	[ vm_move_each_player_campaigner_free ],
 	[ vm_campaigning_action ],
 	[ vm_return ],
 ]
@@ -3345,11 +3387,7 @@ CODE[113] = [ // Eye on the Future
 ]
 
 CODE[114] = [ // Transportation
-	[ vm_if, ()=>(game.active === SUF) ],
-	[ vm_move_each_campaigner_free, PURPLE_OR_YELLOW ],
-	[ vm_else ],
-	[ vm_move_each_campaigner_free, RED ],
-	[ vm_endif ],
+	[ vm_move_each_player_campaigner_free ],
 	[ vm_campaigning_action ],
 	[ vm_return ],
 ]
