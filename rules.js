@@ -1470,6 +1470,13 @@ function vm_operand(a) {
 	return x
 }
 
+function vm_operand_us_states(x) {
+	let s = vm_operand(x)
+	if (typeof s === "number")
+		return [ s ]
+	return s
+}
+
 function vm_exec() {
 	vm_inst(0)()
 }
@@ -1648,7 +1655,7 @@ function vm_add_cubes_per_state_in_any_one_region() {
 function vm_remove_cubes_limit() {
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
-	game.vm.us_states = us_states_with_color_cubes(vm_operand(3), game.vm.cubes)
+	game.vm.us_states = us_states_with_color_cubes(vm_operand_us_states(3), game.vm.cubes)
 	game.vm.limit = vm_operand(4)
 	goto_vm_remove_cubes()
 }
@@ -1656,7 +1663,7 @@ function vm_remove_cubes_limit() {
 // Remove all :yellow_cube and :purple_cube from California. DONE
 function vm_remove_all_cubes() {
 	game.vm.cubes = vm_operand(1)
-	game.vm.us_states = us_states_with_color_cubes(vm_operand(2), game.vm.cubes)
+	game.vm.us_states = us_states_with_color_cubes(vm_operand_us_states(2), game.vm.cubes)
 	game.vm.all = true
 	goto_vm_remove_cubes()
 }
