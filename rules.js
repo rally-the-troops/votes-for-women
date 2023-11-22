@@ -741,7 +741,7 @@ states.strategy_phase = {
 	defer() {
 		log(`Opposition deferred.`)
 		game.active = SUF
-		game.state = 'strategy_phase_select_strategy_card'
+		game.state = 'select_strategy_card'
 	},
 	match () {
 		log(`Opposition matched.`)
@@ -1704,7 +1704,7 @@ function vm_remove_congress() {
 function vm_roll() {
 	game.vm.count = vm_operand(1)
 	game.vm.d = vm_operand(2)
-	goto_vm_roll_dice()
+	game.state = "vm_roll"
 }
 
 function vm_move_each_player_campaigner_free() {
@@ -1718,11 +1718,12 @@ function vm_move_each_player_campaigner_free() {
 }
 
 function vm_select_strategy_card() {
-	goto_vm_select_strategy_card()
+	game.state = "select_strategy_card"
 }
 
 function vm_select_us_state() {
-	goto_vm_select_us_state()
+	game.state = "vm_select_us_state"
+	delete game.vm.selected_us_state
 }
 
 function vm_persistent() {
@@ -2239,10 +2240,6 @@ function roll_ndx_count_success(n, x, color="B", prefix="Rolled") {
 	return result
 }
 
-function goto_vm_roll_dice() {
-	game.state = "vm_roll"
-}
-
 states.vm_roll = {
 	inactive: "roll dice.",
 	prompt() {
@@ -2273,11 +2270,6 @@ states.vm_roll = {
 	}
 }
 
-function goto_vm_select_us_state() {
-	game.state = "vm_select_us_state"
-	delete game.vm.selected_us_state
-}
-
 states.vm_select_us_state = {
 	inactive: "select a state.",
 	prompt() {
@@ -2300,10 +2292,6 @@ states.vm_select_us_state = {
 		log(`Selected S${game.vm.selected_us_state}.`)
 		vm_next()
 	}
-}
-
-function goto_vm_select_strategy_card() {
-	game.state = "select_strategy_card"
 }
 
 states.move_each_player_campaigner_free = {
