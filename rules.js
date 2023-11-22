@@ -2611,10 +2611,15 @@ function set_delete(set, item) {
 }
 
 function set_filter(set, predicate_fn) {
-	for (let i = set.length - 1; i >= 0; i--) {
-        if (!predicate_fn(set[i]))
-            array_remove(set, i)
+    let hole = 0
+    for (let i = 0; i < set.length; i++) {
+        if (predicate_fn(set[i])) {
+            if (hole !== i)
+                set[hole] = set[i]
+            hole++
+        }
     }
+    set.length = hole
 }
 
 function set_toggle(set, item) {
