@@ -396,6 +396,24 @@ function remove_cube(cube, us_state) {
 	set_color_cubes(cube, us_state, color_cubes(cube, us_state) - 1)
 }
 
+function remove_green_check(us_state) {
+	log(`Removed ${COLOR_CODE[GREEN_CHECK]} from S${us_state}`)
+
+	if (!is_green_check(us_state))
+		throw new Error("Can't remove a green check that aint there")
+
+	clear_green_check(us_state)
+}
+
+function remove_red_x(us_state) {
+	log(`Removed ${COLOR_CODE[RED_X]} from S${us_state}`)
+
+	if (!is_red_x(us_state))
+		throw new Error("Can't remove a red x that aint there")
+
+	clear_red_x(us_state)
+}
+
 // #endregion
 
 // #region PUBLIC FUNCTIONS
@@ -431,6 +449,14 @@ function gen_action_yellow_cube(s) {
 
 function gen_action_red_cube(s) {
 	gen_action("red_cube", s)
+}
+
+function gen_action_green_check(s) {
+	gen_action("green_check", s)
+}
+
+function gen_action_red_x(s) {
+	gen_action("red_x", s)
 }
 
 function gen_action_campaigner(c) {
@@ -1185,7 +1211,12 @@ states.campaigning_add_cubes = {
 			can_move = true
 		}
 
-		for (let s of region_us_states(campaigner_region(game.selected_campaigner))) {
+		let us_states = region_us_states(campaigner_region(game.selected_campaigner))
+		if (game.nineteenth_amendment) {
+			set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
+		}
+
+		for (let s of us_states) {
 			if (opponent_cubes(s)) {
 				has_opponent_cubes = true
 				if (game.active === SUF) {
@@ -1679,8 +1710,12 @@ function vm_remove_all_cubes_up_to() {
 function vm_replace() {
 	game.vm.what = vm_operand(1)
 	game.vm.count = vm_operand(2)
-	game.vm.replacement = vm_operand(3)
-	goto_vm_replace()
+	game.vm.cubes = vm_operand(3)
+	if (!game.nineteenth_amendment || (game.vm.what === GREEN_CHECK && !count_green_checks()) || game.vm.what === RED_X && !count_red_xs()) {
+		vm_next()
+	} else {
+		goto_vm_replace()
+	}
 }
 
 function vm_add_congress() {
@@ -1971,10 +2006,7 @@ function goto_vm_add_cubes() {
 	// If a state has already ratified or rejected the Nineteenth Amendment –
 	// and therefore has a V or X in the state – cubes may not be added to that state.
 	if (game.nineteenth_amendment) {
-		for (let s of game.vm.us_states) {
-			if (is_green_check(s) || is_red_x(s))
-				set_delete(game.vm.us_states, s)
-		}
+		set_filter(game.vm.us_states, s => !(is_green_check(s) || is_red_x(s)))
 	}
 
 	if (!game.vm.us_states.length)
@@ -2089,9 +2121,7 @@ function after_vm_add_cube(us_state) {
 
 	if (game.vm.per_state_in_any_one_region && map_get(game.vm.added, us_state) === 1) {
 		// only need to do this for the the first cube in the state
-		for (let other of game.vm.us_states)
-			if (us_state_region(us_state) !== us_state_region(other))
-				set_delete(game.vm.us_states, other)
+		set_filter(game.vm.us_states, s => us_state_region(us_state) === us_state_region(s))
 	}
 
 	if (game.vm.limit) {
@@ -2165,6 +2195,39 @@ function after_vm_remove_cube(us_state) {
 
 	if (!game.vm.us_states.length)
 		vm_next()
+}
+
+function goto_vm_replace() {
+	game.state = "vm_replace"
+	game.vm.removed = []
+}
+
+states.vm_replace = {
+	inactive: "do a replacement",
+	prompt() {
+		event_prompt(`Replace a ${COLOR_NAMES[game.vm.what]} with ${pluralize(game.vm.count, COLOR_NAMES[game.vm.cubes] + ' cube')}.`)
+
+		for (let s of game.vm.us_states) {
+			if (game.vm.what === GREEN_CHECK && is_green_check(s))
+				gen_action_green_check(s)
+			if (game.vm.what === RED_X && is_red_x(s))
+				gen_action_red_x(s)
+		}
+	},
+	green_check(s) {
+		push_undo()
+		remove_green_check(s)
+
+		game.vm.us_states = [s]
+		goto_vm_add_cubes()
+	},
+	red_x(s) {
+		push_undo()
+		remove_red_x(s)
+
+		game.vm.us_states = [s]
+		goto_vm_add_cubes()
+	}
 }
 
 states.vm_add_congress = {
@@ -2545,6 +2608,13 @@ function set_delete(set, item) {
 			return array_remove(set, m)
 	}
 	return set
+}
+
+function set_filter(set, predicate_fn) {
+	for (let i = set.length - 1; i >= 0; i--) {
+        if (!predicate_fn(set[i]))
+            array_remove(set, i)
+    }
 }
 
 function set_toggle(set, item) {
