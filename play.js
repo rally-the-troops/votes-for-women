@@ -709,6 +709,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 				ui.pieces.appendChild(e)
 			}
 		}
+		ui.us_states[i].classList.toggle("selected", i === view.selected_us_state)
 	}
 
 	// remove remaining unused cubes & checks & xs from DOM
