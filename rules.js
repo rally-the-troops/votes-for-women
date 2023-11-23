@@ -862,16 +862,20 @@ function can_play_event(c) {
 	if ([82, 85, 94, 95].includes(c) && !game.persistent_game.includes(SOUTHERN_STRATEGY))
 		return false
 
+	let cost = 0
 	// Spend 4 buttons to select
-	if ([39, 100].includes(c) && player_buttons() < 4)
+	if ([39, 100].includes(c))
+		cost += 4
+
+	// Suffragist must pay 1 button to play event during 1918 Pandemic or A Threat to the Ideal of Womanhood
+	if (has_extra_event_cost())
+		cost += 1
+
+	if (player_buttons() < cost)
 		return false
 
 	// Playable if it is Turn 5 or Turn 6
 	if (c === 113 && game.turn < 5)
-		return false
-
-	// Suffragist must pay 1 button to play event during 1918 Pandemic or A Threat to the Ideal of Womanhood
-	if (has_extra_event_cost() && !player_buttons())
 		return false
 
 	return true
