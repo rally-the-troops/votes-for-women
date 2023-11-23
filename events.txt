@@ -217,7 +217,6 @@ CARD 40 - Maud Wood Park
 CARD 41 - Voter Registration
 # The Suffragist player rolls :d8 instead of :d6 during Final Voting.
     persistent BALLOT_BOX
-    todo
 
 CARD 42 - Processions for Suffrage
 # For the remainder of the turn, roll :d8 instead of :d6 when taking a Lobbying action. For each 6, 7 or 8 rolled, add 1 :congressional_marker in Congress.
@@ -274,7 +273,6 @@ CARD 51 - Dr. Mabel Ping-Hua Lee
 CARD 52 - Miss Febb Wins the Last Vote
 # The Suffragist player wins all ties during Final Voting.
     persistent BALLOT_BOX
-    todo
 
 # Opposition Cards
 
@@ -517,7 +515,6 @@ CARD 97 - The Unnecessary Privilege
 CARD 98 - Voter Suppression
 # The Opposition player rolls :d8 instead of :d6 during Final Voting.
     persistent BALLOT_BOX
-    todo
 
 CARD 99 - Anti-Suffrage Riots
 # The Suffragist player must discard 2 cards from their hand at random and then draw 2 cards from the Suffragist Draw Deck.

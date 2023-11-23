@@ -82,6 +82,13 @@ function opponent_name() {
 	}
 }
 
+function next_player() {
+	if (game.active === SUF)
+		game.active = OPP
+	else
+		game.active = SUF
+}
+
 // #region CARD & HAND FUNCTIONS
 
 function is_support_card(c) {
@@ -90,14 +97,6 @@ function is_support_card(c) {
 
 function is_opposition_card(c) {
 	return c >= first_opposition_card && c <= last_opposition_card
-}
-
-function is_strategy_card(c) {
-	return c >= first_strategy_card && c <= last_strategy_card
-}
-
-function is_states_card(c) {
-	return c >= first_states_card && c <= last_states_card
 }
 
 function find_card(name) {
@@ -1074,8 +1073,149 @@ function end_cleanup_phase() {
 		discard_persistent_card(game.persistent_game, c)
 	}
 
-	// TODO goto final voting
-	log("TODO Final Voting")
+	goto_final_voting()
+}
+
+
+
+function goto_final_voting() {
+	log_h1("Final Voting")
+	game.active = SUF
+	game.state = "final_voting_select_state"
+}
+
+states.final_voting_select_state = {
+	inactive: "do Final Voting.",
+	prompt() {
+		view.prompt = "Final Voting: Select a state."
+
+		let us_states = anywhere()
+		set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
+
+		for (let s of us_states) {
+			gen_action_us_state(s)
+		}
+	},
+	us_state(s) {
+		push_undo()
+		game.selected_us_state = s
+		log_h2(`Final Voting for S${game.selected_us_state}`)
+		goto_final_voting_roll()
+	}
+}
+
+const VOTER_REGISTRATION = find_card("Voter Registration")
+const VOTER_SUPPRESSION = find_card("Voter Suppression")
+
+function final_voting_dice(player) {
+	if (player === SUF && game.persistent_ballot.includes(VOTER_REGISTRATION))
+		return D8
+	if (player === OPP && game.persistent_ballot.includes(VOTER_SUPPRESSION))
+		return D8
+	else
+		return D6
+}
+
+function goto_final_voting_roll() {
+	game.roll = 0
+	game.opponent_roll = 0
+	game.dice = final_voting_dice(game.active)
+	game.opponent_dice = final_voting_dice(opponent_name())
+	game.state = "final_voting_roll"
+}
+
+states.final_voting_roll = {
+	inactive: "do Final Voting.",
+	prompt() {
+		if (!game.roll) {
+			view.prompt = `Final Voting: Selected S${game.selected_us_state}.`
+			gen_action("roll")
+		} else {
+			view.prompt = `Final Voting: You rolled ${game.roll}, ${opponent_name()} rolled ${game.opponent_roll}.`
+			if (player_buttons() > 0)
+				gen_action("reroll")
+			gen_action("next")
+		}
+	},
+	roll() {
+		game.persistent_ballot.includes(VOTER_REGISTRATION)
+		game.roll = roll_ndx(1, game.dice)
+		game.opponent_roll = roll_ndx(1, game.opponent_dice)
+	},
+	reroll() {
+		decrease_player_buttons(1)
+		game.roll = roll_ndx(game.count, game.dice, "B", "Re-rolled")
+	},
+	next() {
+		next_player()
+		game.state = "final_voting_opponent"
+	}
+}
+
+states.final_voting_opponent = {
+	inactive: "do Final Voting.",
+	prompt() {
+		view.prompt = `Final Voting: You rolled ${game.opponent_roll}, ${opponent_name()} rolled ${game.roll}.`
+		if (player_buttons() > 0)
+			gen_action("reroll")
+		gen_action("next")
+	},
+	reroll() {
+		decrease_player_buttons(1)
+		game.opponent_roll = roll_ndx(1, game.opponent_dice, "B", "Re-rolled")
+	},
+	next() {
+		goto_final_voting_result()
+	}
+}
+
+const MISS_FEBB_WINS_THE_LAST_VOTE = find_card("Miss Febb Wins the Last Vote")
+
+function goto_final_voting_result() {
+	clear_undo()
+	let support_roll = game.active === SUF ? game.roll : game.opponent_roll
+	let opposition_roll = game.active === OPP ? game.roll : game.opponent_roll
+
+	let plus_support_cubes = support_cubes()
+	let plus_opposition_cubes = red_cubes()
+
+	let support_total = support_roll + plus_support_cubes
+	let opposition_total = opposition_roll + plus_opposition_cubes
+
+	log_br()
+	log(`Suffragist ${support_roll} + ${plus_support_cubes} = ${support_total}`)
+	log(`Opposition ${opposition_roll} + ${plus_opposition_cubes} = ${opposition_total}`)
+
+	if (support_total > opposition_total)
+		game.voting_winner = SUF
+	else if (opposition_total > support_total)
+		game.voting_winner = OPP
+	else if (game.persistent_ballot.includes(MISS_FEBB_WINS_THE_LAST_VOTE))
+		game.voting_winner = SUF
+	else
+		game.voting_winner = OPP
+
+	if (game.voting_winner === SUF)
+		ratify_nineteenth_amendment(game.selected_us_state)
+	else
+		reject_nineteenth_amendment(game.selected_us_state)
+
+	game.state = "final_voting_result"
+}
+
+states.final_voting_result = {
+	inactive: "do Final Voting.",
+	prompt() {
+		view.prompt = `Final Voting: ${game.voting_winner} wins S${game.selected_us_state}.`
+		gen_action("next")
+	},
+	next() {
+		if (check_victory())
+			return
+		game.state = "final_voting_select_state"
+		game.selected_us_state = 0
+		game.voting_winner = null
+	}
 }
 
 // #endregion
@@ -1645,14 +1785,14 @@ function vm_opponent_loses_buttons() {
 function vm_add_cubes() {
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
-	game.vm.us_states = vm_operand(3)
+	game.vm.us_states = vm_operand_us_states(3)
 	goto_vm_add_cubes()
 }
 
 function vm_add_cubes_limit() {
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
-	game.vm.us_states = vm_operand(3)
+	game.vm.us_states = vm_operand_us_states(3)
 	game.vm.limit = vm_operand(4)
 	goto_vm_add_cubes()
 }
@@ -1660,7 +1800,7 @@ function vm_add_cubes_limit() {
 function vm_add_cubes_in_each_of() {
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
-	game.vm.us_states = vm_operand(3)
+	game.vm.us_states = vm_operand_us_states(3)
 	game.vm.in_each_of = true
 	goto_vm_add_cubes()
 }
@@ -3003,7 +3143,6 @@ CODE[40] = [ // Maud Wood Park
 
 CODE[41] = [ // Voter Registration
 	[ vm_persistent, BALLOT_BOX ],
-	[ vm_todo ],
 	[ vm_return ],
 ]
 
@@ -3071,7 +3210,6 @@ CODE[51] = [ // Dr. Mabel Ping-Hua Lee
 
 CODE[52] = [ // Miss Febb Wins the Last Vote
 	[ vm_persistent, BALLOT_BOX ],
-	[ vm_todo ],
 	[ vm_return ],
 ]
 
@@ -3358,7 +3496,6 @@ CODE[97] = [ // The Unnecessary Privilege
 
 CODE[98] = [ // Voter Suppression
 	[ vm_persistent, BALLOT_BOX ],
-	[ vm_todo ],
 	[ vm_return ],
 ]
 
