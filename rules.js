@@ -2243,10 +2243,11 @@ function on_4th_cube(us_state) {
 	}
 }
 
-// XXX pick a better name
 function after_vm_add_cube(us_state) {
 	if (player_cubes(us_state) === 4) {
 		on_4th_cube(us_state)
+		if (game.nineteenth_amendment)
+			set_delete(game.vm.us_states, us_state)
 		if (check_victory())
 			return true
 	}
@@ -2314,7 +2315,6 @@ states.vm_remove_cubes = {
 	}
 }
 
-// XXX pick a better name
 function after_vm_remove_cube(us_state) {
 	map_incr(game.vm.removed, us_state, 1)
 
