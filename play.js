@@ -1,6 +1,6 @@
 "use strict"
 
-/* global CARDS, US_STATES, action_button, send_action, view */
+/* global CARDS, US_STATES, action_button, scroll_into_view, send_action, view */
 
 const SUF = 0
 const OPP = 1
@@ -19,10 +19,10 @@ const REGION_NAMES = [
 
 const PURPLE = 1
 const YELLOW = 2
-const PURPLE_OR_YELLOW = 3
+// const PURPLE_OR_YELLOW = 3
 const RED = 4
-const GREEN_CHECK = 5
-const RED_X = 6
+// const GREEN_CHECK = 5
+// const RED_X = 6
 
 const region_count = 6
 const us_states_count = region_count * 8
@@ -467,10 +467,46 @@ function on_blur_card_tip() { // eslint-disable-line no-unused-vars
 	document.getElementById("tooltip").classList = "card hide"
 }
 
+function on_focus_region_tip(x) { // eslint-disable-line no-unused-vars
+	ui.regions[x].classList.add("tip")
+}
+
+function on_blur_region_tip(x) { // eslint-disable-line no-unused-vars
+	ui.regions[x].classList.remove("tip")
+}
+
+function on_click_region_tip(x) { // eslint-disable-line no-unused-vars
+	scroll_into_view(ui.regions[x])
+}
+
+function on_focus_us_state_tip(x) { // eslint-disable-line no-unused-vars
+	ui.us_states[x].classList.add("tip")
+}
+
+function on_blur_us_state_tip(x) { // eslint-disable-line no-unused-vars
+	ui.us_states[x].classList.remove("tip")
+}
+
+function on_click_us_state_tip(x) { // eslint-disable-line no-unused-vars
+	scroll_into_view(ui.us_states[x])
+}
+
 function sub_card_name(_match, p1, _offset, _string) {
 	let c = p1 | 0
 	let n = CARDS[c].name
 	return `<span class="tip" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${n}</span>`
+}
+
+function sub_region_name(_match, p1, _offset, _string) {
+	let r = p1 | 0
+	let n = REGION_NAMES[r]
+	return `<span class="tip" onmouseenter="on_focus_region_tip(${r})" onmouseleave="on_blur_region_tip(${r})" onclick="on_click_region_tip(${r})">${n}</span>`
+}
+
+function sub_us_state_name(_match, p1, _offset, _string) {
+	let s = p1 | 0
+	let n = US_STATES[s].name
+	return `<span class="tip" onmouseenter="on_focus_us_state_tip(${s})" onmouseleave="on_blur_us_state_tip(${s})" onclick="on_click_us_state_tip(${s})">${n}</span>`
 }
 
 function on_log(text) { // eslint-disable-line no-unused-vars
@@ -485,6 +521,8 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 	text = text.replace(/</g, "&lt;")
 	text = text.replace(/>/g, "&gt;")
 	text = text.replace(/C(\d+)/g, sub_card_name)
+	text = text.replace(/R(\d+)/g, sub_region_name)
+	text = text.replace(/S(\d+)/g, sub_us_state_name)
 
 	if (text.match(/^\.h1/)) {
 		text = text.substring(4)
