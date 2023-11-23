@@ -411,6 +411,10 @@ function gen_action(action, argument) {
 	}
 }
 
+function gen_action_card(c) {
+	gen_action("card", c)
+}
+
 function gen_action_region(r) {
 	gen_action("region", r)
 }
@@ -1085,12 +1089,17 @@ states.cleanup_phase = {
 function discard_persistent_card(cards, c) {
 	log(`C${c} discarded.`)
 	array_remove_item(cards, c)
+
+	// TODO does it matter where we discard them?
+	// I see no value in having multiple discard piles.
 	if (is_support_card(c)) {
 		game.support_discard.push(c)
 	} else if (is_opposition_card(c)) {
 		game.opposition_discard.push(c)
+	} else if (game.active === SUF) {
+		game.support_discard.push(c)
 	} else {
-		throw Error(`Unexpected card type ${c}`)
+		game.opposition_discard.push(c)
 	}
 }
 
@@ -2077,6 +2086,10 @@ function vm_todo() {
 	vm_next()
 }
 
+function vm_counter_strat() {
+	game.state = "vm_counter_strat"
+}
+
 function vm_draw_2_play_1_event() {
 	log("TODO draw_2_play_1_event")
 	vm_next()
@@ -2631,6 +2644,23 @@ states.move_each_player_campaigner_free = {
 		}
 	}
 }
+
+states.vm_counter_strat = {
+	inactive: "remove a persistent event card.",
+	prompt() {
+		event_prompt("Select a persistent event card to discard.")
+		for (let c of game.persistent_turn)
+			gen_action_card(c)
+
+	},
+	card(c) {
+		push_undo()
+		discard_persistent_card(game.persistent_turn, c)
+		vm_next()
+	}
+}
+
+
 
 
 // #endregion
@@ -3699,7 +3729,7 @@ CODE[114] = [ // Transportation
 ]
 
 CODE[115] = [ // Counter Strat
-	[ vm_todo ],
+	[ vm_counter_strat ],
 	[ vm_return ],
 ]
 

@@ -634,8 +634,11 @@ function on_update() { // eslint-disable-line no-unused-vars
 		for (let c of view[id] || []) {
 			let elt = create("div", {
 				className: `persistent_card ${CARDS[c].type}`,
-				innerHTML: sub_card_name(null, c)
+				innerHTML: sub_card_name(null, c),
+				my_card: c
 			})
+			elt.addEventListener("click", on_click_card)
+			elt.classList.toggle("action", is_card_enabled(c))
 			document.getElementById(id).appendChild(elt)
 		}
 	}
@@ -758,9 +761,6 @@ function on_update() { // eslint-disable-line no-unused-vars
 	action_button("pass", "Pass")
 	action_button("done", "Done")
 	action_button("undo", "Undo")
-
-	// XXX
-	action_button("restart", "Restart")
 }
 
 build_user_interface()

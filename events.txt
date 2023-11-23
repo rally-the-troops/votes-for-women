@@ -604,7 +604,7 @@ CARD 114 - Transportation
 
 CARD 115 - Counter Strat
 # Remove one card that is “in effect for the remainder of the turn” and place it in the appropriate discard pile.
-    todo
+    counter_strat
 
 CARD 116 - National Focus
 # Add 2 :purple_or_yellow_cube or 2 :red_cube in one state of each region.
