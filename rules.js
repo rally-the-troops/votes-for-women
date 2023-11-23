@@ -516,7 +516,7 @@ exports.setup = function (seed, _scenario, _options) {
 		turn: 0,
 		round: 0,
 		congress: 0,
-		us_states: new Array(us_states_count).fill(0),
+		us_states: new Array(us_states_count + 1).fill(0),
 		nineteenth_amendment: 0,
 
 		strategy_deck: [],
@@ -599,6 +599,62 @@ function init_player_cards(first_card) {
 
 // #region VIEW
 
+// JSON Schema for view data
+exports.VIEW_SCHEMA = {
+	type: "object",
+    properties: {
+		log: {type: "array", items: {type: "string"}},
+		active: {type: "string"},
+		prompt: {type: "string"},
+		actions: {type: "object", nullable: true},
+
+		played_card: {type: "integer", minimum: 0},
+		selected_campaigner: {type: "integer", minimum: 1},
+		selected_us_state: {type: "integer", minimum: 1},
+
+		turn: {type: "integer", minimum: 1, maximum: 6},
+		round: {type: "integer", minimum: 0, maximum: 6},
+		congress: {type: "integer", minimum: 0, maximum: 6},
+		us_states: {type: "array", minItems: us_states_count + 1, maxItems: us_states_count + 1, items: {type: "integer", minimum: 0}},
+		nineteenth_amendment: {type: "integer", minimum: 0, maximum: 1},
+
+		strategy_deck: {type: "integer", minimum: 0, maximum: 12},
+		strategy_draw: {type: "array", maxItems: 3, items: {type: "integer", minimum: 1, maximum: 128}},
+		states_draw: {type: "array", maxItems: 9, items: {type: "integer", minimum: 1, maximum: 128}},
+
+		persistent_turn: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		persistent_game: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		persistent_ballot: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+
+		support_deck: {type: "integer", minimum: 0, maximum: 52},
+		support_discard: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		support_hand: {type: "integer", minimum: 1, maximum: 7},
+		support_claimed: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		support_campaigner: {type: "array", minItems: 4, maxItems: 4, items: {type: "integer", minimum: 0, maximum: region_count}},
+		support_buttons: {type: "integer", minimum: 0, maximum: MAX_SUPPORT_BUTTONS},
+
+		opposition_deck: {type: "integer", minimum: 0, maximum: 52},
+		opposition_discard: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		opposition_hand: {type: "integer", minimum: 1, maximum: 7},
+		opposition_claimed: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		opposition_campaigner: {type: "array", minItems: 2, maxItems: 2, items: {type: "integer", minimum: 0, maximum: region_count}},
+		opposition_buttons: {type: "integer", minimum: 0, maximum: MAX_OPPOSITION_BUTTONS},
+
+		out_of_play: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+
+		hand: {type: "array", maxItems: 7, items: {type: "integer", minimum: 1, maximum: 128}},
+
+    },
+    required: [
+		"log", "active", "prompt", "turn", "congress", "us_states",
+		"strategy_deck", "strategy_draw", "states_draw",
+		"support_deck", "support_discard", "support_hand", "support_claimed", "support_campaigner", "support_buttons",
+		"opposition_deck", "opposition_discard", "opposition_hand", "opposition_claimed", "opposition_campaigner", "opposition_buttons",
+
+	],
+    additionalProperties: false
+}
+
 exports.view = function(state, player) {
 	game = state
 
@@ -642,7 +698,7 @@ exports.view = function(state, player) {
 
 		out_of_play: game.out_of_play,
 
-		hand: 0,
+		hand: [],
 	}
 
 	if (player === SUF) {
@@ -1251,7 +1307,7 @@ states.final_voting_result = {
 		if (check_victory())
 			return
 		game.state = "final_voting_select_state"
-		game.selected_us_state = 0
+		delete game.selected_us_state
 		game.voting_winner = null
 	}
 }
@@ -1947,7 +2003,7 @@ function vm_move_each_player_campaigner_free() {
 	if (has_player_active_campaigners()) {
 		game.vm.moved = []
 		game.state = "move_each_player_campaigner_free"
-		game.selected_campaigner = 0
+		delete game.selected_campaigner
 	} else {
 		vm_next()
 	}
@@ -2589,7 +2645,7 @@ states.move_each_player_campaigner_free = {
 		push_undo()
 		move_campaigner(game.selected_campaigner, r)
 		set_add(game.vm.moved, game.selected_campaigner)
-		game.selected_campaigner = 0
+		delete game.selected_campaigner
 
 		if (game.vm.moved.length === count_player_active_campaigners()) {
 			delete game.selected_campaigner
