@@ -40,8 +40,7 @@ let ui = {
 		document.getElementById("role_Opposition"),
 	],
 	pieces: document.getElementById("pieces"),
-	support_campaigner: [],
-	opposition_campaigner: [],
+	campaigners: [],
 	cubes: [],
 	green_checks: [],
 	red_xs: [],
@@ -342,7 +341,6 @@ function on_click_cube(evt) {
 
 function on_click_green_check(evt) {
 	if (evt.button === 0) {
-		console.log("green_check", evt.target.my_us_state)
 		if (send_action('green_check', evt.target.my_us_state))
 			evt.stopPropagation()
 	}
@@ -351,7 +349,6 @@ function on_click_green_check(evt) {
 
 function on_click_red_x(evt) {
 	if (evt.button === 0) {
-		console.log("red_x", evt.target.my_us_state)
 		if (send_action('red_x', evt.target.my_us_state))
 			evt.stopPropagation()
 	}
@@ -421,13 +418,11 @@ function build_user_interface() {
 		elt.addEventListener("mouseleave", on_blur)
 	}
 
-	ui.support_campaigner = [
+	ui.campaigners = [
 		create_campaigner('purple1', 1),
 		create_campaigner('purple2', 2),
 		create_campaigner('yellow1', 3),
-		create_campaigner('yellow2', 4)
-	]
-	ui.opposition_campaigner = [
+		create_campaigner('yellow2', 4),
 		create_campaigner('red1', 5),
 		create_campaigner('red2', 6),
 	]
@@ -658,32 +653,17 @@ function on_update() { // eslint-disable-line no-unused-vars
 		ui.us_states[i].classList.toggle("action", is_us_state_action(i))
 	}
 
-	for (let i = 0; i < ui.support_campaigner.length; ++i) {
-		// TODO Cleanup
-		let campaigner_region = view.support_campaigner[i]
+	for (let i = 0; i < ui.campaigners.length; ++i) {
+		let campaigner_region = view.campaigners[i]
 		if (campaigner_region) {
-			ui.pieces.appendChild(ui.support_campaigner[i])
+			ui.pieces.appendChild(ui.campaigners[i])
 			let [x, y] = REGIONS_LAYOUT[campaigner_region]
-			ui.support_campaigner[i].style.left = x - 30 + (15 * i) + "px"
-			ui.support_campaigner[i].style.top = y - 40 + "px"
-			ui.support_campaigner[i].classList.toggle("action", is_campaigner_action(1 + i))
-			ui.support_campaigner[i].classList.toggle("selected", 1 + i === view.selected_campaigner)
+			ui.campaigners[i].style.left = x - 30 + (15 * (i % 4)) + "px"
+			ui.campaigners[i].style.top = y - 40 + (30 * Math.floor(i / 4)) + "px"
+			ui.campaigners[i].classList.toggle("action", is_campaigner_action(1 + i))
+			ui.campaigners[i].classList.toggle("selected", 1 + i === view.selected_campaigner)
 		} else {
-			ui.support_campaigner[i].remove()
-		}
-	}
-	for (let i = 0; i < ui.opposition_campaigner.length; ++i) {
-		// TODO Cleanup
-		let campaigner_region = view.opposition_campaigner[i]
-		if (campaigner_region) {
-			ui.pieces.appendChild(ui.opposition_campaigner[i])
-			let [x, y] = REGIONS_LAYOUT[campaigner_region]
-			ui.opposition_campaigner[i].style.left = x - 30 + (15 * i) + "px"
-			ui.opposition_campaigner[i].style.top = y - 10 + "px"
-			ui.opposition_campaigner[i].classList.toggle("action", is_campaigner_action(5 + i))
-			ui.opposition_campaigner[i].classList.toggle("selected", 5 + i === view.selected_campaigner)
-		} else {
-			ui.opposition_campaigner[i].remove()
+			ui.campaigners[i].remove()
 		}
 	}
 
@@ -695,7 +675,6 @@ function on_update() { // eslint-disable-line no-unused-vars
 		// TODO Cleanup
 		if (view.us_states[i]) {
 			let state_cubes = []
-			// console.log("US_STATE", i, purple_cubes(i), yellow_cubes(i), red_cubes(i), is_green_check(i), is_red_x(i))
 			for (let c = 0; c < purple_cubes(i); ++c) {
 				e = ui.cubes[cube_idx++]
 				// TODO track both state and color

@@ -188,63 +188,44 @@ function us_state_region(s) {
 }
 
 function free_campaigner(campaigners, color) {
-	const start = color === YELLOW ? 2 : 0
+	const start = color === YELLOW ? 2 : color === RED ? 4 : 0
 	const index = campaigners.indexOf(0, start)
-	return color !== YELLOW && index > 1 ? -1 : index
+	return index > start + 1 ? -1 : index
 }
 
 function add_campaigner(color, region) {
-	const campaigners = player_campaigners()
-	const index = free_campaigner(campaigners, color)
+	const index = free_campaigner(game.campaigners, color)
 	if (index !== -1) {
-		campaigners[index] = region
+		game.campaigners[index] = region
 	} else {
 		throw Error("No free campaigners")
 	}
 	log(`Placed ${COLOR_CODE[color]}R in R${region}`)
 }
 
-// TODO unify campaigners from both players into one array
-
 function player_campaigners() {
 	if (game.active === SUF) {
-		return game.support_campaigner
+		return game.campaigners.slice(0, 4)
 	} else {
-		return game.opposition_campaigner
+		return game.campaigners.slice(4)
 	}
 }
 
 function for_each_player_campaigner(fn) {
-	if (game.active === SUF) {
-		for (let c = 0; c <= 3; c++) {
-			let r = game.support_campaigner[c]
-			if (r)
-				fn(c + 1)
-		}
-	} else {
-		for (let c = 0; c <= 1; c++) {
-			let r = game.opposition_campaigner[c]
-			if (r)
-				fn(c + 5)
-		}
-	}
+	let i = 1
+	for (let r of player_campaigners())
+		if (r)
+			fn(i)
+		i++
 }
 
 function campaigner_region(c) {
-	if (game.active === SUF) {
-		return game.support_campaigner[c - 1]
-	} else {
-		return game.opposition_campaigner[c - 5]
-	}
+	return game.campaigners[c - 1]
 }
 
 function move_campaigner(c, region) {
 	log(`${COLOR_CODE[campaigner_color(c)]}R moved to R${region}.`)
-	if (game.active === SUF) {
-		game.support_campaigner[c - 1] = region
-	} else {
-		game.opposition_campaigner[c - 5] = region
-	}
+	game.campaigners[c - 1] = region
 }
 
 // RED cubes (6 bits), YELLOW cubes (7 bits), PURPLE cubes (7 bits), RED_X (1 bit), GREEN_CHECK (1 bit),
@@ -518,6 +499,7 @@ exports.setup = function (seed, _scenario, _options) {
 		congress: 0,
 		us_states: new Array(us_states_count + 1).fill(0),
 		nineteenth_amendment: 0,
+		campaigners: [0, 0, 0, 0, 0, 0], // purple, purple, yellow, yellow, red, red
 
 		strategy_deck: [],
 		strategy_draw: [],
@@ -531,14 +513,12 @@ exports.setup = function (seed, _scenario, _options) {
 		support_discard: [],
 		support_hand: [],
 		support_claimed: [],
-		support_campaigner: [0, 0, 0, 0], // purple, purple, yellow, yellow
 		support_buttons: 0,
 
 		opposition_deck: [],
 		opposition_discard: [],
 		opposition_hand: [],
 		opposition_claimed: [],
-		opposition_campaigner: [0, 0],
 		opposition_buttons: 0,
 
 		out_of_play: []
@@ -617,6 +597,7 @@ exports.VIEW_SCHEMA = {
 		congress: {type: "integer", minimum: 0, maximum: 6},
 		us_states: {type: "array", minItems: us_states_count + 1, maxItems: us_states_count + 1, items: {type: "integer", minimum: 0}},
 		nineteenth_amendment: {type: "integer", minimum: 0, maximum: 1},
+		campaigners: {type: "array", minItems: 6, maxItems: 6, items: {type: "integer", minimum: 0, maximum: region_count}},
 
 		strategy_deck: {type: "integer", minimum: 0, maximum: 12},
 		strategy_draw: {type: "array", maxItems: 3, items: {type: "integer", minimum: 1, maximum: 128}},
@@ -630,14 +611,12 @@ exports.VIEW_SCHEMA = {
 		support_discard: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		support_hand: {type: "integer", minimum: 1, maximum: 7},
 		support_claimed: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
-		support_campaigner: {type: "array", minItems: 4, maxItems: 4, items: {type: "integer", minimum: 0, maximum: region_count}},
 		support_buttons: {type: "integer", minimum: 0, maximum: MAX_SUPPORT_BUTTONS},
 
 		opposition_deck: {type: "integer", minimum: 0, maximum: 52},
 		opposition_discard: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		opposition_hand: {type: "integer", minimum: 1, maximum: 7},
 		opposition_claimed: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
-		opposition_campaigner: {type: "array", minItems: 2, maxItems: 2, items: {type: "integer", minimum: 0, maximum: region_count}},
 		opposition_buttons: {type: "integer", minimum: 0, maximum: MAX_OPPOSITION_BUTTONS},
 
 		out_of_play: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
@@ -646,10 +625,10 @@ exports.VIEW_SCHEMA = {
 
     },
     required: [
-		"log", "active", "prompt", "turn", "congress", "us_states",
+		"log", "active", "prompt", "turn", "congress", "us_states", "campaigners",
 		"strategy_deck", "strategy_draw", "states_draw",
-		"support_deck", "support_discard", "support_hand", "support_claimed", "support_campaigner", "support_buttons",
-		"opposition_deck", "opposition_discard", "opposition_hand", "opposition_claimed", "opposition_campaigner", "opposition_buttons",
+		"support_deck", "support_discard", "support_hand", "support_claimed", "support_buttons",
+		"opposition_deck", "opposition_discard", "opposition_hand", "opposition_claimed", "opposition_buttons",
 
 	],
     additionalProperties: false
@@ -673,6 +652,7 @@ exports.view = function(state, player) {
 		congress: game.congress,
 		us_states: game.us_states,
 		nineteenth_amendment: game.nineteenth_amendment,
+		campaigners: game.campaigners,
 
 		strategy_deck: game.strategy_deck.length,
 		strategy_draw: game.strategy_draw,
@@ -686,14 +666,12 @@ exports.view = function(state, player) {
 		support_discard: game.support_discard, // top_discard?
 		support_hand: game.support_hand.length,
 		support_claimed: game.support_claimed,
-		support_campaigner: game.support_campaigner,
 		support_buttons: game.support_buttons,
 
 		opposition_deck: game.opposition_deck.length,
 		opposition_discard: game.opposition_discard,  // top_discard?
 		opposition_hand: game.opposition_hand.length,
 		opposition_claimed: game.opposition_claimed,
-		opposition_campaigner: game.opposition_campaigner,
 		opposition_buttons: game.opposition_buttons,
 
 		out_of_play: game.out_of_play,
