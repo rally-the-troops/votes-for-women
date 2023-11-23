@@ -1862,8 +1862,8 @@ function vm_replace() {
 }
 
 function vm_add_congress() {
-	if (!game.nineteenth_amendment) {
-		game.vm.count = vm_operand(1)
+	game.vm.count = vm_operand(1)
+	if (!game.nineteenth_amendment && game.vm.count) {
 		game.state = "vm_add_congress"
 	} else {
 		vm_next()
@@ -1871,8 +1871,8 @@ function vm_add_congress() {
 }
 
 function vm_remove_congress() {
-	if (!game.nineteenth_amendment && game.congress > 0) {
-		game.vm.count = vm_operand(1)
+	game.vm.count = vm_operand(1)
+	if (!game.nineteenth_amendment && game.congress > 0 && game.vm.count) {
 		game.state = "vm_remove_congress"
 	} else {
 		vm_next()
@@ -1882,6 +1882,13 @@ function vm_remove_congress() {
 function vm_roll() {
 	game.vm.count = vm_operand(1)
 	game.vm.d = vm_operand(2)
+	game.state = "vm_roll"
+}
+
+function vm_roll_list() {
+	game.vm.count = vm_operand(1)
+	game.vm.d = vm_operand(2)
+	game.vm.roll_list = true
 	game.state = "vm_roll"
 }
 
@@ -2450,7 +2457,10 @@ states.vm_roll = {
 	inactive: "roll dice.",
 	prompt() {
 		if (game.vm.roll) {
-			event_prompt(`You rolled ${game.vm.roll}.`)
+			if (game.vm.roll_list)
+				event_prompt(`You rolled ${game.vm.roll.join(", ")}.`)
+			else
+				event_prompt(`You rolled ${game.vm.roll}.`)
 		} else if (game.vm.count === 1) {
 			event_prompt("Roll a die.")
 		} else {
@@ -2465,11 +2475,17 @@ states.vm_roll = {
 		}
 	},
 	roll() {
-		game.vm.roll = roll_ndx(game.vm.count, game.vm.d)
+		if (game.vm.roll_list)
+			game.vm.roll = roll_ndx_list(game.vm.count, game.vm.d)
+		else
+			game.vm.roll = roll_ndx(game.vm.count, game.vm.d)
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "B", "Re-rolled")
+		if (game.vm.roll_list)
+			game.vm.roll = roll_ndx_list(game.vm.count, game.vm.d, "B", "Re-rolled")
+		else
+			game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "B", "Re-rolled")
 	},
 	next() {
 		vm_next()
@@ -3572,7 +3588,12 @@ CODE[109] = [ // Bellwether State
 ]
 
 CODE[110] = [ // Superior Lobbying
-	[ vm_todo ],
+	[ vm_roll_list, 4, D8 ],
+	[ vm_if, ()=>(game.active === SUF) ],
+	[ vm_add_congress, ()=>(game.vm.roll.filter(x => x >= 6).length) ],
+	[ vm_else ],
+	[ vm_remove_congress, ()=>(game.vm.roll.filter(x => x >= 6).length) ],
+	[ vm_endif ],
 	[ vm_return ],
 ]
 
