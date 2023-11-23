@@ -824,6 +824,7 @@ const WAR_IN_EUROPE = find_card("War in Europe")
 const FIFTEENTH_AMENDMENT = find_card("Fifteenth Amendment")
 const EIGHTEENTH_AMENDMENT = find_card("Eighteenth Amendment")
 const SOUTHERN_STRATEGY = find_card("Southern Strategy")
+const _1918_PANDEMIC = find_card("1918 Pandemic")
 
 function can_play_event(c) {
 	if (game.active === SUF && is_opposition_card(c))
@@ -861,6 +862,10 @@ function can_play_event(c) {
 
 	// Playable if it is Turn 5 or Turn 6
 	if (c === 113 && game.turn < 5)
+		return false
+
+	// Suffragist must pay 1 button to play event during 1918 Pandemic
+	if (game.active === SUF && game.persistent_turn.includes(_1918_PANDEMIC) && !player_buttons())
 		return false
 
 	return true
@@ -956,6 +961,8 @@ states.operations_phase = {
 	card_event(c) {
 		push_undo()
 		log(`C${c} - Event`)
+		if (game.active === SUF && game.persistent_turn.includes(_1918_PANDEMIC))
+			decrease_player_buttons(1)
 		log_br()
 		goto_event(c)
 	},
@@ -3459,7 +3466,6 @@ CODE[88] = [ // War in Europe
 CODE[89] = [ // 1918 Pandemic
 	[ vm_remove_congress, 1 ],
 	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event." ],
-	[ vm_todo ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]

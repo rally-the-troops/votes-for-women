@@ -468,7 +468,6 @@ CARD 89 - 1918 Pandemic
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event.
     remove_congress 1
     prompt "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event."
-    todo
     persistent REST_OF_TURN
 
 CARD 90 - The Business of Being a Woman
@@ -503,7 +502,7 @@ CARD 95 - United Daughters of the Confederacy
 
 CARD 96 - Cheers to “No on Suffrage”
 # Playable if *Eighteenth Amendment* is not in effect. Roll :d8. Add that number :red_cube anywhere, no more than 2 per state.
-    requires_persistent REST_OF_GAME find_card("Eighteenth Amendment")
+    requires_not_persistent REST_OF_GAME find_card("Eighteenth Amendment")
     roll 1 D8
     add_cubes_limit (game.vm.roll) RED anywhere() 2
 
