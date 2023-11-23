@@ -610,6 +610,7 @@ exports.view = function(state, player) {
 
 		played_card: game.played_card,
 		selected_campaigner: game.selected_campaigner,
+		selected_us_state: game.selected_us_state,
 
 		turn: game.turn,
 		round: game.round,
@@ -1061,7 +1062,7 @@ function end_cleanup_phase() {
 	// Amendment has not been sent to the states for
 	// ratification, the game ends in an Opposition victory.
 	if (!game.nineteenth_amendment) {
-		goto_game_over(OPP, "Opposition wins.")
+		goto_game_over(OPP, "Opposition wins the game.")
 		return
 	}
 
@@ -1087,6 +1088,8 @@ function end_cleanup_phase() {
 
 function goto_final_voting() {
 	log_h1("Final Voting")
+	log(`Suffragist has ${count_green_checks()} of ${GREEN_CHECK_VICTORY} States.`)
+	log(`Opposition has ${count_red_xs()} of ${RED_X_VICTORY} States.`)
 	game.active = SUF
 	game.state = "final_voting_select_state"
 }
@@ -1135,10 +1138,10 @@ states.final_voting_roll = {
 	inactive: "do Final Voting.",
 	prompt() {
 		if (!game.roll) {
-			view.prompt = `Final Voting: Selected S${game.selected_us_state}.`
+			view.prompt = `Final Voting for S${game.selected_us_state}: Roll dice.`
 			gen_action("roll")
 		} else {
-			view.prompt = `Final Voting: You rolled ${game.roll}, ${opponent_name()} rolled ${game.opponent_roll}.`
+			view.prompt = `Final Voting for S${game.selected_us_state}: ${opponent_name()} rolled ${game.opponent_roll}, You rolled ${game.roll}.`
 			if (player_buttons() > 0)
 				gen_action("reroll")
 			gen_action("next")
@@ -1162,7 +1165,7 @@ states.final_voting_roll = {
 states.final_voting_opponent = {
 	inactive: "do Final Voting.",
 	prompt() {
-		view.prompt = `Final Voting: You rolled ${game.opponent_roll}, ${opponent_name()} rolled ${game.roll}.`
+		view.prompt = `Final Voting for S${game.selected_us_state}: ${opponent_name()} rolled ${game.roll}, You rolled ${game.opponent_roll}.`
 		if (player_buttons() > 0)
 			gen_action("reroll")
 		gen_action("next")
@@ -1180,11 +1183,11 @@ const MISS_FEBB_WINS_THE_LAST_VOTE = find_card("Miss Febb Wins the Last Vote")
 
 function goto_final_voting_result() {
 	clear_undo()
-	let support_roll = game.active === SUF ? game.roll : game.opponent_roll
-	let opposition_roll = game.active === OPP ? game.roll : game.opponent_roll
+	let support_roll = game.active === OPP ? game.roll : game.opponent_roll
+	let opposition_roll = game.active === SUF ? game.roll : game.opponent_roll
 
-	let plus_support_cubes = support_cubes()
-	let plus_opposition_cubes = red_cubes()
+	let plus_support_cubes = support_cubes(game.selected_us_state)
+	let plus_opposition_cubes = red_cubes(game.selected_us_state)
 
 	let support_total = support_roll + plus_support_cubes
 	let opposition_total = opposition_roll + plus_opposition_cubes
@@ -1192,6 +1195,7 @@ function goto_final_voting_result() {
 	log_br()
 	log(`Suffragist ${support_roll} + ${plus_support_cubes} = ${support_total}`)
 	log(`Opposition ${opposition_roll} + ${plus_opposition_cubes} = ${opposition_total}`)
+	// log(`${support_roll} + ${plus_support_cubes} = ${support_total} vs. ${opposition_roll} + ${plus_opposition_cubes} = ${opposition_total}`)
 
 	if (support_total > opposition_total)
 		game.voting_winner = SUF
@@ -1207,13 +1211,21 @@ function goto_final_voting_result() {
 	else
 		reject_nineteenth_amendment(game.selected_us_state)
 
+	log_br()
+	log(`Suffragist won ${count_green_checks()} of ${GREEN_CHECK_VICTORY} States.`)
+	log(`Opposition won ${count_red_xs()} of ${RED_X_VICTORY} States.`)
+
 	game.state = "final_voting_result"
 }
 
 states.final_voting_result = {
 	inactive: "do Final Voting.",
 	prompt() {
-		view.prompt = `Final Voting: ${game.voting_winner} wins S${game.selected_us_state}.`
+		if (game.active === game.voting_winner) {
+			view.prompt = `Final Voting for S${game.selected_us_state}: You win!`
+		} else {
+			view.prompt = `Final Voting for S${game.selected_us_state}: ${game.voting_winner} wins.`
+		}
 		gen_action("next")
 	},
 	next() {
@@ -1542,12 +1554,12 @@ function trigger_nineteenth_amendment() {
 			ratify_nineteenth_amendment(s)
 			green_check += 1
 			if (green_check >= GREEN_CHECK_VICTORY)
-				return goto_game_over(SUF, "Suffragist wins.")
+				return goto_game_over(SUF, "Suffragist wins the game.")
 		} else if (opponent_cubes(s) >= 4) {
 			reject_nineteenth_amendment(s)
 			red_x += 1
 			if (red_x >= RED_X_VICTORY)
-				return goto_game_over(OPP, "Opposition wins.")
+				return goto_game_over(OPP, "Opposition wins the game.")
 		}
 	}
 	return false
@@ -1557,10 +1569,10 @@ function check_victory() {
 	if (!game.nineteenth_amendment)
 		return false
 	if (count_green_checks() >= GREEN_CHECK_VICTORY) {
-		goto_game_over(SUF, "Suffragist wins.")
+		goto_game_over(SUF, "Suffragist wins the game.")
 		return true
 	} else if (count_red_xs() >= RED_X_VICTORY) {
-		goto_game_over(OPP, "Opposition wins.")
+		goto_game_over(OPP, "Opposition wins the game.")
 		return true
 	}
 	return false
