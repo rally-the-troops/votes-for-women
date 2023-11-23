@@ -697,15 +697,15 @@ function on_update() { // eslint-disable-line no-unused-vars
 				e = ui.green_checks[green_check_idx++]
 				e.my_us_state = i
 				e.classList.toggle("action", is_green_check_action(i))
-				e.style.left = x + "px"
-				e.style.top = y + "px"
+				e.style.left = x - 21 + "px"
+				e.style.top = y - 16 + "px"
 				ui.pieces.appendChild(e)
 			} else if (is_red_x(i)) {
 				e = ui.red_xs[red_x_idx++]
 				e.my_us_state = i
 				e.classList.toggle("action", is_red_x_action(i))
-				e.style.left = x + "px"
-				e.style.top = y + "px"
+				e.style.left = x - 21 + "px"
+				e.style.top = y - 16 + "px"
 				ui.pieces.appendChild(e)
 			}
 		}
