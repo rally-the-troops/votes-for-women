@@ -826,6 +826,11 @@ const FIFTEENTH_AMENDMENT = find_card("Fifteenth Amendment")
 const EIGHTEENTH_AMENDMENT = find_card("Eighteenth Amendment")
 const SOUTHERN_STRATEGY = find_card("Southern Strategy")
 const _1918_PANDEMIC = find_card("1918 Pandemic")
+const A_THREAT_TO_THE_IDEAL_OF_WOMANHOOD = find_card("A Threat to the Ideal of Womanhood")
+
+function has_extra_event_cost() {
+	return game.active === SUF && (game.persistent_turn.includes(_1918_PANDEMIC) || game.persistent_turn.includes(A_THREAT_TO_THE_IDEAL_OF_WOMANHOOD))
+}
 
 function can_play_event(c) {
 	if (game.active === SUF && is_opposition_card(c))
@@ -865,8 +870,8 @@ function can_play_event(c) {
 	if (c === 113 && game.turn < 5)
 		return false
 
-	// Suffragist must pay 1 button to play event during 1918 Pandemic
-	if (game.active === SUF && game.persistent_turn.includes(_1918_PANDEMIC) && !player_buttons())
+	// Suffragist must pay 1 button to play event during 1918 Pandemic or A Threat to the Ideal of Womanhood
+	if (has_extra_event_cost() && !player_buttons())
 		return false
 
 	return true
@@ -904,6 +909,10 @@ function end_play_card(c, is_persistent) {
 	game.state = "operations_phase"
 }
 
+function can_campaign() {
+	return (game.active !== SUF || !game.persistent_turn.includes(WAR_IN_EUROPE) || player_buttons())
+}
+
 function can_organize() {
 	return (game.active === SUF && game.support_buttons < MAX_SUPPORT_BUTTONS) || (game.active === OPP && game.opponent_buttons < MAX_OPPOSITION_BUTTONS)
 }
@@ -926,12 +935,18 @@ states.operations_phase = {
 					can_play_hand = true
 				}
 				if (has_player_active_campaigners()) {
-					gen_action("card_campaigning", c)
-					if (can_organize())
+					if (can_campaign()) {
+						gen_action("card_campaigning", c)
+						can_play_hand = true
+					}
+					if (can_organize()) {
 						gen_action("card_organizing", c)
-					if (can_lobby())
+						can_play_hand = true
+					}
+					if (can_lobby()) {
 						gen_action("card_lobbying", c)
-					can_play_hand = true
+						can_play_hand = true
+					}
 				}
 			}
 		}
@@ -962,7 +977,7 @@ states.operations_phase = {
 	card_event(c) {
 		push_undo()
 		log(`C${c} - Event`)
-		if (game.active === SUF && game.persistent_turn.includes(_1918_PANDEMIC))
+		if (has_extra_event_cost())
 			decrease_player_buttons(1)
 		log_br()
 		goto_event(c)
@@ -1360,6 +1375,21 @@ function goto_campaigning_add_cubes(campaigner, die) {
 	game.state = "campaigning_add_cubes"
 }
 
+function filter_us_states(us_states) {
+	// If a state has already ratified or rejected the Nineteenth Amendment –
+	// and therefore has a V or X in the state – cubes may not be added to that state.
+	if (game.nineteenth_amendment) {
+		set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
+	}
+
+	// When The Civil War is in effect, for the remainder of the turn, the Suffragist player
+	// may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions.
+	if (game.active === SUF && game.persistent_turn.includes(THE_CIVIL_WAR)) {
+		let excluded = region_us_states(ATLANTIC_APPALACHIA, SOUTH)
+		set_filter(us_states, s => !set_has(excluded, s))
+	}
+}
+
 states.campaigning_add_cubes = {
 	inactive: "do Campaigning.",
 	prompt() {
@@ -1371,9 +1401,7 @@ states.campaigning_add_cubes = {
 		}
 
 		let us_states = region_us_states(campaigner_region(game.selected_campaigner))
-		if (game.nineteenth_amendment) {
-			set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
-		}
+		filter_us_states(us_states)
 
 		for (let s of us_states) {
 			if (opponent_cubes(s)) {
@@ -2171,12 +2199,7 @@ function goto_vm_add_cubes() {
 		game.vm.cube_color = game.vm.cubes
 	}
 	game.vm.added = []
-
-	// If a state has already ratified or rejected the Nineteenth Amendment –
-	// and therefore has a V or X in the state – cubes may not be added to that state.
-	if (game.nineteenth_amendment) {
-		set_filter(game.vm.us_states, s => !(is_green_check(s) || is_red_x(s)))
-	}
+	filter_us_states(game.vm.us_states)
 
 	if (!game.vm.us_states.length)
 		vm_next()
@@ -3261,7 +3284,6 @@ CODE[53] = [ // The Patriarchy
 CODE[54] = [ // The Civil War
 	[ vm_remove_congress, 1 ],
 	[ vm_prompt, "For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions." ],
-	[ vm_todo ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
@@ -3412,7 +3434,6 @@ CODE[78] = [ // The Great 1906 San Francisco Earthquake
 
 CODE[79] = [ // A Threat to the Ideal of Womanhood
 	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event." ],
-	[ vm_todo ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
@@ -3470,7 +3491,6 @@ CODE[87] = [ // Senator “Cotton Ed” Smith
 CODE[88] = [ // War in Europe
 	[ vm_remove_congress, 1 ],
 	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action." ],
-	[ vm_todo ],
 	[ vm_persistent, REST_OF_TURN ],
 	[ vm_return ],
 ]
@@ -3519,7 +3539,7 @@ CODE[95] = [ // United Daughters of the Confederacy
 ]
 
 CODE[96] = [ // Cheers to “No on Suffrage”
-	[ vm_requires_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
+	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
 	[ vm_roll, 1, D8 ],
 	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
 	[ vm_return ],

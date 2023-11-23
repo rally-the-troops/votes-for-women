@@ -286,7 +286,6 @@ CARD 54 - The Civil War
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions.
     remove_congress 1
     prompt "For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions."
-    todo
     persistent REST_OF_TURN
 
 CARD 55 - 15th Divides Suffragists
@@ -412,7 +411,6 @@ CARD 78 - The Great 1906 San Francisco Earthquake
 CARD 79 - A Threat to the Ideal of Womanhood
 # For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event.
     prompt "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event."
-    todo
     persistent REST_OF_TURN
 
 CARD 80 - “Unwarranted, Unnecessary & Dangerous Interference”
@@ -461,7 +459,6 @@ CARD 88 - War in Europe
 # Remove 1 :congressional_marker from Congress. For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action.
     remove_congress 1
     prompt "For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action."
-    todo
     persistent REST_OF_TURN
 
 CARD 89 - 1918 Pandemic
