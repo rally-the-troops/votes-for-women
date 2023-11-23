@@ -1851,6 +1851,9 @@ function vm_replace() {
 	game.vm.what = vm_operand(1)
 	game.vm.count = vm_operand(2)
 	game.vm.cubes = vm_operand(3)
+	game.vm.us_states = anywhere()
+	set_filter(game.vm.us_states, s => is_green_check(s) || is_red_x(s))
+
 	if (!game.nineteenth_amendment || (game.vm.what === GREEN_CHECK && !count_green_checks()) || game.vm.what === RED_X && !count_red_xs()) {
 		vm_next()
 	} else {
@@ -2458,7 +2461,7 @@ states.vm_roll = {
 		} else {
 			if (player_buttons() > 0)
 				gen_action("reroll")
-			gen_action("done")
+			gen_action("next")
 		}
 	},
 	roll() {
@@ -2468,7 +2471,7 @@ states.vm_roll = {
 		decrease_player_buttons(1)
 		game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "B", "Re-rolled")
 	},
-	done() {
+	next() {
 		vm_next()
 	}
 }
