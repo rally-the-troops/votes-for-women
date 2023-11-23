@@ -212,7 +212,7 @@ function player_campaigners() {
 }
 
 function for_each_player_campaigner(fn) {
-	let i = 1
+	let i = (game.active === SUF) ? 1 : 5
 	for (let r of player_campaigners())
 		if (r)
 			fn(i)
