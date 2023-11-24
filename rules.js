@@ -142,6 +142,14 @@ function player_claimed() {
 	}
 }
 
+function player_deck() {
+	if (game.active === SUF) {
+		return game.support_deck
+	} else {
+		return game.opposition_deck
+	}
+}
+
 function player_discard() {
 	if (game.active === SUF) {
 		return game.support_discard
@@ -614,19 +622,19 @@ exports.VIEW_SCHEMA = {
 
 		support_deck: {type: "integer", minimum: 0, maximum: 52},
 		support_discard: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
-		support_hand: {type: "integer", minimum: 1, maximum: 7},
+		support_hand: {type: "integer", minimum: 1},
 		support_claimed: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		support_buttons: {type: "integer", minimum: 0, maximum: MAX_SUPPORT_BUTTONS},
 
 		opposition_deck: {type: "integer", minimum: 0, maximum: 52},
 		opposition_discard: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
-		opposition_hand: {type: "integer", minimum: 1, maximum: 7},
+		opposition_hand: {type: "integer", minimum: 1},
 		opposition_claimed: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		opposition_buttons: {type: "integer", minimum: 0, maximum: MAX_OPPOSITION_BUTTONS},
 
 		out_of_play: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 
-		hand: {type: "array", maxItems: 7, items: {type: "integer", minimum: 1, maximum: 128}},
+		hand: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 
     },
     required: [
@@ -940,7 +948,6 @@ function discard_card_from_hand(c, is_persistent) {
 }
 
 function end_play_card(c, is_persistent) {
-	clear_undo()
 	if (is_player_claimed_card(c)) {
 		game.has_played_claimed = 1
 		remove_claimed_card(c)
@@ -1019,11 +1026,7 @@ states.operations_phase = {
 	},
 	card_event(c) {
 		push_undo()
-		log_h3(`C${c} - Event`)
-		if (has_extra_event_cost())
-			decrease_player_buttons(1)
-		log_br()
-		goto_event(c)
+		play_card_event(c)
 	},
 	card_campaigning(c) {
 		push_undo()
@@ -1046,6 +1049,14 @@ states.operations_phase = {
 	done() {
 		end_player_round()
 	}
+}
+
+function play_card_event(c) {
+	log_h3(`C${c} - Event`)
+	if (has_extra_event_cost())
+		decrease_player_buttons(1)
+	log_br()
+	goto_event(c)
 }
 
 function begin_player_round() {
@@ -2056,8 +2067,6 @@ function vm_requires_not_persistent() {
 	vm_next()
 }
 
-
-
 function vm_discard_persistent() {
 	let type = vm_operand(1)
 	let card = vm_operand(2)
@@ -2094,8 +2103,16 @@ function vm_counter_strat() {
 }
 
 function vm_draw_2_play_1_event() {
-	log("TODO draw_2_play_1_event")
-	vm_next()
+	clear_undo()
+	game.vm.draw = []
+	for (let i = 0; i < 2; ++i) {
+		let card = draw_card(player_deck())
+		game.vm.draw.push(card)
+		player_hand().push(card)
+	}
+
+	log(`${game.active} drew 2 cards.`)
+	game.state = "vm_draw_2_play_1_event"
 }
 
 function vm_draw_6_place_any_on_top_of_draw() {
@@ -2673,6 +2690,40 @@ states.vm_counter_strat = {
 
 
 
+states.vm_draw_2_play_1_event = {
+	inactive: "choose which card to play.",
+	prompt() {
+		event_prompt("Select which card to play for its event.")
+		let can_play = false
+		for (let c of game.vm.draw) {
+			if (can_play_event(c)) {
+				gen_action_card(c)
+				can_play = true
+			}
+		}
+
+		if (!can_play)
+			gen_action("skip")
+
+	},
+	card(c) {
+		push_undo()
+		end_play_card(game.played_card)
+		let other = game.vm.draw.find(x => x !== c)
+		discard_card_from_hand(other)
+		log(`C${other} discarded.`)
+		delete game.vm.draw
+		play_card_event(c)
+	},
+	skip() {
+		log(`None of the drawn cards could be played.`)
+		for (let c of game.vm.draw) {
+			discard_card_from_hand(c)
+		}
+		delete game.vm.draw
+		vm_next()
+	}
+}
 
 // #endregion
 
