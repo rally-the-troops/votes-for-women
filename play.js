@@ -40,7 +40,6 @@ let ui = {
 		document.getElementById("role_Opposition"),
 	],
 	pieces: document.getElementById("pieces"),
-	pieces: document.getElementById("pieces"),
 	support_button_box: document.getElementById("support_buttons"),
 	support_buttons: [],
 	opposition_button_box: document.getElementById("opposition_buttons"),
