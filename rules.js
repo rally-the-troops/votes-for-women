@@ -1019,7 +1019,7 @@ states.operations_phase = {
 	},
 	card_event(c) {
 		push_undo()
-		log(`C${c} - Event`)
+		log_h3(`C${c} - Event`)
 		if (has_extra_event_cost())
 			decrease_player_buttons(1)
 		log_br()
@@ -1027,19 +1027,19 @@ states.operations_phase = {
 	},
 	card_campaigning(c) {
 		push_undo()
-		log(`C${c} - Campaigning`)
+		log_h3(`C${c} - Campaigning`)
 		log_br()
 		goto_campaigning(c)
 	},
 	card_organizing(c) {
 		push_undo()
-		log(`C${c} - Organizing`)
+		log_h3(`C${c} - Organizing`)
 		log_br()
 		goto_organizing(c)
 	},
 	card_lobbying(c) {
 		push_undo()
-		log(`C${c} - Lobbying`)
+		log_h3(`C${c} - Lobbying`)
 		log_br()
 		goto_lobbying(c)
 	},
@@ -2264,6 +2264,11 @@ states.vm_add_cubes = {
 		if (game.vm.cubes === PURPLE_OR_YELLOW) {
 			gen_action("purple")
 			gen_action("yellow")
+
+			// Alternatively allow a click on a campaigner to switch color
+			for_each_player_campaigner(c => {
+				gen_action_campaigner(c)
+			})
 		}
 
 		let has_opponent_cubes = false
@@ -2285,9 +2290,9 @@ states.vm_add_cubes = {
 
 		if (!game.vm.cube_color) {
 			if (!has_opponent_cubes)
-				event_prompt("Choose a cube to add.")
+				event_prompt("Choose a cube color to add.")
 			else
-				event_prompt("Choose a cube to add or remove an Opponent's cube.")
+				event_prompt("Choose a cube color to add or remove an Opponent's cube.")
 		} else {
 			if (!has_opponent_cubes)
 				event_prompt(`Add a ${COLOR_NAMES[game.vm.cube_color]} cube.`)
@@ -2300,6 +2305,9 @@ states.vm_add_cubes = {
 	},
 	yellow() {
 		game.vm.cube_color = YELLOW
+	},
+	campaigner(c) {
+		game.vm.cube_color = campaigner_color(c)
 	},
 	purple_cube(s) {
 		push_undo()
