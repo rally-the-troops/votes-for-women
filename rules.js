@@ -2459,14 +2459,14 @@ function after_vm_remove_cube(us_state) {
 	map_incr(game.vm.removed, us_state, 1)
 
 	if (game.vm.all) {
-		if (!color_cubes(game.vm.cube, us_state)) {
+		if (!color_cubes(game.vm.cubes, us_state)) {
 			set_delete(game.vm.us_states, us_state)
 
 			if (game.vm.limit && map_key_count(game.vm.removed) === game.vm.limit)
 				return vm_next()
 		}
 	} else {
-		if (!color_cubes(game.vm.cube, us_state) || map_get(game.vm.removed, us_state) === game.vm.limit)
+		if (!color_cubes(game.vm.cubes, us_state) || map_get(game.vm.removed, us_state) === game.vm.limit)
 			set_delete(game.vm.us_states, us_state)
 
 		if (map_count(game.vm.removed) === game.vm.count)
