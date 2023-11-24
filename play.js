@@ -552,7 +552,7 @@ const ICONS = {
 }
 
 function sub_icon(match) {
-	return ICONS[match]
+	return ICONS[match] || match
 }
 
 function on_log(text) { // eslint-disable-line no-unused-vars
