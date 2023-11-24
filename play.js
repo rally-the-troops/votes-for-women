@@ -288,7 +288,8 @@ function on_focus_region(evt) {
 }
 
 function on_focus_us_state(evt) {
-	document.getElementById("status").textContent = US_STATES[evt.target.my_us_state].name
+	let us_state = US_STATES[evt.target.my_us_state]
+	document.getElementById("status").textContent = `${us_state.name} (${us_state.code})`
 }
 
 function on_click_card(evt) {
