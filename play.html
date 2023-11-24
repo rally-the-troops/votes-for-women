@@ -146,7 +146,7 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 }
 
 #hand, #discard, #support_claimed, #support_discard, #opposition_claimed, #opposition_discard, #states_draw, #strategy_draw, #out_of_play { min-height: 350px; }
-#hand_panel, #states_draw, #support_discard_panel, #opposition_discard_panel, #out_of_play { min-width: 1100px; }
+#hand_panel, #states_draw, #support_discard_panel, #opposition_discard_panel, #out_of_play { min-width: 1650px; }
 #strategy_draw { min-width: 790px; }
 #support_claimed, #opposition_claimed { min-width: 250px; }
 
@@ -173,26 +173,17 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 /* MAP */
 
 #mapwrap {
-	width: 1100px;
-	height: 850px;
+	width: 1650px;
+	height: 1275px;
 	box-shadow: 0 1px 8px #0008;
 }
 
 #map {
-	width: 1100px;
-	height: 850px;
+	width: 1650px;
+	height: 1275px;
 	background-color: #f0e7d0;
 	background-image: url(map.webp);
-	background-size: 1100px 850px;
-}
-
-#map-texture {
-	position: absolute;
-	width: 1100px;
-	height: 850px;
-	background-image: url(map-texture.jpg);
-	background-size: 1100px 850px;
-	mix-blend-mode: multiply;
+	background-size: 1650px 1275px;
 }
 
 svg {
@@ -328,10 +319,10 @@ div.congress_box.action {
 */
 
 .piece.turn {
-	width: 30px;
-	height: 30px;
+	width: 45px;
+	height: 45px;
 	border-radius: 50%;
-	border: 3px solid white;
+	border: 4px solid white;
 	backdrop-filter: invert(80%);
 }
 
@@ -365,8 +356,8 @@ div.button_box.h {
 }
 
 div.button_box .button {
-	width: 38px;
-	height: 38px;
+	width: 57px;
+	height: 57px;
 	background-size: 100%;
 	border-radius: 50%;
 	border: 1px solid #0008;
@@ -609,7 +600,7 @@ div.button_box .button {
 	<div id="mapwrap">
 	<div id="map">
 
-		<svg id="svgmap" width="1100px" height="850px" viewBox="0 0 2200 1700">
+		<svg id="svgmap" width="1650px" height="1275px" viewBox="0 0 2200 1700">
 		<!-- BEGIN SVG -->
 
 <g transform="translate(0.000000,1700.000000) scale(0.500000,-0.500000)" fill="transparent">
@@ -1060,13 +1051,10 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 		<div id="AtlanticAppalachia" class="region" style="top:332px;left:763px;"></div>
 		<div id="Northeast" class="region" style="top:157px;left:880px;"></div>
 
-		<div id="turn" class="piece turn" style="left:806px;top:770px;"></div>
-		<div id="congress_box" class="congress_box" style="left:490px;top:760px;width:270px;height:60px;">
-		</div>
-		<div id="support_buttons" class="button_box" style="left:25px;top:25px;">
-		</div>
-		<div id="opposition_buttons" class="button_box h" style="right:485px;top:30px;">
-		</div>
+		<div id="turn" class="piece turn" style="left:1209px;top:1155px;"></div>
+		<div id="congress_box" class="congress_box" style="left:490px;top:760px;width:270px;height:60px;"></div>
+		<div id="opposition_buttons" class="button_box" style="left:36px;top:36px;"></div>
+		<div id="support_buttons" class="button_box h" style="right:720px;top:45px;"></div>
 
 		<div id="pieces"></div>
 

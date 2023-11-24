@@ -25,7 +25,7 @@ def readsvg(filename):
 def print_list(data):
     print("const LAYOUT = {")
     for (name, x, y) in data:
-        print(f'\t"{name}": [{x}, {y}],')
+        print(f'\t"{name}": [{round(x*1.5)}, {round(y*1.5)}],')
     print("}")
 
 result = readsvg("tools/layout.svg")

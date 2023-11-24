@@ -2,12 +2,14 @@
 
 mkdir -p HIRES/cards800 cards200 cards100
 
-gs -r400 -sDEVICE=png16m -o map400.png HIRES/map-no-tex.pdf
-gs -r400 -sDEVICE=png16m -o map400-tex.png HIRES/map-only-tex.pdf
-convert -colorspace RGB -resize 12.5% -colorspace sRGB map400.png map-uncrop.png
-convert -colorspace RGB -resize 12.5% -colorspace sRGB map400-tex.png map-tex-uncrop.png
-convert -gravity Center -crop 2200x1700+0+0 map-uncrop.png map.png
-convert -gravity Center -crop 2200x1700+0+0 map-tex-uncrop.png map-texture.png
+# gs -r600 -sDEVICE=png16m -o map600.png HIRES/map-no-tex.pdf
+# gs -r600 -sDEVICE=png16m -o map600-tex.png HIRES/map-only-tex.pdf
+convert -colorspace RGB -resize 12.5% -colorspace sRGB map600.png map-uncrop.png
+convert -colorspace RGB -resize 12.5% -colorspace sRGB map600-tex.png map-tex-uncrop.png
+convert -gravity Center -crop 1650x1275+0+0 map-uncrop.png map.png
+convert -gravity Center -crop 1650x1275+0+0 map-tex-uncrop.png map-texture.png
+
+exit
 
 gs -dUseArtBox -r800 -sDEVICE=png16m -o HIRES/cards800/strategy_%02d.png "HIRES/Strategy Cards FINAL-4.pdf"
 gs -dUseArtBox -r800 -sDEVICE=png16m -o HIRES/cards800/states_%02d.png "HIRES/States FINAL-3.pdf"
