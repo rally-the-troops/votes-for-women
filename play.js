@@ -655,18 +655,16 @@ function on_update() { // eslint-disable-line no-unused-vars
 	for (let c of view.out_of_play)
 		document.getElementById("out_of_play").appendChild(ui.cards[c])
 
-	// TODO Replace with stacked cards
 	for (let id of ['persistent_turn', 'persistent_game', 'persistent_ballot']) {
-		document.getElementById(id).replaceChildren()
-		for (let c of view[id] || []) {
-			let elt = create("div", {
-				className: `persistent_card ${CARDS[c].type}`,
-				innerHTML: sub_card_name(null, c),
-				my_card: c
-			})
-			elt.addEventListener("click", on_click_card)
-			elt.classList.toggle("action", is_card_enabled(c))
-			document.getElementById(id).appendChild(elt)
+		const container = document.getElementById(id)
+		container.replaceChildren()
+		const stack = view[id] || []
+		for (let i = 0; i < stack.length; ++i) {
+			const c = stack[i]
+			const elt = ui.cards[c]
+			elt.style.top = -85 * i + "px"
+			elt.style.zIndex = i + 10
+			container.appendChild(elt)
 		}
 	}
 
