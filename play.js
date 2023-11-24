@@ -31,6 +31,7 @@ const green_check_count = 36
 const red_x_count = 13
 
 let ui = {
+	favicon: document.getElementById("favicon"),
 	status: document.getElementById("status"),
 	turn: document.getElementById("turn"),
 	congress_box: document.getElementById("congress_box"),
@@ -634,6 +635,11 @@ function layout_cubes(list, xorig, yorig) {
 
 function on_update() { // eslint-disable-line no-unused-vars
     console.log("VIEW", view)
+
+	switch (player) {
+	case SUF_NAME: ui.favicon.href = "images/badge1.png"; break
+	case OPP_NAME: ui.favicon.href = "images/badge5.png"; break
+	}
 
 	ui.player[SUF].classList.toggle("active", view.active === SUF_NAME)
 	ui.player[OPP].classList.toggle("active", view.active === OPP_NAME)
