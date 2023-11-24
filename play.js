@@ -602,7 +602,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 	document.getElementById("support_info").textContent = support_info()
 	document.getElementById("opposition_info").textContent = opposition_info()
 
-	ui.turn.style.left = 800 + (42 * (view.turn - 1)) + "px"
+	ui.turn.style.left = 806 + (42 * (view.turn - 1)) + "px"
 
 	ui.congress_box.replaceChildren()
 	ui.congress_box.classList.toggle("action", !view.congress && is_action("congress"))
