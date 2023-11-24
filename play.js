@@ -1,6 +1,6 @@
 "use strict"
 
-/* global CARDS, US_STATES, action_button, scroll_into_view, send_action, view */
+/* global CARDS, US_STATES, action_button, player, scroll_into_view, send_action, view */
 
 const SUF = 0
 const OPP = 1
@@ -600,9 +600,6 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 	p.innerHTML = text
 	return p
 }
-
-const pluralize = (count, noun, suffix = 's') =>
-  `${count} ${noun}${count !== 1 ? suffix : ''}`;
 
 function support_info() {
 	return `${view.support_buttons}\u{2b50} ${view.support_hand}\u{1f0cf}`
