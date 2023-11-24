@@ -200,7 +200,7 @@ function add_campaigner(color, region) {
 	} else {
 		throw Error("No free campaigners")
 	}
-	log(`Placed ${COLOR_CODE[color]}R in R${region}`)
+	log(`Placed ${COLOR_CODE[color]}R in R${region}.`)
 }
 
 function player_campaigners() {
@@ -354,7 +354,7 @@ function us_states_with_color_cubes(us_states, cube) {
 }
 
 function add_cube(cube, us_state) {
-	log(`Added ${COLOR_CODE[cube]}C in S${us_state}`)
+	log(`Added ${COLOR_CODE[cube]}C in S${us_state}.`)
 
 	if ((cube === RED && support_cubes(us_state) > 0) || (cube !== RED && red_cubes(us_state) > 0))
 		throw new Error("Can't add cube when opponent still has cubes there")
@@ -366,7 +366,7 @@ function add_cube(cube, us_state) {
 }
 
 function remove_cube(cube, us_state) {
-	log(`Removed ${COLOR_CODE[cube]}C from S${us_state}`)
+	log(`Removed ${COLOR_CODE[cube]}C from S${us_state}.`)
 
 	if ((cube === PURPLE && !purple_cubes(us_state)) || (cube === YELLOW && !yellow_cubes(us_state)) || (cube === RED && !red_cubes(us_state)))
 		throw new Error("Can't remove cube that aint there")
@@ -378,7 +378,7 @@ function remove_cube(cube, us_state) {
 }
 
 function remove_green_check(us_state) {
-	log(`Removed ${COLOR_CODE[GREEN_CHECK]} from S${us_state}`)
+	log(`Removed ${COLOR_CODE[GREEN_CHECK]} from S${us_state}.`)
 
 	if (!is_green_check(us_state))
 		throw new Error("Can't remove a green check that aint there")
@@ -387,7 +387,7 @@ function remove_green_check(us_state) {
 }
 
 function remove_red_x(us_state) {
-	log(`Removed ${COLOR_CODE[RED_X]} from S${us_state}`)
+	log(`Removed ${COLOR_CODE[RED_X]} from S${us_state}.`)
 
 	if (!is_red_x(us_state))
 		throw new Error("Can't remove a red x that aint there")
@@ -800,7 +800,7 @@ states.strategy_phase = {
 
 	},
 	done() {
-		log(`Suffragist committed ${pluralize(game.support_committed, 'button')}.`)
+		log(`Suffragist committed ${game.support_committed} BM.`)
 		game.active = OPP
 	},
 	defer() {
@@ -1416,7 +1416,8 @@ function campaigner_color(c) {
 function goto_campaigning_add_cubes(campaigner, die) {
 	game.selected_campaigner = campaigner
 	set_add(game.campaigning.assigned, campaigner)
-	log(`Assigned ${die} to ${COLOR_CODE[campaigner_color(campaigner)]}R in R${campaigner_region(campaigner)}.`)
+	// TODO die type & color
+	log(`Assigned B${die} to ${COLOR_CODE[campaigner_color(campaigner)]}R in R${campaigner_region(campaigner)}.`)
 	game.campaigning.count = die
 	game.campaigning.added = 0
 	game.campaigning.moved = false
@@ -1604,13 +1605,13 @@ const GREEN_CHECK_VICTORY = 36
 const RED_X_VICTORY = 13
 
 function ratify_nineteenth_amendment(us_state) {
-	log(`S${us_state} ratified the Nineteenth Amendment`)
+	log(`S${us_state} ratified the Nineteenth Amendment.`)
 	game.us_states[us_state] = 0
 	set_green_check(us_state)
 }
 
 function reject_nineteenth_amendment(us_state) {
-	log(`S${us_state} rejected the Nineteenth Amendment`)
+	log(`S${us_state} rejected the Nineteenth Amendment.`)
 	game.us_states[us_state] = 0
 	set_red_x(us_state)
 }
@@ -1618,7 +1619,7 @@ function reject_nineteenth_amendment(us_state) {
 function trigger_nineteenth_amendment() {
 	if (game.nineteenth_amendment)
 		throw Error("ASSERT: nineteenth_amendment already set")
-	log("Congress passed the Nineteenth Amendment")
+	log("Congress passed the Nineteenth Amendment.")
 	game.nineteenth_amendment = 1
 	game.congress = 0
 
@@ -2178,7 +2179,7 @@ states.vm_add_campaigner = {
 }
 
 function increase_player_buttons(count=1) {
-	log(`+${pluralize(count, 'button')}.`)
+	log(`+${count} BM.`)
 	if (game.active === SUF) {
 		game.support_buttons = Math.min(game.support_buttons + count, MAX_SUPPORT_BUTTONS)
 	} else {
@@ -2187,7 +2188,7 @@ function increase_player_buttons(count=1) {
 }
 
 function decrease_player_buttons(count=1) {
-	log(`-${pluralize(count, 'button')}.`)
+	log(`-${count} BM.`)
 	if (game.active === SUF) {
 		game.support_buttons = Math.max(game.support_buttons - count, 0)
 	} else {
@@ -2196,7 +2197,7 @@ function decrease_player_buttons(count=1) {
 }
 
 function decrease_opponent_buttons(count=1) {
-	log(`${opponent_name()} -${pluralize(count, 'button')}.`)
+	log(`${opponent_name()} -${count} BM.`)
 	if (game.active === SUF) {
 		game.opposition_buttons = Math.max(game.opposition_buttons - count, 0)
 	} else {
@@ -2482,7 +2483,7 @@ states.vm_add_congress = {
 	},
 	congress() {
 		game.congress = Math.min(game.congress + game.vm.count, 6)
-		log(`+${pluralize(game.vm.count, 'Congressional marker')}.`)
+		log(`+${game.vm.count} CM.`)
 
 		if (game.congress >= 6) {
 			if (trigger_nineteenth_amendment())
@@ -2500,7 +2501,7 @@ states.vm_remove_congress = {
 	},
 	congress() {
 		game.congress = Math.max(game.congress - game.vm.count, 0)
-		log(`-${pluralize(game.vm.count, 'Congressional marker')}.`)
+		log(`-${game.vm.count} CM.`)
 
 		vm_next()
 	}

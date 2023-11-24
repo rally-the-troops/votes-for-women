@@ -405,7 +405,7 @@ function build_user_interface() {
 
 	for (let i = 0; i < 6; ++i) {
 		elt = ui.opposition_buttons[i] = create("div", {
-			className: `button button_${(i % 2) + 1}`,
+			className: `button button_${(i % 2) + 5}`,
 		})
 	}
 
@@ -521,6 +521,40 @@ function sub_us_state_name(_match, p1, _offset, _string) {
 	return `<span class="tip" onmouseenter="on_focus_us_state_tip(${s})" onmouseleave="on_blur_us_state_tip(${s})" onclick="on_click_us_state_tip(${s})">${n}</span>`
 }
 
+// TODO blue d4, red d6, white d8
+
+const ICONS = {
+	B0: '<span class="icon black d0"></span>',
+	B1: '<span class="icon black d1"></span>',
+	B2: '<span class="icon black d2"></span>',
+	B3: '<span class="icon black d3"></span>',
+	B4: '<span class="icon black d4"></span>',
+	B5: '<span class="icon black d5"></span>',
+	B6: '<span class="icon black d6"></span>',
+	W0: '<span class="icon white d0"></span>',
+	W1: '<span class="icon white d1"></span>',
+	W2: '<span class="icon white d2"></span>',
+	W3: '<span class="icon white d3"></span>',
+	W4: '<span class="icon white d4"></span>',
+	W5: '<span class="icon white d5"></span>',
+	W6: '<span class="icon white d6"></span>',
+	PR: '<span class="icon purple_campaigner"></span>',
+	YR: '<span class="icon yellow_campaigner"></span>',
+	RR: '<span class="icon red_campaigner"></span>',
+	PC: '<span class="icon purple_cube"></span>',
+	YC: '<span class="icon yellow_cube"></span>',
+	PYC: '<span class="icon purple_or_yellow_cube"></span>',
+	RC: '<span class="icon red_cube"></span>',
+	BM: '<span class="icon button"></span>',
+	CM: '<span class="icon congressional_marker"></span>',
+	GV: '<span class="icon green_check"></span>',
+	RX: '<span class="icon red_x"></span>',
+}
+
+function sub_icon(match) {
+	return ICONS[match]
+}
+
 function on_log(text) { // eslint-disable-line no-unused-vars
 	let p = document.createElement("div")
 
@@ -535,6 +569,11 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 	text = text.replace(/C(\d+)/g, sub_card_name)
 	text = text.replace(/R(\d+)/g, sub_region_name)
 	text = text.replace(/S(\d+)/g, sub_us_state_name)
+
+	text = text.replace(/\b[PYR]R\b/g, sub_icon)
+	text = text.replace(/\b[PYR]C|PYC\b/g, sub_icon)
+	text = text.replace(/\b[BC]M|GV|RX\b/g, sub_icon)
+	text = text.replace(/\b[BW]\d\b/g, sub_icon)
 
 	if (text.match(/^\.h1/)) {
 		text = text.substring(4)

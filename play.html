@@ -59,6 +59,84 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 #log > .p { padding-left: 20px; text-align: right; font-style: italic; opacity: 75%; }
 #log > .i { padding-left: 20px; }
 
+#log .icon {
+	display: inline-block;
+	vertical-align: -2px;
+	width: 12px;
+	height: 12px;
+	border-radius: 0px;
+	box-shadow: none;
+	border: none;
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+}
+
+#log .white {
+	background-image: url(images/die_black_pips.svg);
+	background-size: 600% 100%;
+	background-color: #fff;
+	border: 1px solid #444;
+}
+
+#log .black {
+	background-image: url(images/die_white_pips.svg);
+	background-size: 600% 100%;
+	background-color: #666;
+	border: 1px solid #222;
+}
+
+.d0 { background-position: -100% 0 }
+.d1 { background-position: 0% 0; }
+.d2 { background-position: 20% 0; }
+.d3 { background-position: 40% 0; }
+.d4 { background-position: 60% 0; }
+.d5 { background-position: 80% 0; }
+.d6 { background-position: 100% 0; }
+
+#log .purple_campaigner {
+	background-image: url(images/icon_purple_campaigner.png);
+}
+
+#log .yellow_campaigner {
+	background-image: url(images/icon_yellow_campaigner.png);
+}
+
+#log .red_campaigner {
+	background-image: url(images/icon_opposition_campaigner.png);
+}
+
+#log .purple_cube {
+	background-image: url(images/icon_purple_cube.png);
+}
+
+#log .yellow_cube {
+	background-image: url(images/icon_yellow_cube.png);
+}
+
+#log .purple_or_yellow_cube {
+	background-image: url(images/icon_purple_or_yellow_cube.png);
+}
+
+#log .red_cube {
+	background-image: url(images/icon_opposition_cube.png);
+}
+
+#log .button {
+	background-image: url(images/icon_button.png);
+}
+
+#log .congressional_marker {
+	background-image: url(images/icon_congressional_marker.png);
+}
+
+#log .green_check {
+	background-image: url(images/icon_green_check.png);
+}
+
+#log .red_x {
+	background-image: url(images/icon_red_x.png);
+}
+
 /* PANELS */
 
 .panel_grid {
