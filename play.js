@@ -40,6 +40,11 @@ let ui = {
 		document.getElementById("role_Opposition"),
 	],
 	pieces: document.getElementById("pieces"),
+	pieces: document.getElementById("pieces"),
+	support_button_box: document.getElementById("support_buttons"),
+	support_buttons: [],
+	opposition_button_box: document.getElementById("opposition_buttons"),
+	opposition_buttons: [],
 	campaigners: [],
 	cubes: [],
 	green_checks: [],
@@ -392,6 +397,18 @@ function build_user_interface() {
 		elt.addEventListener("click", on_click_congress)
 	}
 
+	for (let i = 0; i < 12; ++i) {
+		elt = ui.support_buttons[i] = create("div", {
+			className: `button button_${(i % 4) + 1}`,
+		})
+	}
+
+	for (let i = 0; i < 6; ++i) {
+		elt = ui.opposition_buttons[i] = create("div", {
+			className: `button button_${(i % 2) + 1}`,
+		})
+	}
+
     for (let c = 1; c <= card_count; ++c) {
 		elt = ui.cards[c] = create("div", {
 			className: `card card_${c}`,
@@ -592,6 +609,16 @@ function on_update() { // eslint-disable-line no-unused-vars
 	for (let c = 1; c <= view.congress; ++c) {
 		ui.congress_box.appendChild(ui.congress[c])
 		ui.congress[c].classList.toggle("action", is_action("congress"))
+	}
+
+	ui.support_button_box.replaceChildren()
+	for (let i = 0; i < view.support_buttons; ++i) {
+		ui.support_button_box.appendChild(ui.support_buttons[i])
+	}
+
+	ui.opposition_button_box.replaceChildren()
+	for (let i = 0; i < view.opposition_buttons; ++i) {
+		ui.opposition_button_box.appendChild(ui.opposition_buttons[i])
 	}
 
 	document.getElementById("hand").replaceChildren()
