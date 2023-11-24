@@ -2121,18 +2121,12 @@ function vm_draw_2_play_1_event() {
 }
 
 function vm_draw_6_place_any_on_top_of_draw() {
-	clear_undo()
-	game.vm.draw = []
-	game.selected_cards = []
-	let draw_count = Math.min(player_deck().length, 6)
-	for (let i = 0; i < draw_count; ++i) {
-		let card = draw_card(player_deck())
-		game.vm.draw.push(card)
-		player_hand().push(card)
-	}
+	goto_vm_place_any_on_top_of_draw()
+}
 
-	log(`${game.active} drew ${draw_count} cards.`)
-	game.state = "vm_draw_6_place_any_on_top_of_draw"
+function vm_draw_6_play_1_place_any_on_top_of_draw() {
+	game.vm.play_one = -1
+	goto_vm_place_any_on_top_of_draw()
 }
 
 function vm_support_discard_2_random_draw_2() {
@@ -2729,7 +2723,7 @@ states.vm_draw_2_play_1_event = {
 		play_card_event(c)
 	},
 	skip() {
-		log("None of the drawn cards could be played.")
+		log("None of the drawn cards could be played for their event.")
 		for (let c of game.vm.draw) {
 			discard_card_from_hand(c)
 		}
@@ -2738,22 +2732,59 @@ states.vm_draw_2_play_1_event = {
 	}
 }
 
-states.vm_draw_6_place_any_on_top_of_draw = {
+function goto_vm_place_any_on_top_of_draw() {
+	clear_undo()
+	game.vm.draw = []
+	game.selected_cards = []
+	let draw_count = Math.min(player_deck().length, 6)
+	for (let i = 0; i < draw_count; ++i) {
+		let card = draw_card(player_deck())
+		game.vm.draw.push(card)
+		player_hand().push(card)
+	}
+
+	log(`${game.active} drew ${draw_count} cards.`)
+	game.state = "vm_place_any_on_top_of_draw"
+}
+
+states.vm_place_any_on_top_of_draw = {
 	inactive: "choose which cards to put on top of their Draw Deck.",
 	prompt() {
-		event_prompt(`Select which cards to put on top of your Draw Deck. ${game.selected_cards.length} selected.`)
-		for (let c of game.vm.draw) {
-			if (!game.selected_cards.includes(c))
-				gen_action_card(c)
+		let can_play = false
+		if (game.vm.play_one && !game.selected_cards.length) {
+			event_prompt(`Select which card to play as event.`)
+			for (let c of game.vm.draw) {
+				if (can_play_event(c)) {
+					gen_action_card(c)
+					can_play = true
+				}
+			}
+		} else {
+			event_prompt(`Select which cards to put on top of your Draw Deck.`)
+			for (let c of game.vm.draw) {
+				if (!game.selected_cards.includes(c))
+					gen_action_card(c)
+			}
 		}
 
-		gen_action("done")
+
+		if (!game.vm.play_one || game.selected_cards.length) {
+			gen_action("done")
+		} else if (!can_play) {
+			gen_action("skip")
+		}
 	},
 	card(c) {
 		push_undo()
 		game.selected_cards.push(c)
 	},
+	skip() {
+		log("None of the drawn cards could be played for their event.")
+		delete game.vm.play_one
+	},
 	done() {
+		if (game.vm.play_one)
+			game.vm.play_one = game.selected_cards.shift()
 		log(`${game.active} selected ${pluralize(game.selected_cards.length, 'card')} to put on top of their Draw Deck.`)
 
 		// XXX does this order make sense? first selected card goes on top.
@@ -2769,7 +2800,12 @@ states.vm_draw_6_place_any_on_top_of_draw = {
 
 		delete game.vm.draw
 		game.selected_cards = []
-		vm_next()
+		if (game.vm.play_one) {
+			end_play_card(game.played_card)
+			play_card_event(game.vm.play_one)
+		} else {
+			vm_next()
+		}
 	}
 }
 
@@ -3814,7 +3850,7 @@ CODE[110] = [ // Superior Lobbying
 ]
 
 CODE[111] = [ // The Winning Plan
-	[ vm_todo ],
+	[ vm_draw_6_play_1_place_any_on_top_of_draw ],
 	[ vm_return ],
 ]
 
