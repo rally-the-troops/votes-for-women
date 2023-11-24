@@ -604,11 +604,11 @@ const pluralize = (count, noun, suffix = 's') =>
   `${count} ${noun}${count !== 1 ? suffix : ''}`;
 
 function support_info() {
-	return `${pluralize(view.support_buttons, 'button')}, ${pluralize(view.support_hand, 'card')} in hand`
+	return `${view.support_buttons}\u{2b50} ${view.support_hand}\u{1f0cf}`
 }
 
 function opposition_info() {
-	return `${pluralize(view.opposition_buttons, 'button')}, ${pluralize(view.opposition_hand, 'card')} in hand`
+	return `${view.opposition_buttons}\u{2b55} ${view.opposition_hand}\u{1f3b4}`
 }
 
 function layout_cubes(list, xorig, yorig) {

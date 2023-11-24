@@ -29,15 +29,12 @@ main {
 
 #role_Suffragist .role_name { background-color: var(--suf-85); }
 #role_Opposition .role_name { background-color: var(--opp-85); }
-.role.active span { text-decoration: underline; }
+.role.active .role_name span { text-decoration: underline; }
+
+.role_vp { float: right; height: 24px; color: #000c; }
 
 body.Suffragist header.your_turn { background-color: var(--suf-75); }
 body.Opposition header.your_turn { background-color: var(--opp-75); }
-.role_info {
-	padding: 3px 18px;
-	background-color: gainsboro;
-	white-space: pre-wrap;
-}
 
 #log { background-color: whitesmoke; }
 #log .h1, #log .h2 {
@@ -357,22 +354,31 @@ div.button_box {
 	flex-direction: column;
 	flex-wrap: wrap;
 	justify-content: start;
-	gap: 4px;
+	gap: 0px;
 }
 
-.button {
-	width: 40px;
-	height: 40px;
-	background-size: 40px 40px;
-	filter: drop-shadow(0px 1px 2px #0004);
+div.button_box .button { margin: 0 0 -10px 0; }
+div.button_box.h .button { margin: 0 0 0 -10px; }
+
+div.button_box.h {
+	flex-direction: row;
 }
 
-.button_1{background-image:url(images/badge1.png)}
-.button_2{background-image:url(images/badge2.png)}
-.button_3{background-image:url(images/badge3.png)}
-.button_4{background-image:url(images/badge4.png)}
-.button_5{background-image:url(images/badge5.png)}
-.button_6{background-image:url(images/badge6.png)}
+div.button_box .button {
+	width: 38px;
+	height: 38px;
+	background-size: 100%;
+	border-radius: 50%;
+	border: 1px solid #0008;
+	box-shadow: 0 1px 4px #0004;
+}
+
+.button_1{background-image:url(images/button1.png)}
+.button_2{background-image:url(images/button2.png)}
+.button_3{background-image:url(images/button3.png)}
+.button_4{background-image:url(images/button4.png)}
+.button_5{background-image:url(images/button5.png)}
+.button_6{background-image:url(images/button6.png)}
 
 .card {
 	background-size: cover;
@@ -581,17 +587,17 @@ div.button_box {
 	<div id="roles">
 		<div class="role" id="role_Suffragist">
 			<div class="role_name">
+				<div class="role_vp" id="support_info"></div>
 				<span>Suffragist</span>
 				<div class="role_user">-</div>
 			</div>
-			<div class="role_info" id="support_info">0 buttons, 0 cards in hand</div>
 		</div>
 		<div class="role" id="role_Opposition">
 			<div class="role_name">
+				<div class="role_vp" id="opposition_info"></div>
 				<span>Opposition</span>
 				<div class="role_user">-</div>
 			</div>
-			<div class="role_info" id="opposition_info">0 buttons, 0 cards in hand</div>
 		</div>
 		<div class="card_info"></div></div>
 	</div>
@@ -1057,9 +1063,9 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 		<div id="turn" class="piece turn" style="left:806px;top:770px;"></div>
 		<div id="congress_box" class="congress_box" style="left:490px;top:760px;width:270px;height:60px;">
 		</div>
-		<div id="support_buttons" class="button_box" style="left:4px;top:40px;width:50px;height:534px;">
+		<div id="support_buttons" class="button_box" style="left:25px;top:25px;">
 		</div>
-		<div id="opposition_buttons" class="button_box" style="left:1056px;top:460px;width:50px;height:270px;">
+		<div id="opposition_buttons" class="button_box h" style="right:485px;top:30px;">
 		</div>
 
 		<div id="pieces"></div>
