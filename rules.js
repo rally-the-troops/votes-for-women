@@ -187,14 +187,14 @@ function us_state_region(s) {
 	return US_STATES[s].region
 }
 
-function free_campaigner(campaigners, color) {
-	const start = color === YELLOW ? 2 : color === RED ? 4 : 0
-	const index = campaigners.indexOf(0, start)
-	return index > start + 1 ? -1 : index
+function free_campaigner(color) {
+	const start = (color === YELLOW) ? 2 : color === RED ? 4 : 0
+	const index = game.campaigners.indexOf(0, start)
+	return index > (start + 1) ? -1 : index
 }
 
 function add_campaigner(color, region) {
-	const index = free_campaigner(game.campaigners, color)
+	const index = free_campaigner(color)
 	if (index !== -1) {
 		game.campaigners[index] = region
 	} else {
@@ -1767,7 +1767,8 @@ function vm_goto() {
 }
 
 function vm_return() {
-	game.state = "vm_return"
+	// game.state = "vm_return"
+	end_event()
 }
 
 states.vm_return = {
@@ -3467,7 +3468,7 @@ CODE[70] = [ // Old Dixie
 ]
 
 CODE[71] = [ // NAOWS Forms
-	[ vm_add_campaigner, NORTHEAST ],
+	[ vm_add_campaigner, RED, NORTHEAST ],
 	[ vm_receive_buttons, 2 ],
 	[ vm_return ],
 ]

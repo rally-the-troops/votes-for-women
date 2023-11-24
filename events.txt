@@ -374,7 +374,7 @@ CARD 70 - Old Dixie
 
 CARD 71 - NAOWS Forms
 # Add 1 :red_campaigner in the Northeast region. Receive 2 :button.
-    add_campaigner NORTHEAST
+    add_campaigner RED NORTHEAST
     receive_buttons 2
 
 CARD 72 - Woman and the Republic
