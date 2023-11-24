@@ -213,10 +213,11 @@ function player_campaigners() {
 
 function for_each_player_campaigner(fn) {
 	let i = (game.active === SUF) ? 1 : 5
-	for (let r of player_campaigners())
+	for (let r of player_campaigners()) {
 		if (r)
 			fn(i)
 		i++
+	}
 }
 
 function campaigner_region(c) {
