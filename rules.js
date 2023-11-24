@@ -506,6 +506,7 @@ exports.setup = function (seed, _scenario, _options) {
 		state: null,
 
 		played_card: 0,
+		selected_cards: [],
 
 		turn: 0,
 		round: 0,
@@ -635,6 +636,7 @@ exports.VIEW_SCHEMA = {
 		out_of_play: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 
 		hand: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		selected_cards: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 
     },
     required: [
@@ -690,12 +692,15 @@ exports.view = function(state, player) {
 		out_of_play: game.out_of_play,
 
 		hand: [],
+		selected_cards: [],
 	}
 
 	if (player === SUF) {
 		view.hand = game.support_hand
+		view.selected_cards = game.selected_cards
 	} else if (player === OPP) {
 		view.hand = game.opposition_hand
+		view.selected_cards = game.selected_cards
 	}
 
 	if (game.state === "game_over") {
@@ -2116,8 +2121,18 @@ function vm_draw_2_play_1_event() {
 }
 
 function vm_draw_6_place_any_on_top_of_draw() {
-	log("TODO draw_6_place_any_on_top_of_draw")
-	vm_next()
+	clear_undo()
+	game.vm.draw = []
+	game.selected_cards = []
+	let draw_count = Math.min(player_deck().length, 6)
+	for (let i = 0; i < draw_count; ++i) {
+		let card = draw_card(player_deck())
+		game.vm.draw.push(card)
+		player_hand().push(card)
+	}
+
+	log(`${game.active} drew ${draw_count} cards.`)
+	game.state = "vm_draw_6_place_any_on_top_of_draw"
 }
 
 function vm_support_discard_2_random_draw_2() {
@@ -2688,8 +2703,6 @@ states.vm_counter_strat = {
 	}
 }
 
-
-
 states.vm_draw_2_play_1_event = {
 	inactive: "choose which card to play.",
 	prompt() {
@@ -2711,16 +2724,51 @@ states.vm_draw_2_play_1_event = {
 		end_play_card(game.played_card)
 		let other = game.vm.draw.find(x => x !== c)
 		discard_card_from_hand(other)
-		log(`C${other} discarded.`)
+		log(`Discarded C${other}.`)
 		delete game.vm.draw
 		play_card_event(c)
 	},
 	skip() {
-		log(`None of the drawn cards could be played.`)
+		log("None of the drawn cards could be played.")
 		for (let c of game.vm.draw) {
 			discard_card_from_hand(c)
 		}
 		delete game.vm.draw
+		vm_next()
+	}
+}
+
+states.vm_draw_6_place_any_on_top_of_draw = {
+	inactive: "choose which cards to put on top of their Draw Deck.",
+	prompt() {
+		event_prompt(`Select which cards to put on top of your Draw Deck. ${game.selected_cards.length} selected.`)
+		for (let c of game.vm.draw) {
+			if (!game.selected_cards.includes(c))
+				gen_action_card(c)
+		}
+
+		gen_action("done")
+	},
+	card(c) {
+		push_undo()
+		game.selected_cards.push(c)
+	},
+	done() {
+		log(`${game.active} selected ${pluralize(game.selected_cards.length, 'card')} to put on top of their Draw Deck.`)
+
+		// XXX does this order make sense? first selected card goes on top.
+		for (let c of game.selected_cards.reverse()) {
+			player_deck().push(c)
+			array_remove_item(game.vm.draw, c)
+			array_remove_item(player_hand(), c)
+		}
+		for (let c of game.vm.draw) {
+			player_deck().unshift(c)
+			array_remove_item(player_hand(), c)
+		}
+
+		delete game.vm.draw
+		game.selected_cards = []
 		vm_next()
 	}
 }
