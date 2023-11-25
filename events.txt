@@ -514,7 +514,7 @@ CARD 98 - Voter Suppression
 
 CARD 99 - Anti-Suffrage Riots
 # The Suffragist player must discard 2 cards from their hand at random and then draw 2 cards from the Suffragist Draw Deck.
-    support_discard_2_random_draw_2
+    opponent_discard_2_random_draw_2
 
 CARD 100 - American Constitutional League
 # Spend 4 :button to select, and place in front of you, 1 available Strategy card.
