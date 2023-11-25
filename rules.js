@@ -2126,6 +2126,8 @@ function vm_draw_6_play_1_place_any_on_top_of_draw() {
 function vm_opponent_discard_2_random_draw_2() {
 	clear_undo()
 	next_player()
+	game.selected_cards = shuffle(object_copy(player_hand())).slice(0, 2)
+	log(`Randomly selected ${pluralize(game.selected_cards.length, 'card')} from ${game.active}'s Hand.`)
 	game.state = "vm_opponent_discard_2_random_draw_2"
 }
 
@@ -2805,25 +2807,23 @@ states.vm_place_any_on_top_of_draw = {
 }
 
 states.vm_opponent_discard_2_random_draw_2 = {
-	inactive: "discard 2 cards at random and then draw 2 cards.",
+	inactive: "discard 2 random cards and then draw 2 cards.",
 	prompt() {
-		event_prompt("You must discard 2 cards from Hand at random and then draw 2 cards.")
+		event_prompt("You must discard 2 random cards and then draw 2 cards.")
 		gen_action("next")
 	},
 	next() {
-		clear_undo()
-		let first_two = shuffle(object_copy(player_hand())).slice(0, 2)
-		for (let c of first_two) {
+		for (let c of game.selected_cards) {
 			discard_card_from_hand(c)
-			log(`${game.active} discarded C${c}.`)
+			log(`Discarded C${c}.`)
 		}
 		// XXX if we could discard less than two, should we also draw less than two?
-		let draw_count = Math.min(first_two.length, 2)
-		for (let i = 0; i < draw_count; ++i) {
+		for (let i = 0; i < game.selected_cards.length; ++i) {
 			let card = draw_card(player_deck())
 			player_hand().push(card)
 		}
-		log(`${game.active} drew ${draw_count} cards.`)
+		log(`${game.active} drew ${pluralize(game.selected_cards.length, 'card')}.`)
+		game.selected_cards = []
 		next_player()
 		vm_next()
 	}
