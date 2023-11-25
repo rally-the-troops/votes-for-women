@@ -1233,7 +1233,7 @@ states.final_voting_roll = {
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		game.roll = roll_ndx(game.count, game.dice, "B", "Re-rolled")
+		game.roll = roll_ndx(game.count, game.dice, "Re-rolled")
 	},
 	next() {
 		next_player()
@@ -1251,7 +1251,7 @@ states.final_voting_opponent = {
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		game.opponent_roll = roll_ndx(1, game.opponent_dice, "B", "Re-rolled")
+		game.opponent_roll = roll_ndx(1, game.opponent_dice, "Re-rolled")
 	},
 	next() {
 		goto_final_voting_result()
@@ -1370,7 +1370,7 @@ states.campaigning = {
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		game.roll = roll_ndx_list(game.count, game.dice, "B", "Re-rolled")
+		game.roll = roll_ndx_list(game.count, game.dice, "Re-rolled")
 	},
 	next() {
 		goto_campaigning_assign()
@@ -2539,33 +2539,39 @@ states.vm_remove_congress = {
 	}
 }
 
-function roll_ndx(n, x, color="B", prefix="Rolled") {
+const DICE_COLOR = {
+	[D4]: "B", // blue
+	[D6]: "D", // red
+	[D8]: "W", // white
+}
+
+function roll_ndx(n, x, prefix="Rolled") {
 	clear_undo()
 	let result = 0
 	let summary = []
 	for (let i = 0; i < n; ++i) {
 		let roll = random(x) + 1
 		result += roll
-		summary.push(color + roll)
+		summary.push(DICE_COLOR[x] + roll)
 	}
 	log(prefix + " " + summary.join(" "))
 	return result
 }
 
-function roll_ndx_list(n, x, color="B", prefix="Rolled") {
+function roll_ndx_list(n, x, prefix="Rolled") {
 	clear_undo()
 	let result = []
 	let summary = []
 	for (let i = 0; i < n; ++i) {
 		let roll = random(x) + 1
 		result.push(roll)
-		summary.push(color + roll)
+		summary.push(DICE_COLOR[x] + roll)
 	}
 	log(prefix + " " + summary.join(" "))
 	return result
 }
 
-function roll_ndx_count_success(n, x, color="B", prefix="Rolled") {
+function roll_ndx_count_success(n, x, prefix="Rolled") {
 	clear_undo()
 	let result = 0
 	let summary = []
@@ -2573,8 +2579,7 @@ function roll_ndx_count_success(n, x, color="B", prefix="Rolled") {
 		let roll = random(x) + 1
 		if (roll >= 6)
 			result += 1
-		// TODO color for success?
-		summary.push(color + roll)
+		summary.push(DICE_COLOR[x] + roll)
 	}
 	log(prefix + " " + summary.join(" "))
 	return result
@@ -2610,9 +2615,9 @@ states.vm_roll = {
 	reroll() {
 		decrease_player_buttons(1)
 		if (game.vm.roll_list)
-			game.vm.roll = roll_ndx_list(game.vm.count, game.vm.d, "B", "Re-rolled")
+			game.vm.roll = roll_ndx_list(game.vm.count, game.vm.d, "Re-rolled")
 		else
-			game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "B", "Re-rolled")
+			game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "Re-rolled")
 	},
 	next() {
 		vm_next()

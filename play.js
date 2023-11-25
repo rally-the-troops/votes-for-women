@@ -525,20 +525,24 @@ function sub_us_state_name(_match, p1, _offset, _string) {
 // TODO blue d4, red d6, white d8
 
 const ICONS = {
-	B0: '<span class="icon black d0"></span>',
-	B1: '<span class="icon black d1"></span>',
-	B2: '<span class="icon black d2"></span>',
-	B3: '<span class="icon black d3"></span>',
-	B4: '<span class="icon black d4"></span>',
-	B5: '<span class="icon black d5"></span>',
-	B6: '<span class="icon black d6"></span>',
-	W0: '<span class="icon white d0"></span>',
-	W1: '<span class="icon white d1"></span>',
-	W2: '<span class="icon white d2"></span>',
-	W3: '<span class="icon white d3"></span>',
-	W4: '<span class="icon white d4"></span>',
-	W5: '<span class="icon white d5"></span>',
-	W6: '<span class="icon white d6"></span>',
+	B1: '<span class="icon die_d4 d1"></span>',
+	B2: '<span class="icon die_d4 d2"></span>',
+	B3: '<span class="icon die_d4 d3"></span>',
+	B4: '<span class="icon die_d4 d4"></span>',
+	D1: '<span class="icon die_d6 d1"></span>',
+	D2: '<span class="icon die_d6 d2"></span>',
+	D3: '<span class="icon die_d6 d3"></span>',
+	D4: '<span class="icon die_d6 d4"></span>',
+	D5: '<span class="icon die_d6 d5"></span>',
+	D6: '<span class="icon die_d6 d6"></span>',
+	W1: '<span class="icon die_d8 d1"></span>',
+	W2: '<span class="icon die_d8 d2"></span>',
+	W3: '<span class="icon die_d8 d3"></span>',
+	W4: '<span class="icon die_d8 d4"></span>',
+	W5: '<span class="icon die_d8 d5"></span>',
+	W6: '<span class="icon die_d8 d6"></span>',
+	// W7: '<span class="icon die_d8 d7"></span>',
+	// W8: '<span class="icon die_d8 d8"></span>',
 	PR: '<span class="icon purple_campaigner"></span>',
 	YR: '<span class="icon yellow_campaigner"></span>',
 	RR: '<span class="icon red_campaigner"></span>',
@@ -574,7 +578,7 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 	text = text.replace(/\b[PYR]R\b/g, sub_icon)
 	text = text.replace(/\b[PYR]C|PYC\b/g, sub_icon)
 	text = text.replace(/\b[BC]M|GV|RX\b/g, sub_icon)
-	text = text.replace(/\b[BW]\d\b/g, sub_icon)
+	text = text.replace(/\b[BDW]\d\b/g, sub_icon)
 
 	if (text.match(/^\.h1/)) {
 		text = text.substring(4)
