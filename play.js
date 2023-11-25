@@ -671,12 +671,9 @@ function on_update() { // eslint-disable-line no-unused-vars
 	document.getElementById("hand").replaceChildren()
 	document.getElementById("set_aside").replaceChildren()
 	document.getElementById("support_claimed").replaceChildren()
-	document.getElementById("support_discard").replaceChildren()
 	document.getElementById("opposition_claimed").replaceChildren()
-	document.getElementById("opposition_discard").replaceChildren()
 	document.getElementById("states_draw").replaceChildren()
 	document.getElementById("strategy_draw").replaceChildren()
-	document.getElementById("out_of_play").replaceChildren()
 
     if (view.hand.length) {
 		document.getElementById("hand_panel").classList.remove("hide")
@@ -696,20 +693,13 @@ function on_update() { // eslint-disable-line no-unused-vars
 
 	for (let c of view.support_claimed)
 		document.getElementById("support_claimed").appendChild(ui.cards[c])
-	for (let c of view.support_discard)
-		document.getElementById("support_discard").appendChild(ui.cards[c])
 	for (let c of view.opposition_claimed)
 		document.getElementById("opposition_claimed").appendChild(ui.cards[c])
-	for (let c of view.opposition_discard)
-		document.getElementById("opposition_discard").appendChild(ui.cards[c])
 
 	for (let c of view.states_draw)
 		document.getElementById("states_draw").appendChild(ui.cards[c])
 	for (let c of view.strategy_draw)
 		document.getElementById("strategy_draw").appendChild(ui.cards[c])
-
-	for (let c of view.out_of_play)
-		document.getElementById("out_of_play").appendChild(ui.cards[c])
 
 	for (let id of ['persistent_turn', 'persistent_game', 'persistent_ballot']) {
 		const container = document.getElementById(id)

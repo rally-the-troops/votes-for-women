@@ -155,14 +155,6 @@ function opponent_deck() {
 	}
 }
 
-function player_discard() {
-	if (game.active === SUF) {
-		return game.support_discard
-	} else {
-		return game.opposition_discard
-	}
-}
-
 function is_player_claimed_card(c) {
 	return player_claimed().includes(c)
 }
@@ -559,20 +551,16 @@ exports.setup = function (seed, _scenario, _options) {
 		persistent_ballot: [],
 
 		support_deck: [],
-		support_discard: [],
 		support_hand: [],
 		support_set_aside: [],
 		support_claimed: [],
 		support_buttons: 0,
 
 		opposition_deck: [],
-		opposition_discard: [],
 		opposition_hand: [],
 		opposition_set_aside: [],
 		opposition_claimed: [],
 		opposition_buttons: 0,
-
-		out_of_play: []
 	}
 
 	log_h1("Votes for Women")
@@ -598,7 +586,7 @@ function setup_game() {
 	shuffle(game.states_draw)
 	shuffle(game.strategy_deck)
 
-	game.out_of_play.push(...game.states_draw.splice(-3)) // 3 states card aren't used
+	game.states_draw.splice(-3) // 3 states card aren't used
 	log_h2("States Cards")
 	for (let c of game.states_draw)
 		log(`C${c}`)
@@ -659,18 +647,14 @@ exports.VIEW_SCHEMA = {
 		persistent_ballot: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 
 		support_deck: {type: "integer", minimum: 0, maximum: 52},
-		support_discard: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		support_hand: {type: "integer", minimum: 1},
 		support_claimed: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		support_buttons: {type: "integer", minimum: 0, maximum: MAX_SUPPORT_BUTTONS},
 
 		opposition_deck: {type: "integer", minimum: 0, maximum: 52},
-		opposition_discard: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		opposition_hand: {type: "integer", minimum: 1},
 		opposition_claimed: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		opposition_buttons: {type: "integer", minimum: 0, maximum: MAX_OPPOSITION_BUTTONS},
-
-		out_of_play: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 
 		hand: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		set_aside: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
@@ -680,8 +664,8 @@ exports.VIEW_SCHEMA = {
     required: [
 		"log", "active", "prompt", "turn", "congress", "us_states", "campaigners",
 		"strategy_deck", "strategy_draw", "states_draw",
-		"support_deck", "support_discard", "support_hand", "support_claimed", "support_buttons",
-		"opposition_deck", "opposition_discard", "opposition_hand", "opposition_claimed", "opposition_buttons",
+		"support_deck", "support_hand", "support_claimed", "support_buttons",
+		"opposition_deck", "opposition_hand", "opposition_claimed", "opposition_buttons",
 
 	],
     additionalProperties: false
@@ -716,18 +700,14 @@ exports.view = function(state, player) {
 		persistent_ballot: game.persistent_ballot,
 
 		support_deck: game.support_deck.length,
-		support_discard: game.support_discard, // top_discard?
 		support_hand: game.support_hand.length,
 		support_claimed: game.support_claimed,
 		support_buttons: game.support_buttons,
 
 		opposition_deck: game.opposition_deck.length,
-		opposition_discard: game.opposition_discard,  // top_discard?
 		opposition_hand: game.opposition_hand.length,
 		opposition_claimed: game.opposition_claimed,
 		opposition_buttons: game.opposition_buttons,
-
-		out_of_play: game.out_of_play,
 
 		hand: [],
 		set_aside: [],
@@ -978,20 +958,17 @@ function has_player_active_campaigners() {
 
 function remove_claimed_card(c) {
 	array_remove_item(player_claimed(), c)
-	game.out_of_play.push(c)
 }
 
-function discard_card_from_hand(c, is_persistent) {
+function discard_card_from_hand(c) {
 	array_remove_item(player_hand(), c)
-	if (!is_persistent)
-		player_discard().push(c)
 }
 
-function end_play_card(c, is_persistent) {
+function end_play_card(c) {
 	if (is_player_claimed_card(c)) {
 		remove_claimed_card(c)
 	} else {
-		discard_card_from_hand(c, is_persistent)
+		discard_card_from_hand(c)
 	}
 	game.played_card = 0
 	game.state = "operations_phase"
@@ -1151,18 +1128,6 @@ states.cleanup_phase = {
 function discard_persistent_card(cards, c) {
 	log(`C${c} discarded.`)
 	array_remove_item(cards, c)
-
-	// XXX does it matter where we discard them?
-	// I see no value in having multiple discard piles.
-	if (is_support_card(c)) {
-		game.support_discard.push(c)
-	} else if (is_opposition_card(c)) {
-		game.opposition_discard.push(c)
-	} else if (game.active === SUF) {
-		game.support_discard.push(c)
-	} else {
-		game.opposition_discard.push(c)
-	}
 }
 
 function end_cleanup_phase() {
@@ -1756,9 +1721,8 @@ function goto_event(c) {
 
 function end_event() {
 	let c = game.vm.fp
-	let is_persistent = game.vm.persistent
 	game.vm = null
-	end_play_card(c, is_persistent)
+	end_play_card(c)
 }
 
 function goto_vm(proc) {
