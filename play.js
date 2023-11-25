@@ -385,7 +385,8 @@ function build_user_interface() {
 		if (s) US_STATES_LAYOUT.push(LAYOUT[s.code])
 	}
 	for(let r of REGION_NAMES) {
-		if (r) REGIONS_LAYOUT.push(LAYOUT[r])
+		if (r)
+			REGIONS_LAYOUT.push(LAYOUT[r.replaceAll(' & ', '')])
 	}
 
 	// TODO use onmousedown and figure out why it didn't work on mobile
