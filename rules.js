@@ -2812,6 +2812,7 @@ states.vm_place_any_on_top_of_draw = {
 		delete game.vm.play_one
 	},
 	done() {
+		// first selected card is the to be played event card
 		if (game.vm.play_one)
 			game.vm.play_one = game.selected_cards.shift()
 		log(`${game.active} selected ${pluralize(game.selected_cards.length, 'card')} to put on top of their Draw Deck.`)
@@ -2822,9 +2823,12 @@ states.vm_place_any_on_top_of_draw = {
 			array_remove_item(game.vm.draw, c)
 			array_remove_item(player_hand(), c)
 		}
+		// rest goes to the bottom, except for the to be played event card
 		for (let c of game.vm.draw) {
-			player_deck().unshift(c)
-			array_remove_item(player_hand(), c)
+			if (c !== game.vm.play_one) {
+				player_deck().unshift(c)
+				array_remove_item(player_hand(), c)
+			}
 		}
 
 		delete game.vm.draw
