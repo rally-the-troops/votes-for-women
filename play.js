@@ -602,11 +602,11 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 }
 
 function support_info() {
-	return `${view.support_buttons}\u{2b50} ${view.support_hand}\u{1f0cf}`
+	return `${view.support_buttons}\u{2b50} ${view.support_hand}\u{1f3b4}`
 }
 
 function opposition_info() {
-	return `${view.opposition_buttons}\u{2b55} ${view.opposition_hand}\u{1f3b4}`
+	return `${view.opposition_buttons}\u{2b50} ${view.opposition_hand}\u{1f3b4}`
 }
 
 function layout_cubes(list, xorig, yorig) {
