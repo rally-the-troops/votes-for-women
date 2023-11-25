@@ -112,10 +112,17 @@ function draw_card(deck) {
 function player_hand() {
 	if (game.active === SUF) {
 		return game.support_hand
-	} else if (game.active === OPP) {
+	} else {
 		return game.opposition_hand
 	}
-	return []
+}
+
+function opponent_hand() {
+	if (game.active === SUF) {
+		return game.opposition_hand
+	} else {
+		return game.support_hand
+	}
 }
 
 function player_buttons() {
@@ -150,6 +157,14 @@ function player_deck() {
 	}
 }
 
+function opponent_deck() {
+	if (game.active === SUF) {
+		return game.opposition_deck
+	} else {
+		return game.support_deck
+	}
+}
+
 function player_discard() {
 	if (game.active === SUF) {
 		return game.support_discard
@@ -160,6 +175,32 @@ function player_discard() {
 
 function is_player_claimed_card(c) {
 	return player_claimed().includes(c)
+}
+
+function player_set_aside() {
+	if (game.active === SUF) {
+		return game.support_set_aside
+	} else {
+		return game.opposition_set_aside
+	}
+}
+
+function set_aside_player_hand() {
+	let aside = player_set_aside()
+	let hand = player_hand()
+	set_clear(aside)
+	for (let c of hand)
+		aside.push(c)
+	set_clear(hand)
+}
+
+function restore_player_hand() {
+	let aside = player_set_aside()
+	let hand = player_hand()
+	set_clear(hand)
+	for (let c of aside)
+		hand.push(c)
+	set_clear(aside)
 }
 
 // #endregion
@@ -526,12 +567,14 @@ exports.setup = function (seed, _scenario, _options) {
 		support_deck: [],
 		support_discard: [],
 		support_hand: [],
+		support_set_aside: [],
 		support_claimed: [],
 		support_buttons: 0,
 
 		opposition_deck: [],
 		opposition_discard: [],
 		opposition_hand: [],
+		opposition_set_aside: [],
 		opposition_claimed: [],
 		opposition_buttons: 0,
 
@@ -636,6 +679,7 @@ exports.VIEW_SCHEMA = {
 		out_of_play: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 
 		hand: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		set_aside: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		selected_cards: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 
     },
@@ -692,14 +736,17 @@ exports.view = function(state, player) {
 		out_of_play: game.out_of_play,
 
 		hand: [],
+		set_aside: [],
 		selected_cards: [],
 	}
 
 	if (player === SUF) {
 		view.hand = game.support_hand
+		view.set_aside = game.support_set_aside
 		view.selected_cards = game.selected_cards
 	} else if (player === OPP) {
 		view.hand = game.opposition_hand
+		view.set_aside = game.opposition_set_aside
 		view.selected_cards = game.selected_cards
 	}
 
@@ -1107,7 +1154,7 @@ function discard_persistent_card(cards, c) {
 	log(`C${c} discarded.`)
 	array_remove_item(cards, c)
 
-	// TODO does it matter where we discard them?
+	// XXX does it matter where we discard them?
 	// I see no value in having multiple discard piles.
 	if (is_support_card(c)) {
 		game.support_discard.push(c)
@@ -1431,8 +1478,7 @@ function campaigner_color(c) {
 function goto_campaigning_add_cubes(campaigner, die) {
 	game.selected_campaigner = campaigner
 	set_add(game.campaigning.assigned, campaigner)
-	// TODO die type & color
-	log(`Assigned B${die} to ${COLOR_CODE[campaigner_color(campaigner)]}R in R${campaigner_region(campaigner)}.`)
+	log(`Assigned ${DICE_COLOR[game.dice]}${die} to ${COLOR_CODE[campaigner_color(campaigner)]}R in R${campaigner_region(campaigner)}.`)
 	game.campaigning.count = die
 	game.campaigning.added = 0
 	game.campaigning.moved = false
@@ -2091,12 +2137,6 @@ function vm_campaigning_action() {
 	}
 }
 
-function vm_todo() {
-	// TODO
-	log("TODO")
-	vm_next()
-}
-
 function vm_counter_strat() {
 	game.state = "vm_counter_strat"
 }
@@ -2129,6 +2169,28 @@ function vm_opponent_discard_2_random_draw_2() {
 	game.selected_cards = shuffle(object_copy(player_hand())).slice(0, 2)
 	log(`Randomly selected ${pluralize(game.selected_cards.length, 'card')} from ${game.active}'s Hand.`)
 	game.state = "vm_opponent_discard_2_random_draw_2"
+}
+
+function vm_show_opponents_hand_discard_1_draw_1() {
+	clear_undo()
+	set_aside_player_hand()
+
+	for (let c of opponent_hand())
+		player_hand().push(c)
+
+	log(`${game.active} looked at ${opponent_name()}'s Hand.`)
+	game.state = "vm_show_opponents_hand_discard_1_draw_1"
+}
+
+function vm_select_1_card_from_draw_deck_play_event_shuffle() {
+	clear_undo()
+	set_aside_player_hand()
+
+	for (let c of player_deck())
+		player_hand().push(c)
+
+	log(`${game.active} looked at their Draw Deck.`)
+	game.state = "vm_select_1_card_from_draw_deck_play_event_shuffle"
 }
 
 // #endregion
@@ -2633,8 +2695,7 @@ states.vm_select_us_state = {
 				gen_action_us_state(s)
 			}
 		} else {
-			// TODO show state name
-			event_prompt(`Selected S${game.vm.selected_us_state}.`)
+			event_prompt(`Selected ${US_STATES[game.vm.selected_us_state].name}.`)
 			gen_action("done")
 		}
 	},
@@ -2725,7 +2786,7 @@ states.vm_draw_2_play_1_event = {
 		play_card_event(c)
 	},
 	skip() {
-		log("None of the drawn cards could be played for their event.")
+		log("None of the cards could be played for their event.")
 		for (let c of game.vm.draw) {
 			discard_card_from_hand(c)
 		}
@@ -2754,7 +2815,7 @@ states.vm_place_any_on_top_of_draw = {
 	prompt() {
 		let can_play = false
 		if (game.vm.play_one && !game.selected_cards.length) {
-			event_prompt(`Select which card to play as event.`)
+			event_prompt("Select which card to play as event.")
 			for (let c of game.vm.draw) {
 				if (can_play_event(c)) {
 					gen_action_card(c)
@@ -2762,7 +2823,7 @@ states.vm_place_any_on_top_of_draw = {
 				}
 			}
 		} else {
-			event_prompt(`Select which cards to put on top of your Draw Deck.`)
+			event_prompt("Select which cards to put on top of your Draw Deck.")
 			for (let c of game.vm.draw) {
 				if (!game.selected_cards.includes(c))
 					gen_action_card(c)
@@ -2830,6 +2891,76 @@ states.vm_opponent_discard_2_random_draw_2 = {
 		log(`${game.active} drew ${pluralize(game.selected_cards.length, 'card')}.`)
 		game.selected_cards = []
 		next_player()
+		vm_next()
+	}
+}
+
+const CAMPAIGNER_CARDS = [
+	1, 19, 36, 53, 71, 84, 108, 114
+]
+
+states.vm_show_opponents_hand_discard_1_draw_1 = {
+	inactive: "discard one card from of your hand.",
+	prompt() {
+		event_prompt("Select one card from your opponent's Hand to discard.")
+		let can_discard = false
+		for (let c of player_hand()) {
+			// exclude cards with campaigners on them
+			if (!CAMPAIGNER_CARDS.includes(c)) {
+				gen_action_card(c)
+				can_discard = true
+			}
+		}
+
+		if (!can_discard)
+			gen_action("skip")
+	},
+	card(c) {
+		restore_player_hand()
+		log(`Discarded C${c}.`)
+		array_remove_item(opponent_hand(), c)
+		opponent_hand().push(draw_card(opponent_deck()))
+		log(`${opponent_name()} drew 1 card.`)
+		vm_next()
+	},
+	skip() {
+		restore_player_hand()
+		log("None of the Opponent's cards could be discarded.")
+		vm_next()
+	}
+}
+
+states.vm_select_1_card_from_draw_deck_play_event_shuffle = {
+	inactive: "play one card from their draw deck as event.",
+	prompt() {
+		event_prompt("Select one card from your Draw Deck and play for its event.")
+		let can_play = false
+		for (let c of player_hand()) {
+			if (can_play_event(c)) {
+				gen_action_card(c)
+				can_play = true
+			}
+		}
+
+		if (!can_play)
+			gen_action("skip")
+	},
+	card(c) {
+		restore_player_hand()
+		log(`Selected C${c}.`)
+		player_hand().push(c)
+		array_remove_item(player_deck(), c)
+		log(`Shuffled ${game.active}'s Deck.`)
+		shuffle(player_deck())
+
+		end_play_card(game.played_card)
+		play_card_event(c)
+	},
+	skip() {
+		restore_player_hand()
+		log("None of the cards could be played for their event.")
+		log(`Shuffled ${game.active}'s Deck.`)
+		shuffle(player_deck())
 		vm_next()
 	}
 }
@@ -3849,7 +3980,7 @@ CODE[107] = [ // Opposition Research
 ]
 
 CODE[108] = [ // Change In Plans
-	[ vm_todo ],
+	[ vm_show_opponents_hand_discard_1_draw_1 ],
 	[ vm_return ],
 ]
 
@@ -3890,7 +4021,7 @@ CODE[112] = [ // Regional Focus
 ]
 
 CODE[113] = [ // Eye on the Future
-	[ vm_todo ],
+	[ vm_select_1_card_from_draw_deck_play_event_shuffle ],
 	[ vm_return ],
 ]
 

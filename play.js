@@ -668,6 +668,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 	}
 
 	document.getElementById("hand").replaceChildren()
+	document.getElementById("set_aside").replaceChildren()
 	document.getElementById("support_claimed").replaceChildren()
 	document.getElementById("support_discard").replaceChildren()
 	document.getElementById("opposition_claimed").replaceChildren()
@@ -682,6 +683,14 @@ function on_update() { // eslint-disable-line no-unused-vars
 			document.getElementById("hand").appendChild(ui.cards[c])
 	} else {
 		document.getElementById("hand_panel").classList.add("hide")
+	}
+
+	if (view.set_aside.length) {
+		document.getElementById("set_aside_panel").classList.remove("hide")
+		for (let c of view.set_aside)
+			document.getElementById("set_aside").appendChild(ui.cards[c])
+	} else {
+		document.getElementById("set_aside_panel").classList.add("hide")
 	}
 
 	for (let c of view.support_claimed)
@@ -752,7 +761,6 @@ function on_update() { // eslint-disable-line no-unused-vars
 			let state_cubes = []
 			for (let c = 0; c < purple_cubes(i); ++c) {
 				e = ui.cubes[cube_idx++]
-				// TODO track both state and color
 				e.my_us_state = i
 				e.my_cube = PURPLE
 				e.classList.add("purple")

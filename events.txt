@@ -559,7 +559,7 @@ CARD 107 - Opposition Research
 
 CARD 108 - Change In Plans
 # Look at your opponent’s hand. Your opponent must discard 1 card of your choice that does not have a :yellow_campaigner / :purple_campaigner / :red_campaigner on it. Your opponent then draws 1 replacement card from their Draw Deck.
-    todo
+    show_opponents_hand_discard_1_draw_1
 
 CARD 109 - Bellwether State
 # Select one state and remove any :red_cube and add 4 :purple_or_yellow_cube or remove any :purple_or_yellow_cube and add 4 :red_cube.
@@ -595,7 +595,7 @@ CARD 112 - Regional Focus
 
 CARD 113 - Eye on the Future
 # Playable if it is Turn 5 or Turn 6. Look through your Draw Deck and select 1 card and play for its event immediately. Then reshuffle your Draw Deck.
-    todo
+    select_1_card_from_draw_deck_play_event_shuffle
 
 CARD 114 - Transportation
 # Move all of your :purple_campaigner and :yellow_campaigner OR :red_campaigner to any region(s) without playing any :button and then take a Campaigning action.
