@@ -969,7 +969,7 @@ function can_campaign() {
 }
 
 function can_organize() {
-	return (game.active === SUF && game.support_buttons < MAX_SUPPORT_BUTTONS) || (game.active === OPP && game.opponent_buttons < MAX_OPPOSITION_BUTTONS)
+	return (game.active === SUF && game.support_buttons < MAX_SUPPORT_BUTTONS) || (game.active === OPP && game.opposition_buttons < MAX_OPPOSITION_BUTTONS)
 }
 
 function can_lobby() {
