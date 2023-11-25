@@ -28,16 +28,6 @@ const MIDWEST = 4
 const ATLANTIC_APPALACHIA = 5
 const NORTHEAST = 6
 
-const REGION_NAMES = [
-    null,
-    "West",
-    "Plains",
-    "South",
-    "Midwest",
-    "Atlantic & Appalachia",
-    "Northeast"
-]
-
 const PURPLE = 1
 const YELLOW = 2
 const PURPLE_OR_YELLOW = 3
@@ -234,6 +224,10 @@ function region_us_states_except(region, excluded) {
 
 function us_state_region(s) {
 	return US_STATES[s].region
+}
+
+function us_state_name(s) {
+	return US_STATES[s].name
 }
 
 function free_campaigner(color) {
@@ -799,12 +793,6 @@ states.planning_phase = {
 		gen_action("draw")
 	},
 	draw() {
-		/*
-		Each player draws six cards from their Draw deck. When added to either their Start card (on
-		Turn 1) or their card held from the previous turn (on Turns 2-6), their hand should begin with
-		seven cards.
-		*/
-
 		for (let n = 0; n < 6; ++n) {
 			game.support_hand.push(draw_card(game.support_deck))
 			game.opposition_hand.push(draw_card(game.opposition_deck))
@@ -892,7 +880,7 @@ function claim_strategy_card(c) {
 states.select_strategy_card = {
 	inactive: "select Strategy card.",
 	prompt() {
-		view.prompt = `Select Strategy card.`
+		view.prompt = "Select Strategy card."
 		for (let c of game.strategy_draw)
 			gen_action("card", c)
 	},
@@ -1001,10 +989,8 @@ function discard_card_from_hand(c, is_persistent) {
 
 function end_play_card(c, is_persistent) {
 	if (is_player_claimed_card(c)) {
-		game.has_played_claimed = 1
 		remove_claimed_card(c)
 	} else {
-		game.has_played_hand = 1
 		discard_card_from_hand(c, is_persistent)
 	}
 	game.played_card = 0
@@ -1022,6 +1008,14 @@ function can_organize() {
 function can_lobby() {
 	return !game.nineteenth_amendment && (
 		(game.active === SUF && game.congress < 6) || (game.active === OPP && game.congress > 0))
+}
+
+function update_card_played(c) {
+	if (is_player_claimed_card(c)) {
+		game.has_played_claimed = 1
+	} else {
+		game.has_played_hand = 1
+	}
 }
 
 states.operations_phase = {
@@ -1064,11 +1058,11 @@ states.operations_phase = {
 		}
 
 		if (can_play_hand && can_play_claimed) {
-			view.prompt = "Operations: Play a card from Hand or Claimed card (optionally)."
+			view.prompt = "Operations: Play a card from Hand or Claimed card (optional)."
 		} else if (can_play_hand) {
 			view.prompt = "Operations: Play a card from Hand."
 		} else if (can_play_claimed) {
-			view.prompt = "Operations: Play a Claimed card (optionally)."
+			view.prompt = "Operations: Play a Claimed card (optional)."
 		} else {
 			view.prompt = "Operations: Done."
 		}
@@ -1078,24 +1072,28 @@ states.operations_phase = {
 	},
 	card_event(c) {
 		push_undo()
+		update_card_played(c)
 		play_card_event(c)
 	},
 	card_campaigning(c) {
 		push_undo()
 		log_h3(`C${c} - Campaigning`)
 		log_br()
+		update_card_played(c)
 		goto_campaigning(c)
 	},
 	card_organizing(c) {
 		push_undo()
 		log_h3(`C${c} - Organizing`)
 		log_br()
+		update_card_played(c)
 		goto_organizing(c)
 	},
 	card_lobbying(c) {
 		push_undo()
 		log_h3(`C${c} - Lobbying`)
 		log_br()
+		update_card_played(c)
 		goto_lobbying(c)
 	},
 	done() {
@@ -1264,10 +1262,10 @@ states.final_voting_roll = {
 	inactive: "do Final Voting.",
 	prompt() {
 		if (!game.roll) {
-			view.prompt = `Final Voting for S${game.selected_us_state}: Roll dice.`
+			view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: Roll dice.`
 			gen_action("roll")
 		} else {
-			view.prompt = `Final Voting for S${game.selected_us_state}: ${opponent_name()} rolled ${game.opponent_roll}, You rolled ${game.roll}.`
+			view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: ${opponent_name()} rolled ${game.opponent_roll}, You rolled ${game.roll}.`
 			if (player_buttons() > 0)
 				gen_action("reroll")
 			gen_action("next")
@@ -1291,7 +1289,7 @@ states.final_voting_roll = {
 states.final_voting_opponent = {
 	inactive: "do Final Voting.",
 	prompt() {
-		view.prompt = `Final Voting for S${game.selected_us_state}: ${opponent_name()} rolled ${game.roll}, You rolled ${game.opponent_roll}.`
+		view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: ${opponent_name()} rolled ${game.roll}, You rolled ${game.opponent_roll}.`
 		if (player_buttons() > 0)
 			gen_action("reroll")
 		gen_action("next")
@@ -1348,9 +1346,9 @@ states.final_voting_result = {
 	inactive: "do Final Voting.",
 	prompt() {
 		if (game.active === game.voting_winner) {
-			view.prompt = `Final Voting for S${game.selected_us_state}: You win!`
+			view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: You win!`
 		} else {
-			view.prompt = `Final Voting for S${game.selected_us_state}: ${game.voting_winner} wins.`
+			view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: ${game.voting_winner} wins.`
 		}
 		gen_action("next")
 	},
@@ -1583,7 +1581,7 @@ function after_campaigning_add_cube(us_state) {
 states.campaigning_move = {
 	inactive: "do Campaigning.",
 	prompt() {
-		view.prompt = `Campaigning: Select region to move the Campaigner to.`
+		view.prompt = "Campaigning: Select region to move the Campaigner to."
 
 		let current_region = campaigner_region(game.selected_campaigner)
 		for (let r = 1; r <= region_count; r++) {
@@ -1808,18 +1806,9 @@ function vm_next() {
 	vm_exec()
 }
 
-function vm_asm() {
-	vm_operand(1)
-	vm_next()
-}
-
 function vm_prompt() {
 	game.vm.prompt = game.vm.ip
 	vm_next()
-}
-
-function vm_goto() {
-	game.state = vm_operand(1)
 }
 
 function vm_return() {
@@ -1888,26 +1877,6 @@ function vm_endif() {
 	vm_next()
 }
 
-function vm_endswitch() {
-	vm_next()
-}
-
-function vm_switch() {
-	game.vm.choice = null
-	game.state = "vm_switch"
-}
-
-function vm_case() {
-	if (game.vm.choice === vm_operand(1)) {
-		vm_next()
-	} else {
-		do
-			++game.vm.ip
-		while (vm_inst(0) !== vm_case && vm_inst(0) !== vm_endswitch)
-		vm_exec()
-	}
-}
-
 // #endregion
 
 // #region EVENTS VfW DSL
@@ -1974,7 +1943,6 @@ function vm_add_cubes_per_state_in_any_one_region() {
 	goto_vm_add_cubes()
 }
 
-// # Remove 6 :purple_or_yellow_cube from anywhere, no more than 2 per state. DONE
 function vm_remove_cubes_limit() {
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
@@ -1983,7 +1951,6 @@ function vm_remove_cubes_limit() {
 	goto_vm_remove_cubes()
 }
 
-// Remove all :yellow_cube and :purple_cube from California. DONE
 function vm_remove_all_cubes() {
 	game.vm.cubes = vm_operand(1)
 	game.vm.us_states = us_states_with_color_cubes(vm_operand_us_states(2), game.vm.cubes)
@@ -1991,7 +1958,6 @@ function vm_remove_all_cubes() {
 	goto_vm_remove_cubes()
 }
 
-// Remove all :purple_cube from any 1 state. DONE
 function vm_remove_all_cubes_up_to() {
 	game.vm.cubes = vm_operand(1)
 	game.vm.us_states = us_states_with_color_cubes(anywhere(), game.vm.cubes)
@@ -2695,7 +2661,7 @@ states.vm_select_us_state = {
 				gen_action_us_state(s)
 			}
 		} else {
-			event_prompt(`Selected ${US_STATES[game.vm.selected_us_state].name}.`)
+			event_prompt(`Selected ${us_state_name(game.vm.selected_us_state)}.`)
 			gen_action("done")
 		}
 	},
@@ -2815,7 +2781,7 @@ states.vm_place_any_on_top_of_draw = {
 	prompt() {
 		let can_play = false
 		if (game.vm.play_one && !game.selected_cards.length) {
-			event_prompt("Select which card to play as event.")
+			event_prompt("Select which card to play as Event.")
 			for (let c of game.vm.draw) {
 				if (can_play_event(c)) {
 					gen_action_card(c)
@@ -2842,7 +2808,7 @@ states.vm_place_any_on_top_of_draw = {
 		game.selected_cards.push(c)
 	},
 	skip() {
-		log("None of the drawn cards could be played for their event.")
+		log("None of the drawn cards could be played for their Event.")
 		delete game.vm.play_one
 	},
 	done() {
@@ -2931,9 +2897,9 @@ states.vm_show_opponents_hand_discard_1_draw_1 = {
 }
 
 states.vm_select_1_card_from_draw_deck_play_event_shuffle = {
-	inactive: "play one card from their draw deck as event.",
+	inactive: "play one card from their Draw Deck as Event.",
 	prompt() {
-		event_prompt("Select one card from your Draw Deck and play for its event.")
+		event_prompt("Select one card from your Draw Deck and play for its Event.")
 		let can_play = false
 		for (let c of player_hand()) {
 			if (can_play_event(c)) {
@@ -2958,7 +2924,7 @@ states.vm_select_1_card_from_draw_deck_play_event_shuffle = {
 	},
 	skip() {
 		restore_player_hand()
-		log("None of the cards could be played for their event.")
+		log("None of the cards could be played for their Event.")
 		log(`Shuffled ${game.active}'s Deck.`)
 		shuffle(player_deck())
 		vm_next()
@@ -3104,7 +3070,6 @@ function array_remove(array, index) {
 		array[i - 1] = array[i]
 	array.length = n - 1
 }
-
 
 // insert item at index (faster than splice)
 function array_insert(array, index, item) {
