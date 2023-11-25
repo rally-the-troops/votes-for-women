@@ -1378,13 +1378,25 @@ states.campaigning = {
 }
 
 function goto_campaigning_assign() {
-	game.state = "campaigning_assign"
-	game.campaigning = {
-		dice_idx: 0,
-		assigned: [],
-		count: 0,
-		region: 0,
-		moved: false
+	if (!game.campaigning) {
+		game.campaigning = {
+			dice_idx: 0,
+			assigned: [],
+			count: 0,
+			region: 0,
+			moved: false
+		}
+	}
+
+	if (game.campaigning.assigned.length !== game.count) {
+		game.state = "campaigning_assign"
+	} else {
+		delete game.selected_campaigner
+		delete game.campaigning
+		if (game.vm)
+			vm_next()
+		else
+			end_play_card(game.played_card)
 	}
 }
 
@@ -1398,24 +1410,11 @@ states.campaigning_assign = {
 			if (!set_has(game.campaigning.assigned, c))
 				gen_action_campaigner(c)
 		})
-
-		if (game.campaigning.assigned.length === game.count) {
-			view.prompt = `Campaigning: Done.`
-			gen_action("done")
-		}
 	},
 	campaigner(c) {
 		push_undo()
 		let die = game.roll[game.campaigning.dice_idx]
 		goto_campaigning_add_cubes(c, die)
-	},
-	done() {
-		delete game.selected_campaigner
-		delete game.campaigning
-		if (game.vm)
-			vm_next()
-		else
-			end_play_card(game.played_card)
 	}
 }
 
@@ -1531,7 +1530,7 @@ function after_campaigning_add_cube(us_state) {
 		delete game.selected_campaigner
 		if (game.campaigning.dice_idx < game.roll.length)
 			game.campaigning.dice_idx += 1
-		game.state = "campaigning_assign"
+		goto_campaigning_assign()
 	}
 }
 
@@ -1552,11 +1551,6 @@ states.campaigning_move = {
 		move_campaigner(game.selected_campaigner, r)
 		game.campaigning.moved = true
 		game.state = "campaigning_add_cubes"
-	},
-	done() {
-		delete game.selected_campaigner
-		delete game.campaigning
-		end_play_card(game.played_card)
 	}
 }
 
