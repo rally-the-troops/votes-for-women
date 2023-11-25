@@ -672,7 +672,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 	document.getElementById("strategy_draw").replaceChildren()
 	document.getElementById("out_of_play").replaceChildren()
 
-    if (view.hand) {
+    if (view.hand.length) {
 		document.getElementById("hand_panel").classList.remove("hide")
 		for (let c of view.hand)
 			document.getElementById("hand").appendChild(ui.cards[c])
