@@ -1243,7 +1243,7 @@ states.final_voting_roll = {
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		game.roll = roll_ndx(game.count, game.dice, "Re-rolled")
+		game.roll = roll_ndx(1, game.dice, "Re-rolled")
 	},
 	next() {
 		next_player()
