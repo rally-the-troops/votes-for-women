@@ -970,6 +970,9 @@ function end_play_card(c) {
 	} else {
 		discard_card_from_hand(c)
 	}
+	delete game.count
+	delete game.dice
+	delete game.roll
 	game.played_card = 0
 	game.state = "operations_phase"
 }
@@ -1594,6 +1597,7 @@ function goto_lobbying(c) {
 	game.played_card = c
 	game.state = 'lobbying'
 	game.count = count_player_active_campaigners()
+	game.roll = -1
 	if (has_lobbying_boost())
 		game.dice = D8
 	else
@@ -1603,12 +1607,26 @@ function goto_lobbying(c) {
 states.lobbying = {
 	inactive: "do Lobbying.",
 	prompt() {
-		view.prompt = `Lobbying: Roll ${game.count} d${game.dice}.`
-		gen_action("roll")
+		if (game.roll === -1) {
+			view.prompt = `Lobbying: Roll ${game.count} d${game.dice}.`
+			gen_action("roll")
+		} else {
+			view.prompt = `Lobbying: You rolled ${game.roll} sixes (or higher).`
+			if (player_buttons() > 0 && game.roll < game.count)
+				gen_action("reroll")
+			gen_action("next")
+		}
 	},
 	roll() {
-		game.count = roll_ndx_count_success(game.count, game.dice)
-		if (game.count > 0) {
+		game.roll = roll_ndx_count_success(game.count, game.dice)
+	},
+	reroll() {
+		decrease_player_buttons(1)
+		game.roll = roll_ndx_count_success(game.count, game.dice, "Re-rolled")
+	},
+	next() {
+		if (game.roll > 0) {
+			game.count = game.roll
 			if (game.active === SUF) {
 				game.state = "lobbying_add_congress"
 			} else {
