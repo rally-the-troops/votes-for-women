@@ -941,6 +941,10 @@ function can_play_event(c) {
 	if ([82, 85, 94, 95].includes(c) && !game.persistent_game.includes(SOUTHERN_STRATEGY))
 		return false
 
+	// Needs 19th amendment to have passed
+	if ([102, 106] && !game.nineteenth_amendment)
+		return false
+
 	let cost = 0
 	// Spend 4 buttons to select
 	if ([39, 100].includes(c))
@@ -1961,7 +1965,7 @@ function vm_remove_all_cubes_up_to() {
 function vm_replace() {
 	game.vm.what = vm_operand(1)
 	game.vm.count = vm_operand(2)
-	game.vm.cubes = vm_operand(3)
+	game.vm.replacement = vm_operand(3)
 	game.vm.us_states = anywhere()
 	set_filter(game.vm.us_states, s => is_green_check(s) || is_red_x(s))
 
@@ -2510,7 +2514,11 @@ function goto_vm_replace() {
 states.vm_replace = {
 	inactive: "do a replacement",
 	prompt() {
-		event_prompt(`Replace a ${COLOR_NAMES[game.vm.what]} with ${pluralize(game.vm.count, COLOR_NAMES[game.vm.cubes] + ' cube')}.`)
+		if (game.vm.replacement !== GREEN_CHECK && game.vm.replacement !== RED_X) {
+			event_prompt(`Replace a ${COLOR_NAMES[game.vm.what]} with ${pluralize(game.vm.count, COLOR_NAMES[game.vm.replacement] + ' cube')}.`)
+		} else {
+			event_prompt(`Replace a ${COLOR_NAMES[game.vm.what]} with ${COLOR_NAMES[game.vm.replacement]}.`)
+		}
 
 		for (let s of game.vm.us_states) {
 			if (game.vm.what === GREEN_CHECK && is_green_check(s))
@@ -2523,15 +2531,27 @@ states.vm_replace = {
 		push_undo()
 		remove_green_check(s)
 
-		game.vm.us_states = [s]
-		goto_vm_add_cubes()
+		if (game.vm.replacement !== RED_X) {
+			game.vm.cubes = game.vm.replacement
+			game.vm.us_states = [s]
+			goto_vm_add_cubes()
+		} else {
+			reject_nineteenth_amendment(s)
+			vm_next()
+		}
 	},
 	red_x(s) {
 		push_undo()
 		remove_red_x(s)
 
-		game.vm.us_states = [s]
-		goto_vm_add_cubes()
+		if (game.vm.replacement !== GREEN_CHECK) {
+			game.vm.cubes = game.vm.replacement
+			game.vm.us_states = [s]
+			goto_vm_add_cubes()
+		} else {
+			ratify_nineteenth_amendment(s)
+			vm_next()
+		}
 	}
 }
 
