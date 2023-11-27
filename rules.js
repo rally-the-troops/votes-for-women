@@ -1986,6 +1986,13 @@ function vm_roll() {
 	game.state = "vm_roll"
 }
 
+function vm_roll_for_success() {
+	game.vm.count = vm_operand(1)
+	game.vm.d = vm_operand(2)
+	game.vm.for_success = true
+	game.state = "vm_roll"
+}
+
 function vm_roll_list() {
 	game.vm.count = vm_operand(1)
 	game.vm.d = vm_operand(2)
@@ -2612,7 +2619,7 @@ states.vm_roll = {
 		if (!game.vm.roll) {
 			gen_action("roll")
 		} else {
-			if (player_buttons() > 0)
+			if (player_buttons() > 0 && (!game.vm.for_success || game.vm.roll < 3))
 				gen_action("reroll")
 			gen_action("next")
 		}
@@ -3298,7 +3305,7 @@ CODE[4] = [ // A Vindication of the Rights of Woman
 
 CODE[5] = [ // Union Victory
 	[ vm_requires_persistent, REST_OF_TURN, find_card("The Civil War") ],
-	[ vm_roll, 1, D6 ],
+	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_receive_buttons, 2 ],
 	[ vm_discard_persistent, REST_OF_TURN, find_card("The Civil War") ],
@@ -3308,7 +3315,7 @@ CODE[5] = [ // Union Victory
 
 CODE[6] = [ // Fifteenth Amendment
 	[ vm_requires_not_persistent, REST_OF_TURN, find_card("The Civil War") ],
-	[ vm_roll, 1, D6 ],
+	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 2 ],
 	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, anywhere(), 2 ],
@@ -3396,7 +3403,7 @@ CODE[19] = [ // National American Woman Suffrage Association
 ]
 
 CODE[20] = [ // Jeannette Rankin
-	[ vm_roll, 1, D6 ],
+	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 1 ],
 	[ vm_add_cubes, 4, PURPLE_OR_YELLOW, us_states("Montana") ],
@@ -3507,7 +3514,7 @@ CODE[37] = [ // The Young Woman Citizen
 ]
 
 CODE[38] = [ // 1918 Midterm Elections
-	[ vm_roll, 1, D6 ],
+	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 3 ],
 	[ vm_endif ],
@@ -3553,7 +3560,7 @@ CODE[45] = [ // Women and World War I
 ]
 
 CODE[46] = [ // Eighteenth Amendment
-	[ vm_roll, 1, D6 ],
+	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 1 ],
 	[ vm_receive_buttons, 2 ],
@@ -3625,7 +3632,7 @@ CODE[56] = [ // Senator Joseph Brown
 ]
 
 CODE[57] = [ // Minor v. Happersett
-	[ vm_roll, 1, D6 ],
+	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_remove_congress, 1 ],
 	[ vm_add_cubes, 2, RED, us_states("Missouri") ],
@@ -3634,7 +3641,7 @@ CODE[57] = [ // Minor v. Happersett
 ]
 
 CODE[58] = [ // Senate Rejects Suffrage Amendment
-	[ vm_roll, 1, D6 ],
+	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_receive_buttons, 1 ],
 	[ vm_remove_congress, 1 ],
@@ -3643,7 +3650,7 @@ CODE[58] = [ // Senate Rejects Suffrage Amendment
 ]
 
 CODE[59] = [ // South Dakota Rejects Suffrage
-	[ vm_roll, 1, D6 ],
+	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_remove_congress, 1 ],
 	[ vm_add_cubes, 2, RED, us_states("South Dakota") ],

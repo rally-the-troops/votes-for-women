@@ -23,7 +23,7 @@ CARD 4 - A Vindication of the Rights of Woman
 CARD 5 - Union Victory
 # Playable if *The Civil War* is in effect. Roll :d6. On a roll of 3-6, receive two :button and move *The Civil War* to the discard pile.
     requires_persistent REST_OF_TURN find_card("The Civil War")
-    roll 1 D6
+    roll_for_success 1 D6
     if (game.vm.roll >= 3)
         receive_buttons 2
         discard_persistent REST_OF_TURN find_card("The Civil War")
@@ -32,7 +32,7 @@ CARD 5 - Union Victory
 CARD 6 - Fifteenth Amendment
 # Playable if *The Civil War* is not in effect. Roll :d6. On a roll of 3-6, add 2 :congressional_marker in Congress and add 8 :purple_or_yellow_cube anywhere, no more than 2 per state.
     requires_not_persistent REST_OF_TURN find_card("The Civil War")
-    roll 1 D6
+    roll_for_success 1 D6
     if (game.vm.roll >= 3)
         add_congress 2
         add_cubes_limit 8 PURPLE_OR_YELLOW anywhere() 2
@@ -107,7 +107,7 @@ CARD 19 - National American Woman Suffrage Association
 
 CARD 20 - Jeannette Rankin
 # Roll :d6. On a roll of 3-6, add 1 :congressional_marker in Congress and 4 :purple_or_yellow_cube in Montana and 2 :purple_or_yellow_cube in each other state in the Plains region.
-    roll 1 D6
+    roll_for_success 1 D6
     if (game.vm.roll >= 3)
         add_congress 1
         add_cubes 4 PURPLE_OR_YELLOW us_states("Montana")
@@ -200,7 +200,7 @@ CARD 37 - The Young Woman Citizen
 
 CARD 38 - 1918 Midterm Elections
 # Roll :d6. On a roll of 3-6, add 3 :congressional_marker in Congress.
-    roll 1 D6
+    roll_for_success 1 D6
     if (game.vm.roll >= 3)
         add_congress 3
     endif
@@ -238,7 +238,7 @@ CARD 45 - Women and World War I
 
 CARD 46 - Eighteenth Amendment
 # Roll :d6. On a roll of 3-6, add 1 congressional_marker in Congress and receive 2 :button.
-    roll 1 D6
+    roll_for_success 1 D6
     if (game.vm.roll >= 3)
         add_congress 1
         receive_buttons 2
@@ -301,7 +301,7 @@ CARD 56 - Senator Joseph Brown
 
 CARD 57 - Minor v. Happersett
 # Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in Missouri.
-    roll 1 D6
+    roll_for_success 1 D6
     if (game.vm.roll >= 3)
         remove_congress 1
         add_cubes 2 RED us_states("Missouri")
@@ -309,7 +309,7 @@ CARD 57 - Minor v. Happersett
 
 CARD 58 - Senate Rejects Suffrage Amendment
 # Roll :d6. On a roll of 3-6, receive 1 :button and remove 1 :congressional_marker from Congress.
-    roll 1 D6
+    roll_for_success 1 D6
     if (game.vm.roll >= 3)
         receive_buttons 1
         remove_congress 1
@@ -317,7 +317,7 @@ CARD 58 - Senate Rejects Suffrage Amendment
 
 CARD 59 - South Dakota Rejects Suffrage
 # Roll :d6. On a roll of 3-6, remove 1 :congressional_marker and add 2 :red_cube in South Dakota.
-    roll 1 D6
+    roll_for_success 1 D6
     if (game.vm.roll >= 3)
         remove_congress 1
         add_cubes 2 RED us_states("South Dakota")
