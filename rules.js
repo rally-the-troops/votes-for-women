@@ -260,7 +260,7 @@ function campaigner_region(c) {
 }
 
 function move_campaigner(c, region) {
-	log(`${COLOR_CODE[campaigner_color(c)]}R moved to R${region}.`)
+	log(`Moved ${COLOR_CODE[campaigner_color(c)]}R to R${region}.`)
 	game.campaigners[c - 1] = region
 }
 
@@ -1143,29 +1143,29 @@ function goto_cleanup_phase() {
 			throw Error("ASSERT game.support_hand.length === 1")
 		if (game.opposition_hand.length !== 1)
 			throw Error("ASSERT game.opposition_hand.length === 1")
-	}
+	} else {
+		// At the end of Turn 6, if the Nineteenth
+		// Amendment has not been sent to the states for
+		// ratification, the game ends in an Opposition victory.
+		if (!game.nineteenth_amendment) {
+			goto_game_over(OPP, "Opposition wins the game.")
+			return
+		}
 
-	// At the end of Turn 6, if the Nineteenth
-	// Amendment has not been sent to the states for
-	// ratification, the game ends in an Opposition victory.
-	if (!game.nineteenth_amendment) {
-		goto_game_over(OPP, "Opposition wins the game.")
-		return
-	}
+		// If the Nineteenth Amendment has been sent to the
+		// states for ratification but neither player has won
+		// the necessary number of states for victory, the game
+		// advances to Final Voting.
 
-	// If the Nineteenth Amendment has been sent to the
-	// states for ratification but neither player has won
-	// the necessary number of states for victory, the game
-	// advances to Final Voting.
-
-	// Any cards in the “Cards in Effect for the Rest of the Turn box”
-	// and “Cards in Effect for the Rest of the Game box” are placed in
-	// the appropriate discard pile.
-	for (let c of game.persistent_turn) {
-		discard_persistent_card(game.persistent_turn, c)
-	}
-	for (let c of game.persistent_game) {
-		discard_persistent_card(game.persistent_game, c)
+		// Any cards in the “Cards in Effect for the Rest of the Turn box”
+		// and “Cards in Effect for the Rest of the Game box” are placed in
+		// the appropriate discard pile.
+		for (let c of game.persistent_turn) {
+			discard_persistent_card(game.persistent_turn, c)
+		}
+		for (let c of game.persistent_game) {
+			discard_persistent_card(game.persistent_game, c)
+		}
 	}
 
 	game.state = "cleanup_phase"
@@ -2230,7 +2230,7 @@ states.vm_add_campaigner = {
 }
 
 function increase_player_buttons(count=1) {
-	log(`+${count} BM.`)
+	log(`${game.active} +${count} BM`)
 	if (game.active === SUF) {
 		game.support_buttons = Math.min(game.support_buttons + count, MAX_SUPPORT_BUTTONS)
 	} else {
@@ -2239,7 +2239,7 @@ function increase_player_buttons(count=1) {
 }
 
 function decrease_player_buttons(count=1) {
-	log(`-${count} BM.`)
+	log(`${game.active} -${count} BM`)
 	if (game.active === SUF) {
 		game.support_buttons = Math.max(game.support_buttons - count, 0)
 	} else {
@@ -2248,7 +2248,7 @@ function decrease_player_buttons(count=1) {
 }
 
 function decrease_opponent_buttons(count=1) {
-	log(`${opponent_name()} -${count} BM.`)
+	log(`${opponent_name()} -${count} BM`)
 	if (game.active === SUF) {
 		game.opposition_buttons = Math.max(game.opposition_buttons - count, 0)
 	} else {
@@ -2543,7 +2543,7 @@ states.vm_add_congress = {
 	},
 	congress() {
 		game.congress = Math.min(game.congress + game.vm.count, 6)
-		log(`+${game.vm.count} CM.`)
+		log(`+${game.vm.count} CM`)
 
 		if (game.congress >= 6) {
 			if (trigger_nineteenth_amendment())
@@ -2561,7 +2561,7 @@ states.vm_remove_congress = {
 	},
 	congress() {
 		game.congress = Math.max(game.congress - game.vm.count, 0)
-		log(`-${game.vm.count} CM.`)
+		log(`-${game.vm.count} CM`)
 
 		vm_next()
 	}
