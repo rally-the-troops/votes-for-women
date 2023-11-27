@@ -942,7 +942,7 @@ function can_play_event(c) {
 		return false
 
 	// Needs 19th amendment to have passed
-	if ([102, 106] && !game.nineteenth_amendment)
+	if ([102, 106].includes(c) && !game.nineteenth_amendment)
 		return false
 
 	let cost = 0
