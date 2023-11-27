@@ -2099,7 +2099,7 @@ function vm_discard_persistent() {
 
 function vm_campaigning_action() {
 	if (has_player_active_campaigners()) {
-		log("Campaigning Action")
+		log_h3("Campaigning Action")
 		goto_campaigning(game.played_card)
 	} else {
 		vm_next()
