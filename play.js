@@ -440,8 +440,8 @@ function build_user_interface() {
 	ui.campaigners = [
 		create_campaigner('purple1', 1),
 		create_campaigner('purple2', 2),
-		create_campaigner('yellow1', 3),
-		create_campaigner('yellow2', 4),
+		create_campaigner('yellow2', 3),
+		create_campaigner('yellow1', 4),
 		create_campaigner('red1', 5),
 		create_campaigner('red2', 6),
 	]
