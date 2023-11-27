@@ -1624,13 +1624,13 @@ const GREEN_CHECK_VICTORY = 36
 const RED_X_VICTORY = 13
 
 function ratify_nineteenth_amendment(us_state) {
-	log(`S${us_state} ratified the Nineteenth Amendment.`)
+	log(`S${us_state} ${COLOR_CODE[GREEN_CHECK]}.`)
 	game.us_states[us_state] = 0
 	set_green_check(us_state)
 }
 
 function reject_nineteenth_amendment(us_state) {
-	log(`S${us_state} rejected the Nineteenth Amendment.`)
+	log(`S${us_state} ${COLOR_CODE[RED_X]}.`)
 	game.us_states[us_state] = 0
 	set_red_x(us_state)
 }
