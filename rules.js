@@ -816,9 +816,21 @@ states.strategy_phase = {
 			gen_action("done")
 		} else {
 			view.prompt = `Strategy: Suffragist committed ${pluralize(game.support_committed, 'button')}.`
-			view.actions.defer = game.support_committed > 0
-			view.actions.match = game.opposition_buttons >= game.support_committed
-			view.actions.supersede = game.opposition_buttons > game.support_committed
+			view.actions.defer = 0
+			view.actions.match = 0
+			view.actions.supersede = 0
+			if (game.support_committed > 0) {
+				view.actions.defer = 1
+				view.prompt += ` Defer with 0 buttons.`
+			}
+			if (game.opposition_buttons >= game.support_committed) {
+				view.actions.match = 1
+				view.prompt += ` Match with ${pluralize(game.support_committed, 'button')}.`
+			}
+			if (game.opposition_buttons > game.support_committed) {
+				view.actions.supersede = 1
+				view.prompt += ` Supersede with ${pluralize(game.support_committed + 1, 'button')}.`
+			}
 		}
 	},
 	commit_1_button() {
