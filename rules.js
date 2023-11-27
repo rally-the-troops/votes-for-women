@@ -2278,12 +2278,13 @@ states.vm_add_cubes = {
 	inactive: "add a cube.",
 	prompt() {
 		if (game.vm.cubes === PURPLE_OR_YELLOW) {
-			gen_action("purple")
-			gen_action("yellow")
+			view.actions.purple = (game.vm.cube_color !== PURPLE)
+			view.actions.yellow = (game.vm.cube_color !== YELLOW)
 
 			// Alternatively allow a click on a campaigner to switch color
 			for_each_player_campaigner(c => {
-				gen_action_campaigner(c)
+				if (game.vm.cube_color !== campaigner_color(c))
+					gen_action_campaigner(c)
 			})
 		}
 
