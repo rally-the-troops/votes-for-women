@@ -1112,28 +1112,14 @@ function end_player_round() {
 	begin_player_round()
 }
 
-function goto_cleanup_phase() {
-	log_h2("Cleanup")
-	game.state = "cleanup_phase"
-}
-
-states.cleanup_phase = {
-	inactive: "do Cleanup.",
-	prompt() {
-		view.prompt = "Cleanup."
-		gen_action("done")
-	},
-	done() {
-		end_cleanup_phase()
-	}
-}
-
 function discard_persistent_card(cards, c) {
 	log(`C${c} discarded.`)
 	array_remove_item(cards, c)
 }
 
-function end_cleanup_phase() {
+function goto_cleanup_phase() {
+	log_h2("Cleanup")
+
 	if (game.turn < 6) {
 		// any cards in the “Cards in Effect for the Rest of the Turn box”
 		// are placed in the appropriate discard pile.
@@ -1145,9 +1131,6 @@ function end_cleanup_phase() {
 			throw Error("ASSERT game.support_hand.length === 1")
 		if (game.opposition_hand.length !== 1)
 			throw Error("ASSERT game.opposition_hand.length === 1")
-
-		start_turn()
-		return
 	}
 
 	// At the end of Turn 6, if the Nineteenth
@@ -1173,10 +1156,25 @@ function end_cleanup_phase() {
 		discard_persistent_card(game.persistent_game, c)
 	}
 
-	goto_final_voting()
+	game.state = "cleanup_phase"
 }
 
-
+states.cleanup_phase = {
+	inactive: "do Cleanup.",
+	prompt() {
+		view.prompt = "Cleanup."
+		if (game.turn < 6)
+			gen_action("next_turn")
+		else
+			gen_action("final_voting")
+	},
+	next_turn() {
+		start_turn()
+	},
+	final_voting() {
+		goto_final_voting()
+	}
+}
 
 function goto_final_voting() {
 	log_h1("Final Voting")
