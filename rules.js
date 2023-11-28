@@ -3781,7 +3781,7 @@ CODE[73] = [ // The Ladies’ Battle
 ]
 
 CODE[74] = [ // Backlash to the Movement
-	[ vm_remove_cubes_limit, 6, PURPLE_OR_YELLOW, 2 ],
+	[ vm_remove_cubes_limit, 6, PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
 

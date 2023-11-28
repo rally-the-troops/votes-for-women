@@ -387,7 +387,7 @@ CARD 73 - The Ladies’ Battle
 
 CARD 74 - Backlash to the Movement
 # Remove 6 :purple_or_yellow_cube from anywhere, no more than 2 per state.
-    remove_cubes_limit 6 PURPLE_OR_YELLOW 2
+    remove_cubes_limit 6 PURPLE_OR_YELLOW anywhere() 2
 
 CARD 75 - Xenophobia
 # Remove all :purple_cube from any 1 state. Remove all :yellow_cube from any 1 state.
