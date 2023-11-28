@@ -587,6 +587,7 @@ function setup_game() {
 	shuffle(game.strategy_deck)
 
 	game.states_draw.splice(-3) // 3 states card aren't used
+	game.states_draw.sort()
 	log_h2("States Cards")
 	for (let c of game.states_draw)
 		log(`C${c}`)

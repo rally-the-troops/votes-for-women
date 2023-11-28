@@ -666,7 +666,8 @@ function on_update() { // eslint-disable-line no-unused-vars
 	for (let c of view.opposition_claimed)
 		document.getElementById("opposition_claimed").appendChild(ui.cards[c])
 
-	for (let c of view.states_draw)
+	// XXX sort is temporary, is done server side for new games.
+	for (let c of view.states_draw.sort())
 		document.getElementById("states_draw").appendChild(ui.cards[c])
 	for (let c of view.strategy_draw)
 		document.getElementById("strategy_draw").appendChild(ui.cards[c])
