@@ -1460,6 +1460,7 @@ function campaigner_color(c) {
 function goto_campaigning_add_cubes(campaigner, die) {
 	game.selected_campaigner = campaigner
 	set_add(game.campaigning.assigned, campaigner)
+	log_br()
 	log(`Assigned ${DICE_COLOR[game.dice]}${die} to ${COLOR_CODE[campaigner_color(campaigner)]}R in R${campaigner_region(campaigner)}.`)
 	game.campaigning.count = die
 	game.campaigning.added = 0
