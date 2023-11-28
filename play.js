@@ -17,13 +17,6 @@ const REGION_NAMES = [
     "Northeast"
 ]
 
-const PURPLE = 1
-const YELLOW = 2
-// const PURPLE_OR_YELLOW = 3
-const RED = 4
-// const GREEN_CHECK = 5
-// const RED_X = 6
-
 const region_count = 6
 const us_states_count = region_count * 8
 const card_count = 128
@@ -243,20 +236,8 @@ function is_us_state_action(i) {
 	return false
 }
 
-function is_purple_cube_action(i) {
-	if (view.actions && view.actions.purple_cube && view.actions.purple_cube.includes(i))
-		return true
-	return false
-}
-
-function is_yellow_cube_action(i) {
-	if (view.actions && view.actions.yellow_cube && view.actions.yellow_cube.includes(i))
-		return true
-	return false
-}
-
-function is_red_cube_action(i) {
-	if (view.actions && view.actions.red_cube && view.actions.red_cube.includes(i))
+function is_color_cube_action(color, i) {
+	if (view.actions && view.actions[color + "_cube"] && view.actions[color + "_cube"].includes(i))
 		return true
 	return false
 }
@@ -335,11 +316,7 @@ function on_click_campaigner(evt) {
 
 function on_click_cube(evt) {
 	if (evt.button === 0) {
-		if (evt.target.my_cube === PURPLE && send_action('purple_cube', evt.target.my_us_state))
-			evt.stopPropagation()
-		if (evt.target.my_cube === YELLOW && send_action('yellow_cube', evt.target.my_us_state))
-			evt.stopPropagation()
-		if (evt.target.my_cube === RED && send_action('red_cube', evt.target.my_us_state))
+		if (send_action(evt.target.my_cube_color + '_cube', evt.target.my_us_state))
 			evt.stopPropagation()
 	}
 	hide_popup_menu()
@@ -447,13 +424,10 @@ function build_user_interface() {
 	]
 
 	for (let i = 0; i < 190; ++i) {
-		// XXX do we need to set the color here?
-		// let color = (i < 65) ? "purple" : (i < 130) ? "yellow" : "red"
 		elt = ui.cubes[i] = create("div", {
 			className: `piece cube`,
 			onmousedown: on_click_cube,
 		})
-		document.getElementById("pieces").appendChild(elt)
 	}
 
 	for (let i = 0; i < green_check_count; ++i) {
@@ -461,7 +435,6 @@ function build_user_interface() {
 			className: `piece yes`,
 			onmousedown: on_click_green_check,
 		})
-		document.getElementById("pieces").appendChild(elt)
 	}
 
 	for (let i = 0; i < red_x_count; ++i) {
@@ -469,7 +442,6 @@ function build_user_interface() {
 			className: `piece no`,
 			onmousedown: on_click_red_x,
 		})
-		document.getElementById("pieces").appendChild(elt)
 	}
 }
 
@@ -726,17 +698,17 @@ function on_update() { // eslint-disable-line no-unused-vars
 		ui.us_states[i].classList.toggle("action", is_us_state_action(i))
 	}
 
+	// Pieces (Campaigners, Cubes, Checks and Xs)
+	const pieces = new DocumentFragment()
 	for (let i = 0; i < ui.campaigners.length; ++i) {
 		let campaigner_region = view.campaigners[i]
 		if (campaigner_region) {
-			ui.pieces.appendChild(ui.campaigners[i])
+			pieces.append(ui.campaigners[i])
 			let [x, y] = REGIONS_LAYOUT[campaigner_region]
 			ui.campaigners[i].style.left = x - 30 + (15 * (i % 4)) + "px"
 			ui.campaigners[i].style.top = y - 40 + (30 * Math.floor(i / 4)) + "px"
 			ui.campaigners[i].classList.toggle("action", is_campaigner_action(1 + i))
 			ui.campaigners[i].classList.toggle("selected", 1 + i === view.selected_campaigner)
-		} else {
-			ui.campaigners[i].remove()
 		}
 	}
 
@@ -744,40 +716,26 @@ function on_update() { // eslint-disable-line no-unused-vars
 	let green_check_idx = 0
 	let red_x_idx = 0
 	let e = null
+	const colors = ["purple", "yellow", "red"]
+	function place_cubes(state_cubes, us_state, count, color) {
+		let others = colors.filter(c => c !== color)
+		for (let c = 0; c < count; ++c) {
+			e = ui.cubes[cube_idx++]
+			e.my_us_state = us_state
+			e.my_cube_color = color
+			e.classList.add(color)
+			e.classList.remove(...others)
+			e.classList.toggle("action", is_color_cube_action(color, us_state))
+			state_cubes.push(e)
+			pieces.append(e)
+		}
+	}
 	for (let i = 1; i < ui.us_states.length; ++i) {
-		// TODO Cleanup
 		if (view.us_states[i]) {
 			let state_cubes = []
-			for (let c = 0; c < purple_cubes(i); ++c) {
-				e = ui.cubes[cube_idx++]
-				e.my_us_state = i
-				e.my_cube = PURPLE
-				e.classList.add("purple")
-				e.classList.remove("yellow", "red")
-				e.classList.toggle("action", is_purple_cube_action(i))
-				state_cubes.push(e)
-				ui.pieces.appendChild(e)
-			}
-			for (let c = 0; c < yellow_cubes(i); ++c) {
-				e = ui.cubes[cube_idx++]
-				e.my_us_state = i
-				e.my_cube = YELLOW
-				e.classList.add("yellow")
-				e.classList.remove("purple", "red")
-				e.classList.toggle("action", is_yellow_cube_action(i))
-				state_cubes.push(e)
-				ui.pieces.appendChild(e)
-			}
-			for (let c = 0; c < red_cubes(i); ++c) {
-				e = ui.cubes[cube_idx++]
-				e.my_us_state = i
-				e.my_cube = RED
-				e.classList.add("red")
-				e.classList.remove("purple", "yellow")
-				e.classList.toggle("action", is_red_cube_action(i))
-				state_cubes.push(e)
-				ui.pieces.appendChild(e)
-			}
+			place_cubes(state_cubes, i, purple_cubes(i), "purple")
+			place_cubes(state_cubes, i, yellow_cubes(i), "yellow")
+			place_cubes(state_cubes, i, red_cubes(i), "red")
 
 			let [x, y] = US_STATES_LAYOUT[i]
 			if (state_cubes.length) {
@@ -788,29 +746,19 @@ function on_update() { // eslint-disable-line no-unused-vars
 				e.classList.toggle("action", is_green_check_action(i))
 				e.style.left = x - 21 + "px"
 				e.style.top = y - 16 + "px"
-				ui.pieces.appendChild(e)
+				pieces.append(e)
 			} else if (is_red_x(i)) {
 				e = ui.red_xs[red_x_idx++]
 				e.my_us_state = i
 				e.classList.toggle("action", is_red_x_action(i))
 				e.style.left = x - 21 + "px"
 				e.style.top = y - 16 + "px"
-				ui.pieces.appendChild(e)
+				pieces.append(e)
 			}
 		}
 		ui.us_states[i].classList.toggle("selected", i === view.selected_us_state)
 	}
-
-	// remove remaining unused cubes & checks & xs from DOM
-	for (let i = cube_idx; i < ui.cubes.length; ++i) {
-		ui.cubes[i].remove()
-	}
-	for (let i = green_check_idx; i < ui.green_checks.length; ++i) {
-		ui.green_checks[i].remove()
-	}
-	for (let i = red_x_idx; i < ui.red_xs.length; ++i) {
-		ui.red_xs[i].remove()
-	}
+	ui.pieces.replaceChildren(pieces)
 
 	action_button("commit_1_button", "+1 Button")
 	action_button("defer", "Defer")
