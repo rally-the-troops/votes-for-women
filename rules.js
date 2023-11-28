@@ -1791,6 +1791,12 @@ function event_prompt(str) {
 	view.prompt = CARDS[game.vm.fp].name + ": " + str
 }
 
+function vm_assert_argcount(n) {
+	const argcount = CODE[game.vm.fp][game.vm.ip].length - 1
+	if (argcount !== n)
+		throw Error(`ASSERT Invalid number of arguments on event ${game.vm.fp}: ${argcount} instead of ${n}`)
+}
+
 function vm_inst(a) {
 	return CODE[game.vm.fp][game.vm.ip][a]
 }
@@ -1894,17 +1900,20 @@ function vm_endif() {
 // #region EVENTS VfW DSL
 
 function vm_add_campaigner() {
+	vm_assert_argcount(2)
 	game.vm.campaigner = vm_operand(1)
 	game.vm.region = vm_operand(2)
 	game.state = "vm_add_campaigner"
 }
 
 function vm_receive_buttons() {
+	vm_assert_argcount(1)
 	game.vm.count = vm_operand(1)
 	game.state = "vm_receive_buttons"
 }
 
 function vm_spend_buttons() {
+	vm_assert_argcount(1)
 	game.vm.count = vm_operand(1)
 	game.state = "vm_spend_buttons"
 	if (player_buttons() < game.vm.count)
@@ -1912,11 +1921,13 @@ function vm_spend_buttons() {
 }
 
 function vm_opponent_loses_buttons() {
+	vm_assert_argcount(1)
 	game.vm.count = vm_operand(1)
 	game.state = "vm_opponent_loses_buttons"
 }
 
 function vm_add_cubes() {
+	vm_assert_argcount(3)
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
 	game.vm.us_states = vm_operand_us_states(3)
@@ -1924,6 +1935,7 @@ function vm_add_cubes() {
 }
 
 function vm_add_cubes_limit() {
+	vm_assert_argcount(4)
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
 	game.vm.us_states = vm_operand_us_states(3)
@@ -1932,6 +1944,7 @@ function vm_add_cubes_limit() {
 }
 
 function vm_add_cubes_in_each_of() {
+	vm_assert_argcount(3)
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
 	game.vm.us_states = vm_operand_us_states(3)
@@ -1940,6 +1953,7 @@ function vm_add_cubes_in_each_of() {
 }
 
 function vm_add_cubes_in_one_state_of_each_region() {
+	vm_assert_argcount(2)
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
 	game.vm.us_states = anywhere()
@@ -1948,6 +1962,7 @@ function vm_add_cubes_in_one_state_of_each_region() {
 }
 
 function vm_add_cubes_per_state_in_any_one_region() {
+	vm_assert_argcount(2)
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
 	game.vm.us_states = anywhere()
@@ -1956,6 +1971,7 @@ function vm_add_cubes_per_state_in_any_one_region() {
 }
 
 function vm_remove_cubes_limit() {
+	vm_assert_argcount(4)
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
 	game.vm.us_states = us_states_with_color_cubes(vm_operand_us_states(3), game.vm.cubes)
@@ -1964,6 +1980,7 @@ function vm_remove_cubes_limit() {
 }
 
 function vm_remove_all_cubes() {
+	vm_assert_argcount(2)
 	game.vm.cubes = vm_operand(1)
 	game.vm.us_states = us_states_with_color_cubes(vm_operand_us_states(2), game.vm.cubes)
 	game.vm.all = true
@@ -1971,6 +1988,7 @@ function vm_remove_all_cubes() {
 }
 
 function vm_remove_all_cubes_up_to() {
+	vm_assert_argcount(2)
 	game.vm.cubes = vm_operand(1)
 	game.vm.us_states = us_states_with_color_cubes(anywhere(), game.vm.cubes)
 	game.vm.limit = vm_operand(2)
@@ -1979,6 +1997,7 @@ function vm_remove_all_cubes_up_to() {
 }
 
 function vm_replace() {
+	vm_assert_argcount(3)
 	game.vm.what = vm_operand(1)
 	game.vm.count = vm_operand(2)
 	game.vm.replacement = vm_operand(3)
@@ -1993,6 +2012,7 @@ function vm_replace() {
 }
 
 function vm_add_congress() {
+	vm_assert_argcount(1)
 	game.vm.count = vm_operand(1)
 	if (!game.nineteenth_amendment && game.vm.count) {
 		game.state = "vm_add_congress"
@@ -2002,6 +2022,7 @@ function vm_add_congress() {
 }
 
 function vm_remove_congress() {
+	vm_assert_argcount(1)
 	game.vm.count = vm_operand(1)
 	if (!game.nineteenth_amendment && game.congress > 0 && game.vm.count) {
 		game.state = "vm_remove_congress"
@@ -2011,12 +2032,14 @@ function vm_remove_congress() {
 }
 
 function vm_roll() {
+	vm_assert_argcount(2)
 	game.vm.count = vm_operand(1)
 	game.vm.d = vm_operand(2)
 	game.state = "vm_roll"
 }
 
 function vm_roll_for_success() {
+	vm_assert_argcount(2)
 	game.vm.count = vm_operand(1)
 	game.vm.d = vm_operand(2)
 	game.vm.for_success = true
@@ -2024,6 +2047,7 @@ function vm_roll_for_success() {
 }
 
 function vm_roll_list() {
+	vm_assert_argcount(2)
 	game.vm.count = vm_operand(1)
 	game.vm.d = vm_operand(2)
 	game.vm.roll_list = true
@@ -2031,6 +2055,7 @@ function vm_roll_list() {
 }
 
 function vm_move_each_player_campaigner_free() {
+	vm_assert_argcount(0)
 	if (has_player_active_campaigners()) {
 		game.vm.moved = []
 		game.state = "move_each_player_campaigner_free"
@@ -2041,15 +2066,18 @@ function vm_move_each_player_campaigner_free() {
 }
 
 function vm_select_strategy_card() {
+	vm_assert_argcount(0)
 	game.state = "select_strategy_card"
 }
 
 function vm_select_us_state() {
+	vm_assert_argcount(0)
 	game.state = "vm_select_us_state"
 	delete game.vm.selected_us_state
 }
 
 function vm_persistent() {
+	vm_assert_argcount(1)
 	let type = vm_operand(1)
 	switch (type) {
 		case REST_OF_TURN:
@@ -2070,6 +2098,7 @@ function vm_persistent() {
 }
 
 function vm_requires_persistent() {
+	vm_assert_argcount(2)
 	let type = vm_operand(1)
 	let card = vm_operand(2)
 
@@ -2084,6 +2113,7 @@ function vm_requires_persistent() {
 }
 
 function vm_requires_not_persistent() {
+	vm_assert_argcount(2)
 	let type = vm_operand(1)
 	let card = vm_operand(2)
 
@@ -2098,6 +2128,7 @@ function vm_requires_not_persistent() {
 }
 
 function vm_discard_persistent() {
+	vm_assert_argcount(2)
 	let type = vm_operand(1)
 	let card = vm_operand(2)
 
@@ -2114,6 +2145,7 @@ function vm_discard_persistent() {
 }
 
 function vm_campaigning_action() {
+	vm_assert_argcount(0)
 	if (has_player_active_campaigners()) {
 		log_h3("Campaigning Action")
 		goto_campaigning(game.played_card)
@@ -2123,10 +2155,12 @@ function vm_campaigning_action() {
 }
 
 function vm_counter_strat() {
+	vm_assert_argcount(0)
 	game.state = "vm_counter_strat"
 }
 
 function vm_draw_2_play_1_event() {
+	vm_assert_argcount(0)
 	clear_undo()
 	game.vm.draw = []
 	for (let i = 0; i < 2; ++i) {
@@ -2140,15 +2174,18 @@ function vm_draw_2_play_1_event() {
 }
 
 function vm_draw_6_place_any_on_top_of_draw() {
+	vm_assert_argcount(0)
 	goto_vm_place_any_on_top_of_draw()
 }
 
 function vm_draw_6_play_1_place_any_on_top_of_draw() {
+	vm_assert_argcount(0)
 	game.vm.play_one = -1
 	goto_vm_place_any_on_top_of_draw()
 }
 
 function vm_opponent_discard_2_random_draw_2() {
+	vm_assert_argcount(0)
 	clear_undo()
 	next_player()
 	game.selected_cards = shuffle(object_copy(player_hand())).slice(0, 2)
@@ -2157,6 +2194,7 @@ function vm_opponent_discard_2_random_draw_2() {
 }
 
 function vm_show_opponents_hand_discard_1_draw_1() {
+	vm_assert_argcount(0)
 	clear_undo()
 	set_aside_player_hand()
 
@@ -2168,6 +2206,7 @@ function vm_show_opponents_hand_discard_1_draw_1() {
 }
 
 function vm_select_1_card_from_draw_deck_play_event_shuffle() {
+	vm_assert_argcount(0)
 	clear_undo()
 	set_aside_player_hand()
 
@@ -2181,60 +2220,6 @@ function vm_select_1_card_from_draw_deck_play_event_shuffle() {
 // #endregion
 
 // #region EVENT STATES
-
-states.vm_switch = {
-	inactive: "choose an event option.",
-	prompt() {
-		event_prompt()
-		for (let choice of vm_operand(1))
-			view.actions[choice] = 1
-	},
-	place() {
-		push_undo()
-		game.vm.choice = "place"
-		vm_next()
-	},
-	replace() {
-		push_undo()
-		game.vm.choice = "replace"
-		vm_next()
-	},
-	remove() {
-		push_undo()
-		game.vm.choice = "remove"
-		vm_next()
-	},
-	momentum() {
-		push_undo()
-		game.vm.choice = "momentum"
-		vm_next()
-	},
-	ops() {
-		push_undo()
-		game.vm.choice = "ops"
-		vm_next()
-	},
-	political() {
-		push_undo()
-		game.vm.choice = "political"
-		vm_next()
-	},
-	military() {
-		push_undo()
-		game.vm.choice = "military"
-		vm_next()
-	},
-	public_opinion() {
-		push_undo()
-		game.vm.choice = "public_opinion"
-		vm_next()
-	},
-	paris() {
-		push_undo()
-		game.vm.choice = "paris"
-		vm_next()
-	},
-}
 
 states.vm_add_campaigner = {
 	inactive: "add a Campaigner.",
