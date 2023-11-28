@@ -855,8 +855,9 @@ states.strategy_phase = {
 		end_strategy_phase()
 	},
 	supersede() {
-		log(`Opposition superseded.`)
-		game.opposition_buttons -= (game.support_committed + 1)
+		const amount = game.support_committed + 1
+		log(`Opposition superseded with ${amount} BM.`)
+		game.opposition_buttons -= amount
 		game.state = 'select_strategy_card'
 	}
 }
