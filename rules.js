@@ -1511,13 +1511,22 @@ states.campaigning_add_cubes = {
 			}
 		}
 
-		view.prompt = `Campaigning: Add a ${COLOR_NAMES[campaigner_color(game.selected_campaigner)]} cube`
-		if (has_opponent_cubes)
-			view.prompt += " or remove an Opponent's cube"
-		if (can_move) {
-			view.prompt += " or Move to another Region"
+
+		if (us_states.length) {
+			view.prompt = `Campaigning: Add a ${COLOR_NAMES[campaigner_color(game.selected_campaigner)]} cube.`
+			if (has_opponent_cubes)
+				view.prompt += " or remove an Opponent's cube"
+			if (can_move) {
+				view.prompt += " or Move to another Region"
+			}
+			view.prompt += "."
+		} else {
+			view.prompt = `Campaigning: No available States to add a ${COLOR_NAMES[campaigner_color(game.selected_campaigner)]} cube.`
+			gen_action("done")
 		}
-		view.prompt += "."
+	},
+	done() {
+		end_campaigning_add_cube()
 	},
 	move() {
 		push_undo()
@@ -1555,11 +1564,15 @@ function after_campaigning_add_cube(us_state) {
 	game.campaigning.added += 1
 
 	if (game.campaigning.added === game.campaigning.count) {
-		delete game.selected_campaigner
-		if (game.campaigning.dice_idx < game.roll.length)
-			game.campaigning.dice_idx += 1
-		goto_campaigning_assign()
+		end_campaigning_add_cube()
 	}
+}
+
+function end_campaigning_add_cube() {
+	delete game.selected_campaigner
+	if (game.campaigning.dice_idx < game.roll.length)
+		game.campaigning.dice_idx += 1
+	goto_campaigning_assign()
 }
 
 states.campaigning_move = {
