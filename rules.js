@@ -691,6 +691,8 @@ exports.view = function(state, player) {
 		us_states: game.us_states,
 		nineteenth_amendment: game.nineteenth_amendment,
 		campaigners: game.campaigners,
+		green_checks: 0,
+		red_xs: 0,
 
 		strategy_deck: game.strategy_deck.length,
 		strategy_draw: game.strategy_draw,
@@ -713,6 +715,11 @@ exports.view = function(state, player) {
 		hand: [],
 		set_aside: [],
 		selected_cards: [],
+	}
+
+	if (game.nineteenth_amendment) {
+		view.green_checks = count_green_checks()
+		view.red_xs = count_red_xs()
 	}
 
 	if (player === SUF) {

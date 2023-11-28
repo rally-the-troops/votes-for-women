@@ -576,12 +576,15 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 	return p
 }
 
+
 function support_info() {
-	return `${view.support_buttons}\u{2b50} ${view.support_hand}\u{1f3b4}`
+	// TODO show the # of green_checks and red_xs instead of the congress circles when the 19th has passed instead
+	return `${view.support_buttons}\u{2b50} ${view.support_hand}\u{1f3b4} ${view.green_checks} \u{2713}`
 }
 
 function opposition_info() {
-	return `${view.opposition_buttons}\u{2b50} ${view.opposition_hand}\u{1f3b4}`
+	// TODO show the # of green_checks and red_xs instead of the congress circles when the 19th has passed instead
+	return `${view.opposition_buttons}\u{2b50} ${view.opposition_hand}\u{1f3b4} ${view.red_xs} \u{2717}`
 }
 
 function layout_cubes(list, xorig, yorig) {
