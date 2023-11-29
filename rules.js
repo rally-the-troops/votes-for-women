@@ -21,6 +21,9 @@ const last_states_card = 128
 const MAX_SUPPORT_BUTTONS = 12
 const MAX_OPPOSITION_BUTTONS = 6
 
+const GREEN_CHECK_VICTORY = 36
+const RED_X_VICTORY = 13
+
 const WEST = 1
 const PLAINS = 2
 const SOUTH = 3
@@ -638,6 +641,8 @@ exports.VIEW_SCHEMA = {
 		us_states: {type: "array", minItems: us_states_count + 1, maxItems: us_states_count + 1, items: {type: "integer", minimum: 0}},
 		nineteenth_amendment: {type: "integer", minimum: 0, maximum: 1},
 		campaigners: {type: "array", minItems: 6, maxItems: 6, items: {type: "integer", minimum: 0, maximum: region_count}},
+		green_checks: {type: "integer", minimum: 0, maximum: GREEN_CHECK_VICTORY},
+		red_xs: {type: "integer", minimum: 0, maximum: RED_X_VICTORY},
 
 		strategy_deck: {type: "integer", minimum: 0, maximum: 12},
 		strategy_draw: {type: "array", maxItems: 3, items: {type: "integer", minimum: 1, maximum: 128}},
@@ -1213,6 +1218,10 @@ states.final_voting_select_state = {
 	inactive: "do Final Voting.",
 	prompt() {
 		view.prompt = "Final Voting: Select a state."
+		if (game.active === SUF)
+			view.prompt += ` You need ${GREEN_CHECK_VICTORY - count_green_checks()} more States for victory.`
+		else
+			view.prompt += ` You need ${RED_X_VICTORY - count_red_xs()} more States for victory.`
 
 		let us_states = anywhere()
 		set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
@@ -1246,30 +1255,54 @@ function goto_final_voting_roll() {
 	game.opponent_roll = 0
 	game.dice = final_voting_dice(game.active)
 	game.opponent_dice = final_voting_dice(opponent_name())
+
+	let plus_support_cubes = support_cubes(game.selected_us_state)
+	let plus_opposition_cubes = red_cubes(game.selected_us_state)
+	if (plus_support_cubes)
+		log(`Suffragist gets +${plus_support_cubes}.`)
+	if (plus_opposition_cubes)
+		log(`Opposition gets +${plus_opposition_cubes}.`)
+	game.drm = (game.active === SUF) ? plus_support_cubes : plus_opposition_cubes
+	game.opponent_drm = (game.active === SUF) ? plus_opposition_cubes : plus_support_cubes
+
 	game.state = "final_voting_roll"
 }
 
 states.final_voting_roll = {
 	inactive: "do Final Voting.",
 	prompt() {
+		view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: `
+
 		if (!game.roll) {
-			view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: Roll dice.`
+			if (game.drm)
+				view.prompt += `You get +${game.drm}. `
+			else if (game.opponent_drm)
+				view.prompt += `${opponent_name()} gets +${game.opponent_drm}. `
+			view.prompt += "Roll dice."
 			gen_action("roll")
 		} else {
-			view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: ${opponent_name()} rolled ${game.opponent_roll}, You rolled ${game.roll}.`
-			if (player_buttons() > 0)
+			view.prompt += `${opponent_name()} rolled ${game.opponent_roll}`
+			if (game.opponent_drm)
+				view.prompt += ` (+${game.opponent_drm})`
+			view.prompt += `, You rolled ${game.roll}`
+			if (game.drm)
+				view.prompt += ` (+${game.drm})`
+			view.prompt += '.'
+
+			// only reroll when you can and when it makes sense
+			if (player_buttons() > 0 && game.roll < game.dice)
 				gen_action("reroll")
 			gen_action("next")
 		}
 	},
 	roll() {
 		game.persistent_ballot.includes(VOTER_REGISTRATION)
-		game.roll = roll_ndx(1, game.dice)
-		game.opponent_roll = roll_ndx(1, game.opponent_dice)
+		game.roll = roll_ndx(1, game.dice, `${game.active} rolled`)
+		game.opponent_roll = roll_ndx(1, game.opponent_dice, `${opponent_name()} rolled`)
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		game.roll = roll_ndx(1, game.dice, "Re-rolled")
+		game.roll = roll_ndx(1, game.dice, `${game.active} re-rolled`)
 	},
 	next() {
 		next_player()
@@ -1280,14 +1313,23 @@ states.final_voting_roll = {
 states.final_voting_opponent = {
 	inactive: "do Final Voting.",
 	prompt() {
-		view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: ${opponent_name()} rolled ${game.roll}, You rolled ${game.opponent_roll}.`
-		if (player_buttons() > 0)
+		view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: `
+		view.prompt += `${opponent_name()} rolled ${game.roll}`
+		if (game.drm)
+			view.prompt += ` (+${game.drm})`
+		view.prompt += `, You rolled ${game.opponent_roll}`
+		if (game.opponent_drm)
+			view.prompt += ` (+${game.opponent_drm})`
+		view.prompt += '.'
+
+		// only reroll when you can and when it makes sense
+		if (player_buttons() > 0 && game.opponent_roll < game.opponent_dice)
 			gen_action("reroll")
 		gen_action("next")
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		game.opponent_roll = roll_ndx(1, game.opponent_dice, "Re-rolled")
+		game.opponent_roll = roll_ndx(1, game.opponent_dice, `${game.active} re-rolled`)
 	},
 	next() {
 		goto_final_voting_result()
@@ -1308,9 +1350,9 @@ function goto_final_voting_result() {
 	let opposition_total = opposition_roll + plus_opposition_cubes
 
 	log_br()
-	log(`Suffragist ${support_roll} + ${plus_support_cubes} = ${support_total}`)
-	log(`Opposition ${opposition_roll} + ${plus_opposition_cubes} = ${opposition_total}`)
-	// log(`${support_roll} + ${plus_support_cubes} = ${support_total} vs. ${opposition_roll} + ${plus_opposition_cubes} = ${opposition_total}`)
+	// log(`Suffragist ${support_roll} + ${plus_support_cubes} = ${support_total}`)
+	// log(`Opposition ${opposition_roll} + ${plus_opposition_cubes} = ${opposition_total}`)
+	log(`${support_roll} (+${plus_support_cubes}) = ${support_total} vs. ${opposition_roll} (+${plus_opposition_cubes}) = ${opposition_total}`)
 
 	if (support_total > opposition_total)
 		game.voting_winner = SUF
@@ -1674,9 +1716,6 @@ states.lobbying = {
 		}
 	}
 }
-
-const GREEN_CHECK_VICTORY = 36
-const RED_X_VICTORY = 13
 
 function ratify_nineteenth_amendment(us_state) {
 	log(`S${us_state} voted ${COLOR_CODE[GREEN_CHECK]}.`)
