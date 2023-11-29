@@ -29,6 +29,9 @@ let ui = {
 	turn: document.getElementById("turn"),
 	congress_box: document.getElementById("congress_box"),
 	congress: [ null ],
+	nineteenth_amendment_score: document.getElementById("nineteenth_amendment_score"),
+	green_checks_count: document.getElementById("green_checks_count"),
+	red_xs_count: document.getElementById("red_xs_count"),
 	player: [
 		document.getElementById("role_Suffragist"),
 		document.getElementById("role_Opposition"),
@@ -578,13 +581,11 @@ function on_log(text) { // eslint-disable-line no-unused-vars
 
 
 function support_info() {
-	// TODO show the # of green_checks and red_xs instead of the congress circles when the 19th has passed instead
-	return `${view.support_buttons}\u{2b50} ${view.support_hand}\u{1f3b4} ${view.green_checks} \u{2713}`
+	return `${view.support_buttons}\u{2b50} ${view.support_hand}\u{1f3b4}`
 }
 
 function opposition_info() {
-	// TODO show the # of green_checks and red_xs instead of the congress circles when the 19th has passed instead
-	return `${view.opposition_buttons}\u{2b50} ${view.opposition_hand}\u{1f3b4} ${view.red_xs} \u{2717}`
+	return `${view.opposition_buttons}\u{2b50} ${view.opposition_hand}\u{1f3b4}`
 }
 
 function layout_cubes(list, xorig, yorig) {
@@ -629,6 +630,12 @@ function on_update() { // eslint-disable-line no-unused-vars
 	for (let c = 1; c <= view.congress; ++c) {
 		ui.congress_box.appendChild(ui.congress[c])
 		ui.congress[c].classList.toggle("action", is_action("congress"))
+	}
+
+	ui.nineteenth_amendment_score.classList.toggle("hide", !view.nineteenth_amendment)
+	if (view.nineteenth_amendment) {
+		ui.green_checks_count.textContent = view.green_checks
+		ui.red_xs_count.textContent = view.red_xs
 	}
 
 	ui.support_button_box.replaceChildren()

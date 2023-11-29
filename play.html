@@ -279,6 +279,18 @@ div.congress_box.action {
 	border: 5px solid white;
 }
 
+div.nineteenth_amendment_score:not(.hide) {
+	position: absolute;
+	background-color: #EEE7D2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+
+	font-weight: bold;
+	font-size: 24pt;
+}
+
 .piece {
 	pointer-events: none;
 	position: absolute;
@@ -1058,6 +1070,13 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 
 		<div id="turn" class="piece turn" style="left:806px;top:770px;"></div>
 		<div id="congress_box" class="congress_box" style="left:490px;top:760px;width:270px;height:60px;">
+		</div>
+		<div id="nineteenth_amendment_score" class="nineteenth_amendment_score" style="left:490px;top:760px;width:270px;height:60px;">
+			<div id="green_checks_count" class="score">0</div>
+			<div class="piece yes" style="position:relative"></div>
+			<div style="width: 10px;"></div>
+			<div id="red_xs_count" class="score">0</div>
+			<div class="piece no" style="position:relative"></div>
 		</div>
 		<div id="support_buttons" class="button_box" style="left:25px;top:25px;">
 		</div>
