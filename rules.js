@@ -2442,7 +2442,11 @@ states.vm_add_cubes = {
 			// if (has_opponent_cubes)
 			// 	event_prompt("Choose a cube color to add or remove an Opponent's cube.")
 		} else {
-			event_prompt(`Add a ${COLOR_NAMES[game.vm.cube_color]} cube.`)
+
+			event_prompt(`Add ${pluralize(game.vm.count, COLOR_NAMES[game.vm.cube_color] + ' cube')}`)
+			if (game.vm.limit)
+				view.prompt += `, no more than ${game.vm.limit} per state`
+			view.prompt += '.'
 			// if (has_opponent_cubes)
 			// 	event_prompt(`Add a ${COLOR_NAMES[game.vm.cube_color]} cube or remove an Opponent's cube.`)
 		}
@@ -2546,7 +2550,14 @@ function goto_vm_remove_cubes() {
 states.vm_remove_cubes = {
 	inactive: "remove a cube.",
 	prompt() {
-		event_prompt(`Remove a ${COLOR_NAMES[game.vm.cubes]} cube.`)
+		if (game.vm.all) {
+			event_prompt(`Remove all ${COLOR_NAMES[game.vm.cubes]} cube.`)
+		} else {
+			event_prompt(`Remove ${game.vm.count} ${COLOR_NAMES[game.vm.cubes]} cube`)
+			if (game.vm.limit)
+				view.prompt += `, no more than ${game.vm.limit} per state`
+			view.prompt += '.'
+		}
 
 		for (let s of game.vm.us_states) {
 			if ((game.vm.cubes === PURPLE || game.vm.cubes === PURPLE_OR_YELLOW) && purple_cubes(s))
