@@ -1632,6 +1632,7 @@ function end_campaigning_add_cube() {
 
 function goto_claim_states_card(us_state) {
 	game.selected_us_state = us_state
+	game.continue_state = game.state
 	game.state = 'claim_state_card'
 }
 
@@ -1650,15 +1651,15 @@ states.claim_state_card = {
 		array_remove_item(game.states_draw, c)
 		player_claimed().push(c)
 		log(`Claimed C${c}.`)
-		let s = game.selected_us_state
-		delete game.selected_us_state
 
 		// continue
-		if (game.vm) {
-			game.state = "vm_add_cubes"
+		let s = game.selected_us_state
+		game.state = game.continue_state
+		delete game.selected_us_state
+		delete game.continue_state
+		if (game.state === "vm_add_cubes") {
 			after_vm_add_cube(s)
 		} else {
-			game.state = "campaigning_add_cubes"
 			after_campaigning_add_cube(s)
 		}
 	}
