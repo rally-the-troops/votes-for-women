@@ -1875,6 +1875,11 @@ function vm_prompt() {
 	vm_next()
 }
 
+function vm_log() {
+	log(vm_operand(1))
+	vm_next()
+}
+
 function vm_return() {
 	// game.state = "vm_return"
 	end_event()
@@ -2123,19 +2128,20 @@ function vm_select_us_state() {
 }
 
 function vm_persistent() {
-	vm_assert_argcount(1)
+	vm_assert_argcount(2)
 	let type = vm_operand(1)
+	let message = vm_operand(2)
 	switch (type) {
 		case REST_OF_TURN:
-			log("Card in Effect for the Rest of the Turn.")
+			log(message || "Card in Effect for the Rest of the Turn.")
 			game.persistent_turn.push(game.vm.fp)
 			break
 		case REST_OF_GAME:
-			log("Card in Effect for the Rest of the Game.")
+			log(message || "Card in Effect for the Rest of the Game.")
 			game.persistent_game.push(game.vm.fp)
 			break
 		case BALLOT_BOX:
-			log("Card in Effect for Final Voting.")
+			log(message || "Card in Effect for Final Voting.")
 			game.persistent_ballot.push(game.vm.fp)
 			break
 	}
@@ -3370,7 +3376,7 @@ CODE[1] = [ // Seneca Falls Convention
 ]
 
 CODE[2] = [ // Property Rights for Women
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, roll D6 instead of B4 when taking a Campaigning action." ],
 	[ vm_return ],
 ]
 
@@ -3401,7 +3407,7 @@ CODE[6] = [ // Fifteenth Amendment
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 2 ],
 	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, anywhere(), 2 ],
-	[ vm_persistent, REST_OF_GAME ],
+	[ vm_persistent, REST_OF_GAME, "" ],
 	[ vm_endif ],
 	[ vm_return ],
 ]
@@ -3566,7 +3572,7 @@ CODE[32] = [ // Maria de Lopez
 ]
 
 CODE[33] = [ // Marie Louise Bottineau Baldwin
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, roll D6 instead of B4 when taking a Campaigning action." ],
 	[ vm_return ],
 ]
 
@@ -3579,7 +3585,7 @@ CODE[35] = [ // Southern Strategy
 	[ vm_receive_buttons, 2 ],
 	[ vm_add_cubes_in_each_of, 2, PURPLE_OR_YELLOW, region_us_states(SOUTH) ],
 	[ vm_select_strategy_card ],
-	[ vm_persistent, REST_OF_GAME ],
+	[ vm_persistent, REST_OF_GAME, "" ],
 	[ vm_return ],
 ]
 
@@ -3615,17 +3621,17 @@ CODE[40] = [ // Maud Wood Park
 ]
 
 CODE[41] = [ // Voter Registration
-	[ vm_persistent, BALLOT_BOX ],
+	[ vm_persistent, BALLOT_BOX, "The Suffragist player rolls W8 instead of D6 during Final Voting." ],
 	[ vm_return ],
 ]
 
 CODE[42] = [ // Processions for Suffrage
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, roll W8 instead of D6 when taking a Lobbying action. For each 6, 7 or 8 rolled, add 1 CM in Congress." ],
 	[ vm_return ],
 ]
 
 CODE[43] = [ // Prison Tour Special
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, roll D6 instead of B4 when taking a Campaigning action." ],
 	[ vm_return ],
 ]
 
@@ -3646,7 +3652,7 @@ CODE[46] = [ // Eighteenth Amendment
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 1 ],
 	[ vm_receive_buttons, 2 ],
-	[ vm_persistent, REST_OF_GAME ],
+	[ vm_persistent, REST_OF_GAME, "" ],
 	[ vm_endif ],
 	[ vm_return ],
 ]
@@ -3682,7 +3688,7 @@ CODE[51] = [ // Dr. Mabel Ping-Hua Lee
 ]
 
 CODE[52] = [ // Miss Febb Wins the Last Vote
-	[ vm_persistent, BALLOT_BOX ],
+	[ vm_persistent, BALLOT_BOX, "The Suffragist player wins all ties during Final Voting." ],
 	[ vm_return ],
 ]
 
@@ -3695,8 +3701,7 @@ CODE[53] = [ // The Patriarchy
 
 CODE[54] = [ // The Civil War
 	[ vm_remove_congress, 1 ],
-	[ vm_prompt, "For the remainder of the turn, the Suffragist player may not add :purple_or_yellow_cube to any state in the Atlantic & Appalachia and South regions." ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, the Suffragist player may not add PYC to any state in the Atlantic & Appalachia and South regions." ],
 	[ vm_return ],
 ]
 
@@ -3784,8 +3789,7 @@ CODE[67] = [ // Southern “Hospitality”
 
 CODE[68] = [ // Beer Brewers
 	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
-	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, roll D6 instead of B4 when taking a Campaigning action." ],
 	[ vm_return ],
 ]
 
@@ -3845,8 +3849,7 @@ CODE[78] = [ // The Great 1906 San Francisco Earthquake
 ]
 
 CODE[79] = [ // A Threat to the Ideal of Womanhood
-	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event." ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, the Suffragist player must spend 1 BM in order to play a card as an event." ],
 	[ vm_return ],
 ]
 
@@ -3856,8 +3859,7 @@ CODE[80] = [ // “Unwarranted, Unnecessary & Dangerous Interference”
 ]
 
 CODE[81] = [ // Conservative Opposition
-	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, roll D6 instead of B4 when taking a Campaigning action." ],
 	[ vm_return ],
 ]
 
@@ -3902,15 +3904,13 @@ CODE[87] = [ // Senator “Cotton Ed” Smith
 
 CODE[88] = [ // War in Europe
 	[ vm_remove_congress, 1 ],
-	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to take a Campaigning action." ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, the Suffragist player must spend 1 BM in order to take a Campaigning action." ],
 	[ vm_return ],
 ]
 
 CODE[89] = [ // 1918 Pandemic
 	[ vm_remove_congress, 1 ],
-	[ vm_prompt, "For the remainder of the turn, the Suffragist player must spend 1 :button in order to play a card as an event." ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, the Suffragist player must spend 1 BM in order to play a card as an event." ],
 	[ vm_return ],
 ]
 
@@ -3926,8 +3926,7 @@ CODE[91] = [ // The Eden Sphinx
 
 CODE[92] = [ // Big Liquor’s Big Money
 	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
-	[ vm_prompt, "For the remainder of the turn, roll :d6 instead of :d4 when taking a Campaigning action." ],
-	[ vm_persistent, REST_OF_TURN ],
+	[ vm_persistent, REST_OF_TURN, "For the remainder of the turn, roll D6 instead of B4 when taking a Campaigning action." ],
 	[ vm_return ],
 ]
 
@@ -3964,7 +3963,7 @@ CODE[97] = [ // The Unnecessary Privilege
 ]
 
 CODE[98] = [ // Voter Suppression
-	[ vm_persistent, BALLOT_BOX ],
+	[ vm_persistent, BALLOT_BOX, "The Opposition player rolls W8 instead of D6 during Final Voting." ],
 	[ vm_return ],
 ]
 
