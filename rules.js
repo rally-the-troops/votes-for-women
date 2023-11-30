@@ -1606,6 +1606,10 @@ states.campaigning_add_cubes = {
 
 function after_campaigning_add_cube(us_state) {
 	if (player_cubes(us_state) === 4) {
+		if (can_claim_states_card(us_state)) {
+			goto_claim_states_card(us_state)
+			return
+		}
 		on_4th_cube(us_state)
 		if (check_victory())
 			return true
@@ -1623,6 +1627,40 @@ function end_campaigning_add_cube() {
 	if (game.campaigning.dice_idx < game.roll.length)
 		game.campaigning.dice_idx += 1
 	goto_campaigning_assign()
+}
+
+function goto_claim_states_card(us_state) {
+	game.selected_us_state = us_state
+	game.state = 'claim_state_card'
+}
+
+states.claim_state_card = {
+	inactive: "claim States Card.",
+	prompt() {
+		view.prompt = `Claim the "${us_state_name(game.selected_us_state)}" States Card.`
+
+		for (let c of game.states_draw) {
+			if (US_STATES[game.selected_us_state].name === CARDS[c].name) {
+				gen_action_card(c)
+			}
+		}
+	},
+	card(c) {
+		array_remove_item(game.states_draw, c)
+		player_claimed().push(c)
+		log(`Claimed C${c}.`)
+		let s = game.selected_us_state
+		delete game.selected_us_state
+
+		// continue
+		if (game.vm) {
+			game.state = "vm_add_cubes"
+			after_vm_add_cube(s)
+		} else {
+			game.state = "campaigning_add_cubes"
+			after_campaigning_add_cube(s)
+		}
+	}
 }
 
 states.campaigning_move = {
@@ -2437,24 +2475,19 @@ states.vm_add_cubes = {
 		push_undo()
 		add_cube(game.vm.cube_color, s)
 		after_vm_add_cube(s)
-	}
+	},
 }
 
-function claim_states_card(us_state) {
+function can_claim_states_card(us_state) {
 	for (let c of game.states_draw) {
 		if (US_STATES[us_state].name === CARDS[c].name) {
-			array_remove_item(game.states_draw, c)
-			player_claimed().push(c)
-			log(`Claimed C${c}.`)
-			return
+			return true
 		}
 	}
+	return false
 }
 
 function on_4th_cube(us_state) {
-	// claim state cards when 4 cubes have been added
-	claim_states_card(us_state)
-
 	if (game.nineteenth_amendment) {
 		// replace cubes with checks / Xs
 		if (game.active === SUF) {
@@ -2467,6 +2500,10 @@ function on_4th_cube(us_state) {
 
 function after_vm_add_cube(us_state) {
 	if (player_cubes(us_state) === 4) {
+		if (can_claim_states_card(us_state)) {
+			goto_claim_states_card(us_state)
+			return
+		}
 		on_4th_cube(us_state)
 		if (game.nineteenth_amendment)
 			set_delete(game.vm.us_states, us_state)
