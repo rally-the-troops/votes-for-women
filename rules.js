@@ -1535,7 +1535,6 @@ function filter_us_states(us_states) {
 states.campaigning_add_cubes = {
 	inactive: "do Campaigning.",
 	prompt() {
-		// let has_opponent_cubes = false
 		let can_move = false
 		if (!game.campaigning.added && player_buttons() > 0 && !game.campaigning.moved) {
 			gen_action("move")
@@ -1547,7 +1546,6 @@ states.campaigning_add_cubes = {
 
 		for (let s of us_states) {
 			if (opponent_cubes(s)) {
-				// has_opponent_cubes = true
 				if (game.active === SUF) {
 					gen_action_red_cube(s)
 				} else {
@@ -1563,16 +1561,15 @@ states.campaigning_add_cubes = {
 
 
 		if (us_states.length) {
-			view.prompt = `Campaigning: Add a ${COLOR_NAMES[campaigner_color(game.selected_campaigner)]} cube`
-			// if (has_opponent_cubes)
-			// 	view.prompt += " or remove an Opponent's cube"
+			view.prompt = `Campaigning: Add ${pluralize(game.campaigning.count, COLOR_NAMES[campaigner_color(game.selected_campaigner)] + ' cube')}, remove opponent's cubes`
 			if (can_move) {
-				view.prompt += " or Move to another Region"
+				view.prompt += ", and optionally Move Campaigner"
 			}
-			let remaining = game.campaigning.count - game.campaigning.added
-			view.prompt += `. ${pluralize(remaining, 'cube')} remaining.`
+			view.prompt += '.'
+			// let remaining = game.campaigning.count - game.campaigning.added
+			// view.prompt += ` ${pluralize(remaining, 'cube')} remaining.`
 		} else {
-			view.prompt = `Campaigning: No available States to add a ${COLOR_NAMES[campaigner_color(game.selected_campaigner)]} cube.`
+			view.prompt = `Campaigning: No available States to Add or Remove cubes.`
 			gen_action("done")
 		}
 	},
