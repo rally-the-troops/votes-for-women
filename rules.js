@@ -2535,6 +2535,11 @@ function after_vm_remove_cube(us_state) {
 	map_incr(game.vm.removed, us_state, 1)
 
 	if (game.vm.all) {
+		if (map_key_count(game.vm.removed) === game.vm.limit) {
+			// remove all other states from eligible list when we reached our limit
+			set_filter(game.vm.us_states, s => map_has(game.vm.removed, s))
+		}
+
 		if (!color_cubes(game.vm.cubes, us_state)) {
 			set_delete(game.vm.us_states, us_state)
 
