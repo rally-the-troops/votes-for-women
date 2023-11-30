@@ -1153,9 +1153,9 @@ function goto_cleanup_phase() {
 	if (game.turn < 6) {
 		// any cards in the “Cards in Effect for the Rest of the Turn box”
 		// are placed in the appropriate discard pile.
-		for (let c of game.persistent_turn) {
-			discard_persistent_card(game.persistent_turn, c)
-		}
+		for (let c of game.persistent_turn)
+			log(`C${c} discarded.`)
+		game.persistent_turn = []
 
 		if (game.support_hand.length !== 1)
 			throw Error("ASSERT game.support_hand.length === 1")
@@ -1178,12 +1178,12 @@ function goto_cleanup_phase() {
 		// Any cards in the “Cards in Effect for the Rest of the Turn box”
 		// and “Cards in Effect for the Rest of the Game box” are placed in
 		// the appropriate discard pile.
-		for (let c of game.persistent_turn) {
-			discard_persistent_card(game.persistent_turn, c)
-		}
-		for (let c of game.persistent_game) {
-			discard_persistent_card(game.persistent_game, c)
-		}
+		for (let c of game.persistent_turn)
+			log(`C${c} discarded.`)
+		game.persistent_turn = []
+		for (let c of game.persistent_game)
+			log(`C${c} discarded.`)
+		game.persistent_game = []
 	}
 
 	game.state = "cleanup_phase"
