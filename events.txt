@@ -132,7 +132,7 @@ CARD 23 - Equality League of Self-Supporting Women
 CARD 24 - Emmeline Pankhurst
 # Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D6
-    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 1
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 2
 
 CARD 25 - “Debate Us, You Cowards!”
 # Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.

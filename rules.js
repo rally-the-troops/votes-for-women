@@ -3509,7 +3509,7 @@ CODE[23] = [ // Equality League of Self-Supporting Women
 
 CODE[24] = [ // Emmeline Pankhurst
 	[ vm_roll, 2, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 2 ],
 	[ vm_return ],
 ]
 
