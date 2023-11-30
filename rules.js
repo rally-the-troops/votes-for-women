@@ -1778,7 +1778,7 @@ states.lobbying_add_congress = {
 	},
 	congress() {
 		game.congress = Math.min(game.congress + game.count, 6)
-		log(`+${pluralize(game.count, 'Congressional marker')}.`)
+		log(`Congress +${game.count} CM.`)
 
 		if (game.congress >= 6) {
 			if (trigger_nineteenth_amendment())
@@ -1797,7 +1797,7 @@ states.lobbying_remove_congress = {
 	},
 	congress() {
 		game.congress = Math.max(game.congress - game.count, 0)
-		log(`-${pluralize(game.count, 'Congressional marker')}.`)
+		log(`Congress -${game.count} CM.`)
 
 		end_play_card(game.played_card)
 	}
@@ -2615,7 +2615,7 @@ states.vm_add_congress = {
 	},
 	congress() {
 		game.congress = Math.min(game.congress + game.vm.count, 6)
-		log(`+${game.vm.count} CM`)
+		log(`Congress +${game.vm.count} CM.`)
 
 		if (game.congress >= 6) {
 			if (trigger_nineteenth_amendment())
@@ -2633,7 +2633,7 @@ states.vm_remove_congress = {
 	},
 	congress() {
 		game.congress = Math.max(game.congress - game.vm.count, 0)
-		log(`-${game.vm.count} CM`)
+		log(`Congress -${game.vm.count} CM.`)
 
 		vm_next()
 	}
