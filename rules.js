@@ -2760,6 +2760,7 @@ states.vm_roll = {
 			game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "Re-rolled")
 	},
 	next() {
+		push_undo()
 		vm_next()
 	}
 }
