@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="12">
+<defs>
+<path id="d4stroke" fill="#4397D4" stroke-linejoin="bevel" x-stroke="#000" d="M 0.5,6 3,1.5 9,1.5 11.5,6 9,10.5 3,10.5 Z" />
+<path id="d4" fill="#4397D4" d="M 0,6 3,1 9,1 12,6 9,11 3,11 Z" />
+</defs>
+<use xlink:href="#d4" x="0" y="0" />
+<use xlink:href="#d4" x="12" y="0" />
+<use xlink:href="#d4" x="24" y="0" />
+<use xlink:href="#d4" x="36" y="0" />
+<g font-size="7" fill="#FFF" font-family="B612 Mono" font-weight="bold" text-anchor="middle">
+<text x="6" y="8.5">1</text>
+<text x="18" y="8.5">2</text>
+<text x="30" y="8.5">3</text>
+<text x="42" y="8.5">4</text>
+</g>
+</svg>

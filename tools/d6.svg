@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="72" height="12">
+<defs>
+<rect id="d6" fill="#DE5646" x="1" y="1" width="10" height="10" />
+</defs>
+<use xlink:href="#d6" x="0" y="0" />
+<use xlink:href="#d6" x="12" y="0" />
+<use xlink:href="#d6" x="24" y="0" />
+<use xlink:href="#d6" x="36" y="0" />
+<use xlink:href="#d6" x="48" y="0" />
+<use xlink:href="#d6" x="60" y="0" />
+<g font-size="7" fill="#fff" font-family="B612 Mono" font-weight="bold" text-anchor="middle">
+<text x="6" y="8.5">1</text>
+<text x="18" y="8.5">2</text>
+<text x="30" y="8.5">3</text>
+<text x="42" y="8.5">4</text>
+<text x="54" y="8.5">5</text>
+<text x="66" y="8.5">6</text>
+</g>
+</svg>

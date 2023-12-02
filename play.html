@@ -38,8 +38,8 @@ main {
 	background-color: slategray;
 }
 
-#role_Suffragist .role_name { background-color: var(--suf-85); }
-#role_Opposition .role_name { background-color: var(--opp-85); }
+#role_Suffragist { background-color: var(--suf-85); }
+#role_Opposition { background-color: var(--opp-85); }
 .role.active .role_name span { text-decoration: underline; }
 
 .role_vp { float: right; height: 24px; color: #000c; }
@@ -75,22 +75,36 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 	border-radius: 0px;
 	box-shadow: none;
 	border: none;
-	background-size: 100% 100%;
+	background-size: contain;
+	background-position: center;
 	background-repeat: no-repeat;
 }
 
-#log .die_d4 {
-	color: #4397D4;
-	font-weight: bold;
+#log .die_d4, #log .die_d6, #log .die_d8 {
+	display: inline-block;
+	vertical-align: -3px;
+	width: 15px;
+	height: 15px;
+	background-size: auto 15px;
 }
 
-#log .die_d6 {
-	color: #DE5646;
-	font-weight: bold;
-}
+#log .d1 { background-position: -0px 0px; }
+#log .d2 { background-position: -15px 0px; }
+#log .d3 { background-position: -30px 0px; }
+#log .d4 { background-position: -45px 0px; }
+#log .d5 { background-position: -60px 0px; }
+#log .d6 { background-position: -75px 0px; }
+#log .d7 { background-position: -90px 0px; }
+#log .d8 { background-position: -105px 0px; }
 
-#log .die_d8 {
-	font-weight: bold;
+#log .die_d4 { background-image: url(images/d4.1x.png); }
+#log .die_d6 { background-image: url(images/d6.1x.png); }
+#log .die_d8 { background-image: url(images/d8.1x.png); }
+
+@media (min-resolution: 97dpi) {
+#log .die_d4 { background-image: url(images/d4.2x.png); }
+#log .die_d6 { background-image: url(images/d6.2x.png); }
+#log .die_d8 { background-image: url(images/d8.2x.png); }
 }
 
 #log .purple_campaigner {
