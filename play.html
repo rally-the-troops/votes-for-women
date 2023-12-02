@@ -274,6 +274,13 @@ div.label.large {
 	height: 15px;
 }
 
+div.label.claimable::after {
+	content: '*';
+	position: relative;
+	top: -0.5em;
+	font-size: 80%;
+}
+
 div.state.selected {
 	border-color: yellow;
 }
@@ -1113,7 +1120,7 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 		<div id="DE" class="atlantic state" style="top:313px;left:967px;"></div>
 		<div id="MD" class="atlantic state" style="top:373px;left:921px;"></div>
 
-		<div class="label large" style="top:286px;left:935px">NJ</div>
+		<div id="label_NJ" class="label large" style="top:286px;left:935px">NJ</div>
 		<div class="label large" style="top:246px;left:994px">CT</div>
 		<div class="label large" style="top:174px;left:1011px">RI</div>
 		<div class="label large" style="top:83px;left:989px">MA</div>
@@ -1123,16 +1130,16 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 		<div class="label large" style="top:413px;left:927px">MD</div>
 
 		<div class="label" style="top:128px;left:930px">ME</div>
-		<div class="label" style="top:206px;left:817px">NY</div>
+		<div id="label_NY" class="label" style="top:206px;left:817px">NY</div>
 		<div class="label" style="top:393px;left:841px">NC</div>
-		<div class="label" style="top:341px;left:832px">VA</div>
-		<div class="label" style="top:264px;left:814px">PA</div>
+		<div id="label_VA" class="label" style="top:341px;left:832px">VA</div>
+		<div id="label_PA" class="label" style="top:264px;left:814px">PA</div>
 		<div class="label" style="top:318px;left:778px">WV</div>
 		<div class="label" style="top:358px;left:688px">KY</div>
 		<div class="label" style="top:396px;left:701px">TN</div>
-		<div class="label" style="top:297px;left:739px">OH</div>
+		<div id="label_OH"  class="label" style="top:297px;left:739px">OH</div>
 		<div class="label" style="top:309px;left:684px">IN</div>
-		<div class="label" style="top:272px;left:636px">IL</div>
+		<div id="label_IL" class="label" style="top:272px;left:636px">IL</div>
 		<div class="label" style="top:233px;left:703px">MI</div>
 		<div class="label" style="top:207px;left:611px">WI</div>
 		<div class="label" style="top:363px;left:577px">MO</div>
@@ -1140,26 +1147,26 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 		<div class="label" style="top:173px;left:537px">MN</div>
 		<div class="label" style="top:581px;left:814px">FL</div>
 		<div class="label" style="top:441px;left:808px">SC</div>
-		<div class="label" style="top:474px;left:756px">GA</div>
+		<div id="label_GA" class="label" style="top:474px;left:756px">GA</div>
 		<div class="label" style="top:479px;left:690px">AL</div>
 		<div class="label" style="top:486px;left:637px">MS</div>
 		<div class="label" style="top:535px;left:612px">LA</div>
 		<div class="label" style="top:445px;left:580px">AR</div>
-		<div class="label" style="top:525px;left:457px">TX</div>
+		<div id="label_TX" class="label" style="top:525px;left:457px">TX</div>
 		<div class="label" style="top:426px;left:494px">OK</div>
-		<div class="label" style="top:357px;left:472px">KS</div>
+		<div id="label_KS" class="label" style="top:357px;left:472px">KS</div>
 		<div class="label" style="top:282px;left:452px">NE</div>
 		<div class="label" style="top:214px;left:446px">SD</div>
 		<div class="label" style="top:143px;left:443px">ND</div>
 		<div class="label" style="top:340px;left:349px">CO</div>
 		<div class="label" style="top:238px;left:316px">WY</div>
-		<div class="label" style="top:142px;left:310px">MT</div>
+		<div id="label_MT" class="label" style="top:142px;left:310px">MT</div>
 		<div class="label" style="top:448px;left:325px">NM</div>
 		<div class="label" style="top:441px;left:220px">AZ</div>
-		<div class="label" style="top:319px;left:239px">UT</div>
+		<div id="label_UT" class="label" style="top:319px;left:239px">UT</div>
 		<div class="label" style="top:299px;left:164px">NV</div>
 		<div class="label" style="top:214px;left:208px">ID</div>
-		<div class="label" style="top:377px;left:102px">CA</div>
+		<div id="label_CA" class="label" style="top:377px;left:102px">CA</div>
 		<div class="label" style="top:182px;left:110px">OR</div>
 		<div class="label" style="top:106px;left:133px">WA</div>
 

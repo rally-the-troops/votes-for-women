@@ -48,6 +48,7 @@ let ui = {
     cards: [ null ],
 	us_states: [ null ],
 	regions: [ null ],
+	labels: {},
 }
 
 // :r !python3 tools/genlayout.py
@@ -110,6 +111,10 @@ const LAYOUT = {
 
 const US_STATES_LAYOUT = [ null ]
 const REGIONS_LAYOUT = [ null ]
+
+function find_us_state(name) {
+	return US_STATES.findIndex((x) => x && x.name === name)
+}
 
 // bits
 
@@ -409,12 +414,16 @@ function build_user_interface() {
 	}
 
 	for (let s = 1; s <= us_states_count; ++s) {
-		let us_state_css = US_STATES[s].code
-		elt = ui.us_states[s] = document.querySelector(`#map #${us_state_css}`)
+		let us_state_code = US_STATES[s].code
+		elt = ui.us_states[s] = document.querySelector(`#map #${us_state_code}`)
 		elt.my_us_state = s
 		elt.addEventListener("mousedown", on_click_us_state)
 		elt.addEventListener("mouseenter", on_focus_us_state)
 		elt.addEventListener("mouseleave", on_blur)
+
+		let label = document.getElementById("label_" + us_state_code)
+		if (label)
+			ui.labels[us_state_code] = label
 	}
 
 	ui.campaigners = [
@@ -676,8 +685,11 @@ function on_update() { // eslint-disable-line no-unused-vars
 	for (let c of view.opposition_claimed)
 		document.getElementById("opposition_claimed").appendChild(ui.cards[c])
 
-	for (let c of view.states_draw)
+	let claimable = new Set()
+	for (let c of view.states_draw) {
 		document.getElementById("states_draw").appendChild(ui.cards[c])
+		claimable.add(find_us_state(CARDS[c].name))
+	}
 	for (let c of view.strategy_draw)
 		document.getElementById("strategy_draw").appendChild(ui.cards[c])
 
@@ -766,6 +778,8 @@ function on_update() { // eslint-disable-line no-unused-vars
 			}
 		}
 		ui.us_states[i].classList.toggle("selected", i === view.selected_us_state)
+		if (US_STATES[i].code in ui.labels)
+			ui.labels[US_STATES[i].code].classList.toggle("claimable", claimable.has(i))
 	}
 	ui.pieces.replaceChildren(pieces)
 
