@@ -690,7 +690,6 @@ function on_update() { // eslint-disable-line no-unused-vars
 			const c = stack[i]
 			const elt = ui.cards[c]
 			elt.style.top = -85 * i + "px"
-			elt.style.zIndex = i + 10
 			container.appendChild(elt)
 		}
 	}
