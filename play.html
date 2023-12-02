@@ -167,26 +167,29 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 
 /* PANELS */
 
-.panel_grid {
-	display: flex;
-	justify-content: center;
-	min-width: 1100px;
-	max-width: 1500px;
+section > * {
 	margin: 24px auto;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
 	gap: 24px;
 }
 
 .panel {
+	padding: 3px;
 	font-family: CopperplateCC;
 	font-variant: small-caps;
-	x-border: 2px solid #222;
 	background-color: hsl(43, 52%, 88%);
 	box-shadow: 1px 2px 4px #0004;
+	min-width: fit-content;
+	max-width: fit-content;
 }
 
 .panel_header {
 	background-color: hsl(43, 42%, 78%);
-	margin: 3px;
 	border: 2px solid #222;
 	font-weight: bold;
 	text-align: center;
@@ -194,7 +197,7 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 }
 
 .panel_body {
-	margin: 3px;
+	margin-top: 3px;
 	border: 2px solid #222;
 	display: grid;
 	grid-template-columns: repeat(3, 250px);
@@ -202,8 +205,10 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 	gap: 16px;
 	min-height: 350px;
 	min-width: 250px;
-	max-width: 1100px;
 }
+
+#support_claimed_panel { grid-column: 2; }
+#opposition_claimed_panel { grid-column: 3; }
 
 #support_claimed_header { background-color: var(--back-suf); color: white; }
 #opposition_claimed_header { background-color: var(--back-opp); color: white; }
@@ -216,34 +221,52 @@ body.Opposition #hand_header { background-color: var(--opp-75); }
 body.Suffragist #set_aside_header { background-color: var(--suf-85); }
 body.Opposition #set_aside_header { background-color: var(--opp-85); }
 
-#support_claimed, #opposition_claimed {
-	grid-template-columns: 250px;
+#support_claimed, #opposition_claimed { grid-template-columns: 250px; }
+#strategy_draw { grid-template-columns: repeat(3, 250px); }
+
+#states_draw {
+	grid-template-columns: repeat(3, 250px);
+	grid-template-rows: repeat(3, 350px);
 }
 
-#strategy_draw {
-	grid-template-columns: repeat(3, 250px);
+@media (min-width: 1320px) {
+	#states_draw {
+		grid-template-columns: repeat(4, 250px);
+		grid-template-rows: repeat(3, 350px);
+	}
+}
+
+@media (min-width: 1590px) {
+	#states_draw {
+		grid-template-columns: repeat(5, 250px);
+		grid-template-rows: repeat(2, 350px);
+	}
+}
+
+@media (min-width: 1840px) {
+	#states_draw {
+		grid-template-columns: repeat(6, 250px);
+		grid-template-rows: repeat(2, 350px);
+	}
 }
 
 #hand, #set_aside {
-	grid-template-columns: repeat(auto-fill, 250px);
+	grid-template-columns: repeat(4, 250px);
+	grid-template-rows: repeat(2, 350px);
 }
 
-/*
-#hand, #set_aside, #support_claimed, #opposition_claimed, #states_draw, #strategy_draw { min-height: 350px; }
-#hand { min-width: calc(250px * 4 + 16px * 3); }
-#strategy_draw { min-width: calc(250px * 3 + 16px * 2); }
-#states_draw { width: calc(250px * 3 + 16px * 2); }
-#support_claimed, #opposition_claimed { min-width: 250px; }
-
-@media (min-width: 1320px) {
-#states_draw { width: calc(250px * 4 + 16px * 3); }
+@media (min-width: 2120px) {
+	#hand, #set_aside {
+		grid-template-columns: repeat(7, 250px);
+		grid-template-rows: repeat(1, 350px);
+	}
 }
 
-@media (min-width: 1900px) {
-#states_draw { width: calc(250px * 6 + 16px * 5); }
+@media (max-width: 800px) {
+	section {
+		width: 1100px;
+	}
 }
-*/
-
 
 /* MAP */
 
@@ -1271,39 +1294,45 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 	</div>
 	</div>
 
-	<div id="hand_panel" class="panel hide">
-		<div id="hand_header" class="panel_header">Hand</div>
-		<div id="hand" class="panel_body"></div>
-		</div>
-	</div>
+	<section>
 
-	<div id="set_aside_panel" class="panel hide">
-		<div id="set_aside_header" class="panel_header">Set-aside Cards</div>
-		<div id="set_aside" class="panel_body"></div>
-		</div>
-	</div>
-
-	<div class="panel_grid">
-		<div id="support_claimed_panel" class="panel">
-			<div id="support_claimed_header" class="panel_header">Suffragist Claimed</div>
-			<div id="support_claimed" class="panel_body"></div>
+		<div id="hand_panel" class="panel hide">
+			<div id="hand_header" class="panel_header">Hand</div>
+			<div id="hand" class="panel_body"></div>
+			</div>
 		</div>
 
-		<div id="opposition_claimed_panel" class="panel">
-			<div id="opposition_claimed_header" class="panel_header">Opposition Claimed</div>
-			<div id="opposition_claimed" class="panel_body"></div>
+		<div id="set_aside_panel" class="panel hide">
+			<div id="set_aside_header" class="panel_header">Set-aside Cards</div>
+			<div id="set_aside" class="panel_body"></div>
+			</div>
 		</div>
-	</div>
 
-	<div id="strategy_draw_panel" class="panel">
-		<div id="strategy_draw_header" class="panel_header">Available Strategy Cards</div>
-		<div id="strategy_draw" class="panel_body"></div>
-	</div>
+		<div class="row">
 
-	<div id="states_draw_panel" class="panel">
-		<div id="states_draw_header" class="panel_header">Available States Cards</div>
-		<div id="states_draw" class="panel_body"></div>
-	</div>
+			<div id="support_claimed_panel" class="panel">
+				<div id="support_claimed_header" class="panel_header">Suffragist Claimed</div>
+				<div id="support_claimed" class="panel_body"></div>
+			</div>
+
+			<div id="opposition_claimed_panel" class="panel">
+				<div id="opposition_claimed_header" class="panel_header">Opposition Claimed</div>
+				<div id="opposition_claimed" class="panel_body"></div>
+			</div>
+
+		</div>
+
+		<div id="strategy_draw_panel" class="panel">
+			<div id="strategy_draw_header" class="panel_header">Available Strategy Cards</div>
+			<div id="strategy_draw" class="panel_body"></div>
+		</div>
+
+		<div id="states_draw_panel" class="panel">
+			<div id="states_draw_header" class="panel_header">Available States Cards</div>
+			<div id="states_draw" class="panel_body"></div>
+		</div>
+
+	</section>
 
 	<br><br><br>
 	<br><br><br>
