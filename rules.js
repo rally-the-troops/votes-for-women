@@ -1206,14 +1206,14 @@ function goto_final_voting() {
 	game.state = "final_voting_select_state"
 }
 
+function us_states_to_win() {
+	return (game.active === SUF) ? GREEN_CHECK_VICTORY - count_green_checks() : RED_X_VICTORY - count_red_xs()
+}
+
 states.final_voting_select_state = {
 	inactive: "do Final Voting.",
 	prompt() {
-		view.prompt = "Final Voting: Select a state."
-		if (game.active === SUF)
-			view.prompt += ` You need ${GREEN_CHECK_VICTORY - count_green_checks()} more States for victory.`
-		else
-			view.prompt += ` You need ${RED_X_VICTORY - count_red_xs()} more States for victory.`
+		view.prompt = `Final Voting: Select a State. You need ${pluralize(us_states_to_win(), 'more State')} for victory.`
 
 		let us_states = ANYWHERE.slice()
 		set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
