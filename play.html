@@ -15,6 +15,17 @@
 <script defer src="play.js"></script>
 <style>
 
+@font-face {
+	font-family: CopperplateCC;
+	src: url(fonts/CopperplateCC/CopperplateCC-Heavy.woff2) format('woff2')
+}
+
+@font-face {
+	font-family: CopperplateCC;
+	font-weight: bold;
+	src: url(fonts/CopperplateCC/CopperplateCC-Bold.woff2) format('woff2')
+}
+
 :root {
 	--suf-75: hsl(273 39% 75%);
 	--suf-85: hsl(273 39% 85%);
@@ -200,15 +211,8 @@ path.state.northeast { fill: royalblue }
 path.state.atlantic { fill: green }
 path.state.south { fill: #444 }
 
-div.state { opacity: 0% }
-div.state.action { opacity: 70% }
-div.state.west { background-color: teal }
-div.state.plains { background-color: chocolate }
-div.state.midwest { background-color: brown }
-div.state.northeast { background-color: royalblue }
-div.state.atlantic { background-color: green }
-div.state.south { background-color: #444 }
-
+div.state.action.northeast { background-color: #4169e1b3 }
+div.state.action.atlantic { background-color: #008000b3 }
 
 path.state.selected {
 	stroke: yellow;
@@ -228,6 +232,32 @@ div.state {
 	border: 5px solid transparent;
 	width: 62px;
 	height: 62px;
+
+	color: black;
+	font-family: CopperplateCC;
+	font-weight: bold;
+	font-size: 14px;
+	text-align: center;
+	line-height: 52px;
+}
+
+div.label {
+	pointer-events: none;
+	color: #222;
+	position: absolute;
+	font-family: CopperplateCC;
+	font-weight: bold;
+	font-size: 14px;
+	text-align: center;
+	line-height: 14px;
+	width: 50px;
+	height: 14px;
+}
+
+div.label.large {
+	font-size: 15px;
+	line-height: 15px;
+	height: 15px;
 }
 
 div.state.selected {
@@ -1068,6 +1098,56 @@ c5 3 13 7 17 8 8 2 9 3 11 12 1 5 5 12 8 16 5 8 5 8 3 22 l-3 14 -30 -1 c-35
 		<div id="NJ" class="northeast state" style="top:246px;left:929px;"></div>
 		<div id="DE" class="atlantic state" style="top:313px;left:967px;"></div>
 		<div id="MD" class="atlantic state" style="top:373px;left:921px;"></div>
+
+		<div class="label large" style="top:270px;left:935px">NJ</div>
+		<div class="label large" style="top:230px;left:994px">CT</div>
+		<div class="label large" style="top:158px;left:1011px">RI</div>
+		<div class="label large" style="top:67px;left:989px">MA</div>
+		<div class="label large" style="top:89px;left:864px">NH</div>
+		<div class="label large" style="top:150px;left:792px">VT</div>
+		<div class="label large" style="top:338px;left:972px">DE</div>
+		<div class="label large" style="top:397px;left:927px">MD</div>
+
+		<div class="label" style="top:112px;left:938px">ME</div>
+		<div class="label" style="top:200px;left:838px">NY</div>
+		<div class="label" style="top:377px;left:837px">NC</div>
+		<div class="label" style="top:325px;left:832px">VA</div>
+		<div class="label" style="top:250px;left:824px">PA</div>
+		<div class="label" style="top:312px;left:782px">WV</div>
+		<div class="label" style="top:346px;left:718px">KY</div>
+		<div class="label" style="top:394px;left:691px">TN</div>
+		<div class="label" style="top:281px;left:739px">OH</div>
+		<div class="label" style="top:293px;left:684px">IN</div>
+		<div class="label" style="top:296px;left:636px">IL</div>
+		<div class="label" style="top:217px;left:703px">MI</div>
+		<div class="label" style="top:191px;left:611px">WI</div>
+		<div class="label" style="top:347px;left:577px">MO</div>
+		<div class="label" style="top:254px;left:553px">IA</div>
+		<div class="label" style="top:157px;left:537px">MN</div>
+		<div class="label" style="top:565px;left:810px">FL</div>
+		<div class="label" style="top:425px;left:802px">SC</div>
+		<div class="label" style="top:458px;left:756px">GA</div>
+		<div class="label" style="top:463px;left:690px">AL</div>
+		<div class="label" style="top:470px;left:637px">MS</div>
+		<div class="label" style="top:529px;left:594px">LA</div>
+		<div class="label" style="top:429px;left:580px">AR</div>
+		<div class="label" style="top:509px;left:457px">TX</div>
+		<div class="label" style="top:410px;left:494px">OK</div>
+		<div class="label" style="top:341px;left:472px">KS</div>
+		<div class="label" style="top:266px;left:452px">NE</div>
+		<div class="label" style="top:198px;left:446px">SD</div>
+		<div class="label" style="top:127px;left:443px">ND</div>
+		<div class="label" style="top:324px;left:349px">CO</div>
+		<div class="label" style="top:222px;left:316px">WY</div>
+		<div class="label" style="top:126px;left:310px">MT</div>
+		<div class="label" style="top:432px;left:325px">NM</div>
+		<div class="label" style="top:425px;left:220px">AZ</div>
+		<div class="label" style="top:303px;left:239px">UT</div>
+		<div class="label" style="top:283px;left:154px">NV</div>
+		<div class="label" style="top:198px;left:208px">ID</div>
+		<div class="label" style="top:339px;left:84px">CA</div>
+		<div class="label" style="top:166px;left:110px">OR</div>
+		<div class="label" style="top:90px;left:133px">WA</div>
 
 		<div id="West" class="region" style="top:272px;left:98px;width:57px;height:57px;"></div>
 		<div id="Plains" class="region" style="top:202px;left:373px;"></div>
