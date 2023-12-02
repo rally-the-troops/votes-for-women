@@ -374,7 +374,7 @@ function build_user_interface() {
 	for (let c = 1; c <= 6; ++c) {
 		elt = ui.congress[c] = create("div", {
 			className: "piece congress",
-			style: `left:${10 + (c-1) * 42}px;top:5px;`,
+			style: `left:${15 + (c-1) * 42}px;top:-6px;`,
 		})
 		elt.addEventListener("click", on_click_congress)
 	}
