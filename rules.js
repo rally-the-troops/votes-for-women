@@ -192,16 +192,16 @@ function restore_player_hand() {
 
 // #region US_STATES & REGIONS FUNCTIONS
 
-function anywhere() {
-	return Array.from(Array(us_states_count), (e,i)=>i+1)
-}
+// functions returning immutable arrays marked with Object.freeze are used in events.txt and should be copied before mutation
+
+const ANYWHERE = Object.freeze(Array.from(Array(us_states_count), (e,i)=>i+1))
 
 function find_us_state(name) {
 	return US_STATES.findIndex((x) => x && x.name === name)
 }
 
 function us_states(...args) {
-	return args.map(find_us_state).sort()
+	return Object.freeze(args.map(find_us_state).sort())
 }
 
 function region_us_states(...args) {
@@ -209,12 +209,12 @@ function region_us_states(...args) {
 	US_STATES.forEach((element, index) => {
 		if (element && args.includes(element.region)) indexes.push(index)
 	})
-	return indexes
+	return Object.freeze(indexes)
 }
 
 function region_us_states_except(region, excluded) {
 	const to_remove = new Set(excluded)
-	return region_us_states(region).filter( x => !to_remove.has(x) )
+	return Object.freeze(region_us_states(region).filter( x => !to_remove.has(x) ))
 }
 
 function us_state_region(s) {
@@ -1223,7 +1223,7 @@ states.final_voting_select_state = {
 		else
 			view.prompt += ` You need ${RED_X_VICTORY - count_red_xs()} more States for victory.`
 
-		let us_states = anywhere()
+		let us_states = ANYWHERE.slice()
 		set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
 
 		for (let s of us_states) {
@@ -1541,7 +1541,7 @@ states.campaigning_add_cubes = {
 			can_move = true
 		}
 
-		let us_states = region_us_states(campaigner_region(game.selected_campaigner))
+		let us_states = region_us_states(campaigner_region(game.selected_campaigner)).slice()
 		filter_us_states(us_states)
 
 		for (let s of us_states) {
@@ -1895,7 +1895,7 @@ function vm_operand_us_states(x) {
 	let s = vm_operand(x)
 	if (typeof s === "number")
 		return [ s ]
-	return s
+	return s.slice()
 }
 
 function vm_exec() {
@@ -2044,7 +2044,7 @@ function vm_add_cubes_in_one_state_of_each_region() {
 	vm_assert_argcount(2)
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
-	game.vm.us_states = anywhere()
+	game.vm.us_states = ANYWHERE.slice()
 	game.vm.in_one_state_of_each_region = true
 	goto_vm_add_cubes()
 }
@@ -2053,7 +2053,7 @@ function vm_add_cubes_per_state_in_any_one_region() {
 	vm_assert_argcount(2)
 	game.vm.count = vm_operand(1)
 	game.vm.cubes = vm_operand(2)
-	game.vm.us_states = anywhere()
+	game.vm.us_states = ANYWHERE.slice()
 	game.vm.per_state_in_any_one_region = true
 	goto_vm_add_cubes()
 }
@@ -2078,7 +2078,7 @@ function vm_remove_all_cubes() {
 function vm_remove_all_cubes_up_to() {
 	vm_assert_argcount(2)
 	game.vm.cubes = vm_operand(1)
-	game.vm.us_states = us_states_with_color_cubes(anywhere(), game.vm.cubes)
+	game.vm.us_states = us_states_with_color_cubes(ANYWHERE.slice(), game.vm.cubes)
 	game.vm.limit = vm_operand(2)
 	game.vm.all = true
 	goto_vm_remove_cubes()
@@ -2089,7 +2089,7 @@ function vm_replace() {
 	game.vm.what = vm_operand(1)
 	game.vm.count = vm_operand(2)
 	game.vm.replacement = vm_operand(3)
-	game.vm.us_states = anywhere()
+	game.vm.us_states = ANYWHERE.slice()
 	set_filter(game.vm.us_states, s => is_green_check(s) || is_red_x(s))
 
 	if (!game.nineteenth_amendment || (game.vm.what === GREEN_CHECK && !count_green_checks()) || game.vm.what === RED_X && !count_red_xs()) {
@@ -2780,7 +2780,7 @@ states.vm_select_us_state = {
 	prompt() {
 		if (!game.vm.selected_us_state) {
 			event_prompt("Select one state.")
-			for (let s of anywhere()) {
+			for (let s of ANYWHERE) {
 				gen_action_us_state(s)
 			}
 		} else {
@@ -3451,7 +3451,7 @@ CODE[6] = [ // Fifteenth Amendment
 	[ vm_roll_for_success, 1, D6 ],
 	[ vm_if, ()=>(game.vm.roll >= 3) ],
 	[ vm_add_congress, 2 ],
-	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, 8, PURPLE_OR_YELLOW, ANYWHERE, 2 ],
 	[ vm_persistent, REST_OF_GAME, "" ],
 	[ vm_endif ],
 	[ vm_return ],
@@ -3565,13 +3565,13 @@ CODE[23] = [ // Equality League of Self-Supporting Women
 
 CODE[24] = [ // Emmeline Pankhurst
 	[ vm_roll, 2, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
 CODE[25] = [ // “Debate Us, You Cowards!”
 	[ vm_roll, 2, D6 ],
-	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
@@ -3583,7 +3583,7 @@ CODE[26] = [ // Carrie Chapman Catt
 
 CODE[27] = [ // Alice Paul & Lucy Burns
 	[ vm_roll, 2, D6 ],
-	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
@@ -3606,7 +3606,7 @@ CODE[30] = [ // Zitkala-Ša
 
 CODE[31] = [ // Helen Keller
 	[ vm_roll, 2, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
@@ -3688,7 +3688,7 @@ CODE[44] = [ // Victory Map
 
 CODE[45] = [ // Women and World War I
 	[ vm_requires_persistent, REST_OF_TURN, find_card("War in Europe") ],
-	[ vm_add_cubes_limit, 10, PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, 10, PURPLE_OR_YELLOW, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
@@ -3704,19 +3704,19 @@ CODE[46] = [ // Eighteenth Amendment
 
 CODE[47] = [ // Mary McLeod Bethune
 	[ vm_roll, 2, D8 ],
-	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
 CODE[48] = [ // Make a Home Run for Suffrage
 	[ vm_roll, 2, D8 ],
-	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, ()=>(game.vm.roll), RED, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
 CODE[49] = [ // Mary Church Terrell
 	[ vm_roll, 2, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
@@ -3728,7 +3728,7 @@ CODE[50] = [ // Tea Parties for Suffrage
 
 CODE[51] = [ // Dr. Mabel Ping-Hua Lee
 	[ vm_roll, 2, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), PURPLE_OR_YELLOW, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
@@ -3818,7 +3818,7 @@ CODE[64] = [ // Senator George Vest
 
 CODE[65] = [ // Catharine Beecher
 	[ vm_roll, 1, D4 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, ANYWHERE, 1 ],
 	[ vm_return ],
 ]
 
@@ -3866,7 +3866,7 @@ CODE[73] = [ // The Ladies’ Battle
 ]
 
 CODE[74] = [ // Backlash to the Movement
-	[ vm_remove_cubes_limit, 6, PURPLE_OR_YELLOW, anywhere(), 2 ],
+	[ vm_remove_cubes_limit, 6, PURPLE_OR_YELLOW, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
@@ -3883,7 +3883,7 @@ CODE[76] = [ // “O Save Us Senators, From Ourselves”
 
 CODE[77] = [ // Emma Goldman
 	[ vm_roll, 1, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, ANYWHERE, 1 ],
 	[ vm_return ],
 ]
 
@@ -3997,13 +3997,13 @@ CODE[95] = [ // United Daughters of the Confederacy
 CODE[96] = [ // Cheers to “No on Suffrage”
 	[ vm_requires_not_persistent, REST_OF_GAME, find_card("Eighteenth Amendment") ],
 	[ vm_roll, 1, D8 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 2 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, ANYWHERE, 2 ],
 	[ vm_return ],
 ]
 
 CODE[97] = [ // The Unnecessary Privilege
 	[ vm_roll, 1, D6 ],
-	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, anywhere(), 1 ],
+	[ vm_add_cubes_limit, ()=>(game.vm.roll), RED, ANYWHERE, 1 ],
 	[ vm_return ],
 ]
 

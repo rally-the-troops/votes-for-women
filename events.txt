@@ -35,7 +35,7 @@ CARD 6 - Fifteenth Amendment
     roll_for_success 1 D6
     if (game.vm.roll >= 3)
         add_congress 2
-        add_cubes_limit 8 PURPLE_OR_YELLOW anywhere() 2
+        add_cubes_limit 8 PURPLE_OR_YELLOW ANYWHERE 2
         persistent REST_OF_GAME ""
     endif
 
@@ -132,12 +132,12 @@ CARD 23 - Equality League of Self-Supporting Women
 CARD 24 - Emmeline Pankhurst
 # Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D6
-    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 2
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW ANYWHERE 2
 
 CARD 25 - “Debate Us, You Cowards!”
 # Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.
     roll 2 D6
-    remove_cubes_limit (game.vm.roll) RED anywhere() 2
+    remove_cubes_limit (game.vm.roll) RED ANYWHERE 2
 
 CARD 26 - Carrie Chapman Catt
 # Receive 2 :button. Add 1 :purple_or_yellow_cube in one state of each region.
@@ -147,7 +147,7 @@ CARD 26 - Carrie Chapman Catt
 CARD 27 - Alice Paul & Lucy Burns
 # Roll :d6 :d6. Remove that number :red_cube anywhere, no more than 2 per state.
     roll 2 D6
-    remove_cubes_limit (game.vm.roll) RED anywhere() 2
+    remove_cubes_limit (game.vm.roll) RED ANYWHERE 2
 
 CARD 28 - Inez Milholland
 # Add 1 :congressional_marker in Congress. Receive 2 :button and add 1 :purple_or_yellow_cube in one state of each region.
@@ -166,7 +166,7 @@ CARD 30 - Zitkala-Ša
 CARD 31 - Helen Keller
 # Roll :d6 :d6. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D6
-    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 2
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW ANYWHERE 2
 
 CARD 32 - Maria de Lopez
 # Recieve 2 :button. Add 2 :purple_or_yellow_cube in each of California, Nevada and Arizona.
@@ -234,7 +234,7 @@ CARD 44 - Victory Map
 CARD 45 - Women and World War I
 # Playable if *War in Europe* is in effect. Add 10 :purple_or_yellow_cube anywhere, no more than 2 per state.
     requires_persistent REST_OF_TURN find_card("War in Europe")
-    add_cubes_limit 10 PURPLE_OR_YELLOW anywhere() 2
+    add_cubes_limit 10 PURPLE_OR_YELLOW ANYWHERE 2
 
 CARD 46 - Eighteenth Amendment
 # Roll :d6. On a roll of 3-6, add 1 congressional_marker in Congress and receive 2 :button.
@@ -248,17 +248,17 @@ CARD 46 - Eighteenth Amendment
 CARD 47 - Mary McLeod Bethune
 # Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
     roll 2 D8
-    remove_cubes_limit (game.vm.roll) RED anywhere() 2
+    remove_cubes_limit (game.vm.roll) RED ANYWHERE 2
 
 CARD 48 - Make a Home Run for Suffrage
 # Roll :d8 :d8. Remove that number :red_cube anywhere, no more than 2 per state.
     roll 2 D8
-    remove_cubes_limit (game.vm.roll) RED anywhere() 2
+    remove_cubes_limit (game.vm.roll) RED ANYWHERE 2
 
 CARD 49 - Mary Church Terrell
 # Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D8
-    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 2
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW ANYWHERE 2
 
 CARD 50 - Tea Parties for Suffrage
 # Add 1 :congressional_marker in Congress and receive 4 :button
@@ -268,7 +268,7 @@ CARD 50 - Tea Parties for Suffrage
 CARD 51 - Dr. Mabel Ping-Hua Lee
 # Roll :d8 :d8. Add that number :purple_or_yellow_cube anywhere, no more than 2 per state.
     roll 2 D8
-    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW anywhere() 2
+    add_cubes_limit (game.vm.roll) PURPLE_OR_YELLOW ANYWHERE 2
 
 CARD 52 - Miss Febb Wins the Last Vote
 # The Suffragist player wins all ties during Final Voting.
@@ -346,7 +346,7 @@ CARD 64 - Senator George Vest
 CARD 65 - Catharine Beecher
 # Roll :d4. Add that number :red_cube anywhere, no more than 1 per state.
     roll 1 D4
-    add_cubes_limit (game.vm.roll) RED anywhere() 1
+    add_cubes_limit (game.vm.roll) RED ANYWHERE 1
 
 CARD 66 - Progress, Not Politics
 # Draw 6 cards from your Draw Deck. Place any number of the 6 cards on the top of your Draw Deck and the rest at the bottom of your Draw Deck.
@@ -385,7 +385,7 @@ CARD 73 - The Ladies’ Battle
 
 CARD 74 - Backlash to the Movement
 # Remove 6 :purple_or_yellow_cube from anywhere, no more than 2 per state.
-    remove_cubes_limit 6 PURPLE_OR_YELLOW anywhere() 2
+    remove_cubes_limit 6 PURPLE_OR_YELLOW ANYWHERE 2
 
 CARD 75 - Xenophobia
 # Remove all :purple_cube from any 1 state. Remove all :yellow_cube from any 1 state.
@@ -399,7 +399,7 @@ CARD 76 - “O Save Us Senators, From Ourselves”
 CARD 77 - Emma Goldman
 # Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
     roll 1 D6
-    add_cubes_limit (game.vm.roll) RED anywhere() 1
+    add_cubes_limit (game.vm.roll) RED ANYWHERE 1
 
 CARD 78 - The Great 1906 San Francisco Earthquake
 # Remove all :yellow_cube and :purple_cube from California. The Suffragist player loses 1 :button.
@@ -494,12 +494,12 @@ CARD 96 - Cheers to “No on Suffrage”
 # Playable if *Eighteenth Amendment* is not in effect. Roll :d8. Add that number :red_cube anywhere, no more than 2 per state.
     requires_not_persistent REST_OF_GAME find_card("Eighteenth Amendment")
     roll 1 D8
-    add_cubes_limit (game.vm.roll) RED anywhere() 2
+    add_cubes_limit (game.vm.roll) RED ANYWHERE 2
 
 CARD 97 - The Unnecessary Privilege
 # Roll :d6. Add that number :red_cube anywhere, no more than 1 per state.
     roll 1 D6
-    add_cubes_limit (game.vm.roll) RED anywhere() 1
+    add_cubes_limit (game.vm.roll) RED ANYWHERE 1
 
 CARD 98 - Voter Suppression
 # The Opposition player rolls :d8 instead of :d6 during Final Voting.
