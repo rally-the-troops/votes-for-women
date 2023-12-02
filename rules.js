@@ -906,7 +906,6 @@ function goto_operations_phase() {
 	game.state = "operations_phase"
 	game.active = SUF
 	game.round = 1
-	begin_player_round()
 }
 
 const THE_CIVIL_WAR = find_card("The Civil War")
@@ -1079,21 +1078,24 @@ states.operations_phase = {
 	},
 	card_campaigning(c) {
 		push_undo()
-		log_h3(`C${c} - Campaigning`)
+		log_round("Campaigning")
+		log("C" + c)
 		log_br()
 		update_card_played(c)
 		goto_campaigning(c)
 	},
 	card_organizing(c) {
 		push_undo()
-		log_h3(`C${c} - Organizing`)
+		log_round("Organizing")
+		log("C" + c)
 		log_br()
 		update_card_played(c)
 		goto_organizing(c)
 	},
 	card_lobbying(c) {
 		push_undo()
-		log_h3(`C${c} - Lobbying`)
+		log_round("Lobbying")
+		log("C" + c)
 		log_br()
 		update_card_played(c)
 		goto_lobbying(c)
@@ -1104,15 +1106,12 @@ states.operations_phase = {
 }
 
 function play_card_event(c) {
-	log_h3(`C${c} - Event`)
+	log_round("Event")
+	log("C" + c)
 	if (has_extra_event_cost())
 		decrease_player_buttons(1)
 	log_br()
 	goto_event(c)
-}
-
-function begin_player_round() {
-	log_round(`Round ${game.round}`)
 }
 
 function end_player_round() {
@@ -1128,10 +1127,8 @@ function end_player_round() {
 			game.round += 1
 		} else {
 			goto_cleanup_phase()
-			return
 		}
 	}
-	begin_player_round()
 }
 
 function discard_persistent_card(cards, c) {
@@ -3087,9 +3084,9 @@ function log_h3(msg) {
 function log_round(msg) {
 	log_br()
 	if (game.active === SUF)
-		log(".h3.suf " + msg)
+		log(".h3.suf " + game.round + " \u2013 " + msg)
 	else
-		log(".h3.opp " + msg)
+		log(".h3.opp " + game.round + " \u2013 " + msg)
 	log_br()
 }
 

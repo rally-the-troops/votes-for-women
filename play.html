@@ -27,9 +27,11 @@
 }
 
 :root {
+	--suf-25: hsl(273 80% 25%);
 	--suf-75: hsl(273 39% 75%);
 	--suf-85: hsl(273 39% 85%);
 
+	--opp-25: hsl(16 100% 25%);
 	--opp-75: hsl(16 85% 75%);
 	--opp-85: hsl(16 85% 85%);
 }
@@ -59,10 +61,17 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 #log .h1 { background-color: silver; }
 #log .h2 { background-color: gainsboro; }
 
-#log .suf { background-color: var(--suf-85); }
-#log .opp { background-color: var(--opp-85); }
-#log .tip { cursor: pointer; text-decoration: underline; }
-#log .tip:hover { text-decoration: underline; font-weight: bold; }
+#log .suf { background-color: var(--suf-85); border-top: 1px solid var(--suf-25); border-bottom: 1px solid var(--suf-25); }
+#log .opp { background-color: var(--opp-85); border-top: 1px solid var(--opp-25); border-bottom: 1px solid var(--opp-25); }
+#log .tip { cursor: pointer; }
+#log .tip.states { font-style: italic; }
+#log .tip.support { font-style: italic; }
+#log .tip.opposition { font-style: italic; }
+#log .tip.strategy { font-style: italic; }
+#log .tip:hover { text-decoration: underline; }
+
+#log .tip.support { color: var(--suf-25); }
+#log .tip.opposition { color: var(--opp-25); }
 
 #log > .p { padding-left: 20px; text-align: right; font-style: italic; opacity: 75%; }
 #log > .i { padding-left: 20px; }

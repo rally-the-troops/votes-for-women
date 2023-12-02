@@ -45,7 +45,7 @@ let ui = {
 	cubes: [],
 	green_checks: [],
 	red_xs: [],
-    cards: [ null ],
+	cards: [ null ],
 	us_states: [ null ],
 	regions: [ null ],
 	labels: {},
@@ -492,7 +492,7 @@ function on_click_us_state_tip(x) { // eslint-disable-line no-unused-vars
 function sub_card_name(_match, p1, _offset, _string) {
 	let c = p1 | 0
 	let n = CARDS[c].name
-	return `<span class="tip" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${n}</span>`
+	return `<span class="tip ${CARDS[c].type}" onmouseenter="on_focus_card_tip(${c})" onmouseleave="on_blur_card_tip()">${n}</span>`
 }
 
 function sub_region_name(_match, p1, _offset, _string) {
