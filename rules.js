@@ -158,10 +158,6 @@ function opponent_deck() {
 	}
 }
 
-function is_player_claimed_card(c) {
-	return player_claimed().includes(c)
-}
-
 function player_set_aside() {
 	if (game.active === SUF) {
 		return game.support_set_aside
@@ -878,7 +874,7 @@ function claim_strategy_card(c) {
 	log(`${game.active} selected C${c}.`)
 
 	array_remove_item(game.strategy_draw, c)
-	player_claimed().push(c)
+	set_add(player_claimed(), c)
 	if (game.strategy_deck.length)
 		game.strategy_draw.push(draw_card(game.strategy_deck))
 }
@@ -986,17 +982,13 @@ function has_player_active_campaigners() {
 	return player_campaigners().some(value => value !== 0)
 }
 
-function remove_claimed_card(c) {
-	array_remove_item(player_claimed(), c)
-}
-
 function discard_card_from_hand(c) {
 	array_remove_item(player_hand(), c)
 }
 
 function end_play_card(c) {
-	if (is_player_claimed_card(c)) {
-		remove_claimed_card(c)
+	if (set_has(player_claimed(), c)) {
+		set_delete(player_claimed(), c)
 	} else {
 		discard_card_from_hand(c)
 	}
@@ -1021,7 +1013,7 @@ function can_lobby() {
 }
 
 function update_card_played(c) {
-	if (is_player_claimed_card(c)) {
+	if (set_has(player_claimed(), c)) {
 		game.has_played_claimed = 1
 	} else {
 		game.has_played_hand = 1
@@ -1646,7 +1638,7 @@ states.claim_state_card = {
 	},
 	card(c) {
 		array_remove_item(game.states_draw, c)
-		player_claimed().push(c)
+		set_add(player_claimed(), c)
 		log(`Claimed C${c}.`)
 
 		// continue
