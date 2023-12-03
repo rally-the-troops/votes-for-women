@@ -1286,11 +1286,18 @@ function should_reroll() {
 	// not if you have already rolled your max
 	if (game.roll === game.dice)
 		return false
+	const total = game.roll + game.drm
+	const potential = game.dice + game.drm
+	const opponent_total = game.opponent_roll + game.opponent_drm
+	const opponent_potential = game.opponent_dice = game.opponent_drm
 	// not if your have already won, because they are broke and cant reroll
-	if (!opponent_buttons() && (game.roll > game.opponent_roll || (player_wins_ties() && game.roll === game.opponent_roll)))
+	if (!opponent_buttons() && (total > opponent_total || (player_wins_ties() && total === opponent_total)))
 		return false
 	// not if your have already won, because they cant roll any higher
-	if (game.roll > game.opponent_dice || (player_wins_ties() && game.roll === game.opponent_dice))
+	if (total > opponent_potential || (player_wins_ties() && total === opponent_potential))
+		return false
+	// not if you cant roll a win
+	if (potential < opponent_total || (!player_wins_ties() && potential === opponent_total))
 		return false
 	// you could give it a shot
 	return true
@@ -1342,11 +1349,14 @@ function should_opponent_reroll() {
 	// not if you have already rolled your max
 	if (game.opponent_roll === game.opponent_dice)
 		return false
+	const total = game.roll + game.drm
+	const opponent_total = game.opponent_roll + game.opponent_drm
+	const opponent_potential = game.opponent_dice = game.opponent_drm
 	// not if your have already won
-	if (game.opponent_roll > game.roll || (player_wins_ties() && game.opponent_roll === game.roll))
+	if (opponent_total > total || (player_wins_ties() && opponent_total === total))
 		return false
-	// not if you cant roll a win
-	if (game.roll > game.opponent_dice || (!player_wins_ties() && game.roll === game.opponent_dice))
+	// not if you cant reroll a win
+	if (total > opponent_potential || (!player_wins_ties() && total === opponent_potential))
 		return false
 	// you could give it a shot
 	return true
