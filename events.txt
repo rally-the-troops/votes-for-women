@@ -567,7 +567,7 @@ CARD 109 - Bellwether State
 
 CARD 110 - Superior Lobbying
 # Roll 4 :d8. For each 6, 7 or 8 rolled, add 1 :congressional_marker to Congress or remove 1 :congressional_marker from Congress.
-    roll_list 4 D8
+    roll_sixes 4 D8
     if (game.active === SUF)
         add_congress (game.vm.roll.filter(x => x >= 6).length)
     else

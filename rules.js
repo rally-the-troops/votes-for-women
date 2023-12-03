@@ -1735,7 +1735,8 @@ states.lobbying = {
 			view.prompt = `Lobbying: Roll ${game.count} d${game.dice}.`
 			gen_action("roll")
 		} else {
-			view.prompt = `Lobbying: You rolled ${game.roll} sixes (or higher).`
+			view.prompt = `Lobbying: You rolled ${game.roll} six${game.roll!==1?'es':''} (or higher).`
+
 			if (player_buttons() > 0 && game.roll < game.count)
 				gen_action("reroll")
 			gen_action("next")
@@ -2149,11 +2150,11 @@ function vm_roll_for_success() {
 	game.state = "vm_roll"
 }
 
-function vm_roll_list() {
+function vm_roll_sixes() {
 	vm_assert_argcount(2)
 	game.vm.count = vm_operand(1)
 	game.vm.d = vm_operand(2)
-	game.vm.roll_list = true
+	game.vm.roll_sixes = true
 	game.state = "vm_roll"
 }
 
@@ -2761,10 +2762,12 @@ states.vm_roll = {
 	inactive: "roll dice.",
 	prompt() {
 		if (game.vm.roll) {
-			if (game.vm.roll_list)
-				event_prompt(`You rolled ${game.vm.roll.join(", ")}.`)
-			else
+			if (game.vm.roll_sixes) {
+				const sixes = game.vm.roll.filter(x => x >= 6).length
+				event_prompt(`You rolled ${sixes} six${sixes!==1?'es':''} (or higher).`)
+			} else {
 				event_prompt(`You rolled ${game.vm.roll}.`)
+			}
 		} else if (game.vm.count === 1) {
 			event_prompt("Roll a die.")
 		} else {
@@ -2779,14 +2782,14 @@ states.vm_roll = {
 		}
 	},
 	roll() {
-		if (game.vm.roll_list)
+		if (game.vm.roll_sixes)
 			game.vm.roll = roll_ndx_list(game.vm.count, game.vm.d)
 		else
 			game.vm.roll = roll_ndx(game.vm.count, game.vm.d)
 	},
 	reroll() {
 		decrease_player_buttons(1)
-		if (game.vm.roll_list)
+		if (game.vm.roll_sixes)
 			game.vm.roll = roll_ndx_list(game.vm.count, game.vm.d, "Re-rolled")
 		else
 			game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "Re-rolled")
@@ -4104,7 +4107,7 @@ CODE[109] = [ // Bellwether State
 ]
 
 CODE[110] = [ // Superior Lobbying
-	[ vm_roll_list, 4, D8 ],
+	[ vm_roll_sixes, 4, D8 ],
 	[ vm_if, ()=>(game.active === SUF) ],
 	[ vm_add_congress, ()=>(game.vm.roll.filter(x => x >= 6).length) ],
 	[ vm_else ],
