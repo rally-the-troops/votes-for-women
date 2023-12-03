@@ -849,7 +849,7 @@ states.strategy_phase = {
 
 	},
 	done() {
-		log(`Suffragist committed ${game.support_committed} BM.`)
+		log(`Suffragist committed ${game.support_committed} BM`)
 		game.active = OPP
 	},
 	defer() {
@@ -864,7 +864,7 @@ states.strategy_phase = {
 	},
 	supersede() {
 		const amount = game.support_committed + 1
-		log(`Opposition superseded with ${amount} BM.`)
+		log(`Opposition superseded with ${amount} BM`)
 		game.opposition_buttons -= amount
 		game.state = 'select_strategy_card'
 	}
@@ -1804,7 +1804,7 @@ states.lobbying_add_congress = {
 	},
 	congress() {
 		game.congress = Math.min(game.congress + game.count, 6)
-		log(`Congress +${game.count} CM.`)
+		log(`Congress +${game.count} CM`)
 
 		if (game.congress >= 6) {
 			if (trigger_nineteenth_amendment())
@@ -1823,7 +1823,7 @@ states.lobbying_remove_congress = {
 	},
 	congress() {
 		game.congress = Math.max(game.congress - game.count, 0)
-		log(`Congress -${game.count} CM.`)
+		log(`Congress -${game.count} CM`)
 
 		end_play_card(game.played_card)
 	}
@@ -2655,7 +2655,7 @@ states.vm_add_congress = {
 	},
 	congress() {
 		game.congress = Math.min(game.congress + game.vm.count, 6)
-		log(`Congress +${game.vm.count} CM.`)
+		log(`Congress +${game.vm.count} CM`)
 
 		if (game.congress >= 6) {
 			if (trigger_nineteenth_amendment())
@@ -2673,7 +2673,7 @@ states.vm_remove_congress = {
 	},
 	congress() {
 		game.congress = Math.max(game.congress - game.vm.count, 0)
-		log(`Congress -${game.vm.count} CM.`)
+		log(`Congress -${game.vm.count} CM`)
 
 		vm_next()
 	}
