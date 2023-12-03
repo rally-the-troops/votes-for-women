@@ -92,6 +92,14 @@ function is_opposition_card(c) {
 	return c >= first_opposition_card && c <= last_opposition_card
 }
 
+function is_strategy_card(c) {
+	return c >= first_strategy_card && c <= last_strategy_card
+}
+
+function is_states_card(c) {
+	return c >= first_states_card && c <= last_states_card
+}
+
 function find_card(name) {
 	return CARDS.findIndex((x) => x && x.name === name)
 }
@@ -1112,7 +1120,12 @@ states.operations_phase = {
 }
 
 function play_card_event(c) {
-	log_round("Event")
+	if (is_strategy_card(c))
+		log_round("Strategy")
+	else if (is_states_card(c))
+		log_round("State")
+	else
+		log_round("Event")
 	log("C" + c)
 	if (has_extra_event_cost())
 		decrease_player_buttons(1)
