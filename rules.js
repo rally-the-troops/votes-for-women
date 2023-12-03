@@ -920,6 +920,10 @@ function has_extra_event_cost() {
 	return game.active === SUF && (game.persistent_turn.includes(_1918_PANDEMIC) || game.persistent_turn.includes(A_THREAT_TO_THE_IDEAL_OF_WOMANHOOD))
 }
 
+function has_extra_campaigning_cost() {
+	return game.active === SUF && (game.persistent_turn.includes(WAR_IN_EUROPE))
+}
+
 function can_play_event(c) {
 	if (game.active === SUF && is_opposition_card(c))
 		return false
@@ -1080,6 +1084,8 @@ states.operations_phase = {
 		push_undo()
 		log_round("Campaigning")
 		log("C" + c)
+		if (has_extra_campaigning_cost())
+			decrease_player_buttons(1)
 		log_br()
 		update_card_played(c)
 		goto_campaigning(c)
@@ -2224,8 +2230,11 @@ function vm_discard_persistent() {
 
 function vm_campaigning_action() {
 	vm_assert_argcount(0)
-	if (has_player_active_campaigners()) {
-		log_h3("Campaigning Action")
+	if (has_player_active_campaigners() && can_campaign()) {
+		log_round("Campaigning")
+		if (has_extra_campaigning_cost())
+			decrease_player_buttons(1)
+		log_br()
 		goto_campaigning(game.played_card)
 	} else {
 		vm_next()
