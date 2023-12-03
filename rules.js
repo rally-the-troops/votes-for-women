@@ -1813,8 +1813,22 @@ function check_victory() {
 	return false
 }
 
+function increase_congress(count=1) {
+	const before = game.congress
+	game.congress = Math.min(game.congress + count, 6)
+	const added = game.congress - before
+	if (added)
+		log(`Congress +${added} CM`)
+}
 
-// XXX similar to states.vm_add_congress, refactor?
+function decrease_congress(count=1) {
+	const before = game.congress
+	game.congress = Math.max(game.congress - count, 0)
+	const removed = before - game.congress
+	if (removed)
+		log(`Congress -${removed} CM`)
+}
+
 states.lobbying_add_congress = {
 	inactive: "add a Congressional marker.",
 	prompt() {
@@ -1822,18 +1836,13 @@ states.lobbying_add_congress = {
 		gen_action("congress")
 	},
 	congress() {
-		game.congress = Math.min(game.congress + game.count, 6)
-		log(`Congress +${game.count} CM`)
-
-		if (game.congress >= 6) {
-			if (trigger_nineteenth_amendment())
-				return
-		}
+		increase_congress(game.count)
+		if (game.congress >= 6 && trigger_nineteenth_amendment())
+			return
 		end_play_card(game.played_card)
 	}
 }
 
-// XXX similar to states.vm_remove_congress, refactor?
 states.lobbying_remove_congress = {
 	inactive: "remove a Congressional marker.",
 	prompt() {
@@ -1841,9 +1850,7 @@ states.lobbying_remove_congress = {
 		gen_action("congress")
 	},
 	congress() {
-		game.congress = Math.max(game.congress - game.count, 0)
-		log(`Congress -${game.count} CM`)
-
+		decrease_congress(game.count)
 		end_play_card(game.played_card)
 	}
 }
@@ -2335,30 +2342,39 @@ states.vm_add_campaigner = {
 }
 
 function increase_player_buttons(count=1) {
-	log(`${game.active} +${count} BM`)
+	const before = player_buttons()
 	if (game.active === SUF) {
 		game.support_buttons = Math.min(game.support_buttons + count, MAX_SUPPORT_BUTTONS)
 	} else {
 		game.opposition_buttons = Math.min(game.opposition_buttons + count, MAX_OPPOSITION_BUTTONS)
 	}
+	const added = player_buttons() - before
+	if (added)
+		log(`${game.active} +${added} BM`)
 }
 
 function decrease_player_buttons(count=1) {
-	log(`${game.active} -${count} BM`)
+	const before = player_buttons()
 	if (game.active === SUF) {
 		game.support_buttons = Math.max(game.support_buttons - count, 0)
 	} else {
 		game.opposition_buttons = Math.max(game.opposition_buttons - count, 0)
 	}
+	const removed = before - player_buttons()
+	if (removed)
+		log(`${game.active} -${removed} BM`)
 }
 
 function decrease_opponent_buttons(count=1) {
-	log(`${opponent_name()} -${count} BM`)
+	const before = opponent_buttons()
 	if (game.active === SUF) {
 		game.opposition_buttons = Math.max(game.opposition_buttons - count, 0)
 	} else {
 		game.support_buttons = Math.max(game.support_buttons - count, 0)
 	}
+	const removed = before - opponent_buttons()
+	if (removed)
+		log(`${opponent_name()} -${removed} BM`)
 }
 
 states.vm_receive_buttons = {
@@ -2676,13 +2692,9 @@ states.vm_add_congress = {
 		gen_action("congress")
 	},
 	congress() {
-		game.congress = Math.min(game.congress + game.vm.count, 6)
-		log(`Congress +${game.vm.count} CM`)
-
-		if (game.congress >= 6) {
-			if (trigger_nineteenth_amendment())
-				return
-		}
+		increase_congress(game.vm.count)
+		if (game.congress >= 6 && trigger_nineteenth_amendment())
+			return
 		vm_next()
 	}
 }
@@ -2694,9 +2706,7 @@ states.vm_remove_congress = {
 		gen_action("congress")
 	},
 	congress() {
-		game.congress = Math.max(game.congress - game.vm.count, 0)
-		log(`Congress -${game.vm.count} CM`)
-
+		decrease_congress(game.vm.count)
 		vm_next()
 	}
 }
