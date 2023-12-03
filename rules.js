@@ -1218,6 +1218,12 @@ function goto_final_voting() {
 	log_h1("Final Voting")
 	log(`Suffragist has ${count_green_checks()} of ${GREEN_CHECK_VICTORY} States.`)
 	log(`Opposition has ${count_red_xs()} of ${RED_X_VICTORY} States.`)
+	if (game.persistent_ballot.includes(MISS_FEBB_WINS_THE_LAST_VOTE)) {
+		log("Suffragist wins all ties.")
+	} else {
+		log("Opposition wins all ties.")
+	}
+
 	game.active = SUF
 	game.state = "final_voting_select_state"
 }
@@ -1276,6 +1282,20 @@ function goto_final_voting_roll() {
 	game.state = "final_voting_roll"
 }
 
+function should_reroll() {
+	// not if you have already rolled your max
+	if (game.roll === game.dice)
+		return false
+	// not if your have already won, because they are broke and cant reroll
+	if (!opponent_buttons() && (game.roll > game.opponent_roll || (player_wins_ties() && game.roll === game.opponent_roll)))
+		return false
+	// not if your have already won, because they cant roll any higher
+	if (game.roll > game.opponent_dice || (player_wins_ties() && game.roll === game.opponent_dice))
+		return false
+	// you could give it a shot
+	return true
+}
+
 states.final_voting_roll = {
 	inactive: "do Final Voting.",
 	prompt() {
@@ -1298,7 +1318,7 @@ states.final_voting_roll = {
 			view.prompt += '.'
 
 			// only reroll when you can and when it makes sense
-			if (player_buttons() > 0 && game.roll < game.dice)
+			if (player_buttons() > 0 && should_reroll())
 				gen_action("reroll")
 			gen_action("next")
 		}
@@ -1318,6 +1338,20 @@ states.final_voting_roll = {
 	}
 }
 
+function should_opponent_reroll() {
+	// not if you have already rolled your max
+	if (game.opponent_roll === game.opponent_dice)
+		return false
+	// not if your have already won
+	if (game.opponent_roll > game.roll || (player_wins_ties() && game.opponent_roll === game.roll))
+		return false
+	// not if you cant roll a win
+	if (game.roll > game.opponent_dice || (!player_wins_ties() && game.roll === game.opponent_dice))
+		return false
+	// you could give it a shot
+	return true
+}
+
 states.final_voting_opponent = {
 	inactive: "do Final Voting.",
 	prompt() {
@@ -1331,7 +1365,7 @@ states.final_voting_opponent = {
 		view.prompt += '.'
 
 		// only reroll when you can and when it makes sense
-		if (player_buttons() > 0 && game.opponent_roll < game.opponent_dice)
+		if (player_buttons() > 0 && should_opponent_reroll())
 			gen_action("reroll")
 		gen_action("next")
 	},
@@ -1345,6 +1379,10 @@ states.final_voting_opponent = {
 }
 
 const MISS_FEBB_WINS_THE_LAST_VOTE = find_card("Miss Febb Wins the Last Vote")
+
+function player_wins_ties() {
+	return game.active === OPP || game.persistent_ballot.includes(MISS_FEBB_WINS_THE_LAST_VOTE)
+}
 
 function goto_final_voting_result() {
 	clear_undo()
@@ -1376,9 +1414,9 @@ function goto_final_voting_result() {
 	else
 		reject_nineteenth_amendment(game.selected_us_state)
 
-	log_br()
-	log(`Suffragist won ${count_green_checks()} of ${GREEN_CHECK_VICTORY} States.`)
-	log(`Opposition won ${count_red_xs()} of ${RED_X_VICTORY} States.`)
+	// log_br()
+	// log(`Suffragist won ${count_green_checks()} of ${GREEN_CHECK_VICTORY} States.`)
+	// log(`Opposition won ${count_red_xs()} of ${RED_X_VICTORY} States.`)
 
 	game.state = "final_voting_result"
 }
