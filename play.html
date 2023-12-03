@@ -26,11 +26,19 @@
 	src: url(fonts/CopperplateCC/CopperplateCC-Bold.woff2) format('woff2')
 }
 
+@font-face {
+	font-family: TiffanyGothicCC;
+	src: url(fonts/TiffanyGothicCC/TiffanyGothicCC.woff2) format('woff2')
+}
+
 :root {
 	--back-strategy: hsl(36, 71%, 66%);
 	--back-states: #99b778;
 	--back-suf: #754d8d;
 	--back-opp: #da6642;
+
+	--states-25: hsl(88, 100%, 20%);
+	--strategy-25: hsl(36, 100%, 20%);
 
 	--suf-25: hsl(273, 80%, 25%);
 	--suf-75: hsl(273, 39%, 75%);
@@ -43,7 +51,7 @@
 
 main {
 	background-color: slategray;
-	background-color: hsl(170, 13%, 55%);
+	background-color: hsl(170, 15%, 40%);
 }
 
 #role_Suffragist { background-color: var(--suf-85); }
@@ -57,7 +65,8 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 
 #log { background-color: floralwhite; }
 #log .h1, #log .h2 {
-	font-weight: bold;
+	font-family: TiffanyGothicCC;
+	font-size: 10px;
 	padding-top: 2px;
 	padding-bottom: 2px;
 	text-align: center;
@@ -69,6 +78,10 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 
 #log .suf { background-color: var(--suf-85); border-top: 1px solid var(--suf-25); border-bottom: 1px solid var(--suf-25); }
 #log .opp { background-color: var(--opp-85); border-top: 1px solid var(--opp-25); border-bottom: 1px solid var(--opp-25); }
+#log .suf, #log .opp {
+	font-family: TiffanyGothicCC;
+	font-size: 10px;
+}
 #log .tip { cursor: pointer; }
 #log .tip.states { font-style: italic; }
 #log .tip.support { font-style: italic; }
@@ -78,6 +91,8 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 
 #log .tip.support { color: var(--suf-25); }
 #log .tip.opposition { color: var(--opp-25); }
+#log .tip.states { color: var(--states-25); }
+#log .tip.strategy { color: var(--strategy-25); }
 
 #log > .p { padding-left: 20px; text-align: right; font-style: italic; opacity: 75%; }
 #log > .i { padding-left: 20px; }
@@ -175,13 +190,15 @@ section > * {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
+	align-items: start;
 	gap: 24px;
 }
 
 .panel {
 	padding: 3px;
-	font-family: CopperplateCC;
-	font-variant: small-caps;
+	font-family: TiffanyGothicCC;
+	x-font-variant: small-caps;
+	font-feature-settings: 'smcp';
 	background-color: hsl(43, 52%, 88%);
 	box-shadow: 1px 2px 4px #0004;
 	min-width: fit-content;
@@ -191,7 +208,6 @@ section > * {
 .panel_header {
 	background-color: hsl(43, 42%, 78%);
 	border: 2px solid #222;
-	font-weight: bold;
 	text-align: center;
 	padding: 2px 0;
 }
