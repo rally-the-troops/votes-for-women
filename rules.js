@@ -3000,7 +3000,7 @@ states.vm_place_any_on_top_of_draw = {
 				}
 			}
 		} else {
-			event_prompt("Select which cards to put on top of your Draw Deck. The rest goes at the bottom.")
+			event_prompt("Select which cards to put on top of your Draw Deck. The rest go to the bottom.")
 			if (game.vm.play_one) {
 				let event_card_name = CARDS[game.selected_cards[0]].name
 				view.prompt += ` Will play "${event_card_name}" for its event.`
