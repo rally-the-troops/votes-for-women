@@ -286,7 +286,9 @@ function on_focus_us_state(evt) {
 
 function on_click_card(evt) {
 	let card = evt.target.my_card
-	if (is_action('card_select', card)) {
+	if (is_action('card', card)) {
+		send_action('card', card)
+	} else if (is_action('card_select', card)) {
 		show_popup_menu(evt, "popup_select_card", card, CARDS[card].name)
 	} else {
 		show_popup_menu(evt, "popup", card, CARDS[card].name)
