@@ -1332,7 +1332,6 @@ states.final_voting_roll = {
 		}
 	},
 	roll() {
-		game.persistent_ballot.includes(VOTER_REGISTRATION)
 		game.roll = roll_ndx(1, game.dice, `${game.active} rolled`)
 		game.opponent_roll = roll_ndx(1, game.opponent_dice, `${opponent_name()} rolled`)
 	},
