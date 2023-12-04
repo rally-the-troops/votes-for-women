@@ -284,6 +284,21 @@ body.Opposition #set_aside_header { background-color: var(--opp-85); }
 	}
 }
 
+/* CARD ACTION POPUP MENU */
+
+.popup {
+	min-width: 150px;
+	box-shadow: 0px 8px 16px 0px #0004;
+}
+
+body.Suffragist .popup { background-color: var(--suf-85) }
+body.Suffragist .popup li.title { color: black; background-color: var(--suf-75) }
+body.Suffragist .popup li.action:hover { background-color: var(--suf-25) }
+
+body.Opposition .popup { background-color: var(--opp-85) }
+body.Opposition .popup li.title { color: black; background-color: var(--opp-75) }
+body.Opposition .popup li.action:hover { background-color: var(--opp-25) }
+
 /* MAP */
 
 #mapwrap {
@@ -736,7 +751,7 @@ div.button_box .button {
 
 <div id="tooltip" class="card hide"></div>
 
-<menu id="popup">
+<menu id="popup" class="popup">
 	<li class="title">TITLE
 	<li class="separator">
 	<li data-action="card_event"> &#x1f3b4; &nbsp; Event
@@ -745,7 +760,7 @@ div.button_box .button {
 	<li data-action="card_lobbying"> &#x1F3DB; &nbsp; Lobbying Action
 </menu>
 
-<menu id="popup_select_card">
+<menu id="popup_select_card" class="popup">
 	<li class="title">TITLE
 	<li class="separator">
 	<li data-action="card_select"> &#x1f3b4; &nbsp; Select Card
