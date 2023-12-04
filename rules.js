@@ -881,6 +881,7 @@ states.strategy_phase = {
 function claim_strategy_card(c) {
 	log(`${game.active} selected C${c}.`)
 
+	clear_undo()
 	array_remove_item(game.strategy_draw, c)
 	set_add(player_claimed(), c)
 	if (game.strategy_deck.length)
@@ -892,9 +893,9 @@ states.select_strategy_card = {
 	prompt() {
 		view.prompt = "Select Strategy card."
 		for (let c of game.strategy_draw)
-			gen_action("card", c)
+			gen_action("card_select", c)
 	},
-	card(c) {
+	card_select(c) {
 		claim_strategy_card(c)
 		if (game.vm) {
 			vm_next()

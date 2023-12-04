@@ -208,11 +208,14 @@ function show_popup_menu(evt, menu_id, target_id, title) {
 
 function hide_popup_menu() {
 	document.getElementById("popup").style.display = "none"
+	document.getElementById("popup_select_card").style.display = "none"
 }
 
 function is_card_enabled(card) {
 	if (view.actions) {
 		if (card_action_menu.some(a => view.actions[a] && view.actions[a].includes(card)))
+			return true
+		if (view.actions.card_select && view.actions.card_select.includes(card))
 			return true
 		if (view.actions.card && view.actions.card.includes(card))
 			return true
@@ -283,8 +286,8 @@ function on_focus_us_state(evt) {
 
 function on_click_card(evt) {
 	let card = evt.target.my_card
-	if (is_action('card', card)) {
-		send_action('card', card)
+	if (is_action('card_select', card)) {
+		show_popup_menu(evt, "popup_select_card", card, CARDS[card].name)
 	} else {
 		show_popup_menu(evt, "popup", card, CARDS[card].name)
 	}
