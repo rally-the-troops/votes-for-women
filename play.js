@@ -358,8 +358,7 @@ function create_campaigner(color, i) {
 		className: `piece ${color}`,
 		my_campaigner: i,
 	})
-	// TODO use onmousedown and figure out why it didn't work on mobile
-	e.addEventListener("click", on_click_campaigner)
+	e.addEventListener("mousedown", on_click_campaigner)
 	return e
 }
 
@@ -374,14 +373,13 @@ function build_user_interface() {
 			REGIONS_LAYOUT.push(LAYOUT[r.replaceAll(' & ', '')])
 	}
 
-	// TODO use onmousedown and figure out why it didn't work on mobile
-	ui.congress_box.addEventListener("click", on_click_congress)
+	ui.congress_box.addEventListener("mousedown", on_click_congress)
 	for (let c = 1; c <= 6; ++c) {
 		elt = ui.congress[c] = create("div", {
 			className: "piece congress",
 			style: `left:${15 + (c-1) * 42}px;top:-6px;`,
 		})
-		elt.addEventListener("click", on_click_congress)
+		elt.addEventListener("mousedown", on_click_congress)
 	}
 
 	for (let i = 0; i < 12; ++i) {
@@ -401,6 +399,7 @@ function build_user_interface() {
 			className: `card card_${c}`,
 			my_card: c,
 		})
+		// TODO use onmousedown and figure out why it didn't work on mobile
 		elt.addEventListener("click", on_click_card)
 	}
 
