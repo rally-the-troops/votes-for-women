@@ -2889,6 +2889,11 @@ states.move_each_player_campaigner_free = {
 					gen_action_region(r)
 			}
 		}
+		gen_action("next")
+	},
+	next() {
+		delete game.selected_campaigner
+		vm_next()
 	},
 	campaigner(c) {
 		push_undo()
@@ -2901,7 +2906,6 @@ states.move_each_player_campaigner_free = {
 		delete game.selected_campaigner
 
 		if (game.vm.moved.length === count_player_active_campaigners()) {
-			delete game.selected_campaigner
 			vm_next()
 		}
 	}
