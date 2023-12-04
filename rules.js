@@ -1289,7 +1289,7 @@ function should_reroll() {
 	const total = game.roll + game.drm
 	const potential = game.dice + game.drm
 	const opponent_total = game.opponent_roll + game.opponent_drm
-	const opponent_potential = game.opponent_dice = game.opponent_drm
+	const opponent_potential = game.opponent_dice + game.opponent_drm
 	// not if your have already won, because they are broke and cant reroll
 	if (!opponent_buttons() && (total > opponent_total || (player_wins_ties() && total === opponent_total)))
 		return false
@@ -1351,7 +1351,7 @@ function should_opponent_reroll() {
 		return false
 	const total = game.roll + game.drm
 	const opponent_total = game.opponent_roll + game.opponent_drm
-	const opponent_potential = game.opponent_dice = game.opponent_drm
+	const opponent_potential = game.opponent_dice + game.opponent_drm
 	// not if your have already won
 	if (opponent_total > total || (player_wins_ties() && opponent_total === total))
 		return false
@@ -1391,7 +1391,7 @@ states.final_voting_opponent = {
 const MISS_FEBB_WINS_THE_LAST_VOTE = find_card("Miss Febb Wins the Last Vote")
 
 function player_wins_ties() {
-	return game.active === OPP || game.persistent_ballot.includes(MISS_FEBB_WINS_THE_LAST_VOTE)
+	return (game.active === SUF) === game.persistent_ballot.includes(MISS_FEBB_WINS_THE_LAST_VOTE)
 }
 
 function goto_final_voting_result() {
