@@ -2515,9 +2515,20 @@ states.vm_add_cubes = {
 			// 	event_prompt("Choose a cube color to add or remove an Opponent's cube.")
 		} else {
 
-			event_prompt(`Add ${pluralize(game.vm.count, COLOR_NAMES[game.vm.cube_color] + ' cube')}`)
-			if (game.vm.limit)
-				view.prompt += `, no more than ${game.vm.limit} per state`
+			if (!game.vm.in_each_of && !game.vm.in_one_state_of_each_region && !game.vm.per_state_in_any_one_region) {
+				let remaining = game.vm.count - map_count(game.vm.added)
+				event_prompt(`Add ${pluralize(remaining, COLOR_NAMES[game.vm.cube_color] + ' cube')}`)
+				if (game.vm.limit)
+					view.prompt += `, no more than ${game.vm.limit} per State`
+			} else {
+				event_prompt(`Add ${pluralize(game.vm.count, COLOR_NAMES[game.vm.cube_color] + ' cube')}`)
+				if (game.vm.in_each_of)
+					view.prompt += ` in each of ${pluralize(game.vm.us_states.length, 'State')}`
+				if (game.vm.in_one_state_of_each_region)
+					view.prompt += ' in one State of each Region'
+				if (game.vm.per_state_in_any_one_region)
+					view.prompt += ' per State in any one Region'
+			}
 			view.prompt += '.'
 			// if (has_opponent_cubes)
 			// 	event_prompt(`Add a ${COLOR_NAMES[game.vm.cube_color]} cube or remove an Opponent's cube.`)
@@ -2627,7 +2638,7 @@ states.vm_remove_cubes = {
 		} else {
 			event_prompt(`Remove ${pluralize(game.vm.count, COLOR_NAMES[game.vm.cubes] + ' cube')}`)
 			if (game.vm.limit)
-				view.prompt += `, no more than ${game.vm.limit} per state`
+				view.prompt += `, no more than ${game.vm.limit} per State`
 			view.prompt += '.'
 		}
 
