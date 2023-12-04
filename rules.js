@@ -1617,13 +1617,12 @@ states.campaigning_add_cubes = {
 
 
 		if (us_states.length) {
-			view.prompt = `Campaigning: Add ${pluralize(game.campaigning.count, COLOR_NAMES[campaigner_color(game.selected_campaigner)] + ' cube')}, remove opponent's cubes`
+			let remaining = game.campaigning.count - game.campaigning.added
+			view.prompt = `Campaigning: Add ${pluralize(remaining, COLOR_NAMES[campaigner_color(game.selected_campaigner)] + ' cube')}, remove opponent's cubes`
 			if (can_move) {
 				view.prompt += ", and optionally Move Campaigner"
 			}
 			view.prompt += '.'
-			// let remaining = game.campaigning.count - game.campaigning.added
-			// view.prompt += ` ${pluralize(remaining, 'cube')} remaining.`
 		} else {
 			view.prompt = `Campaigning: No available States to Add or Remove cubes.`
 			gen_action("done")
@@ -2624,9 +2623,9 @@ states.vm_remove_cubes = {
 	inactive: "remove a cube.",
 	prompt() {
 		if (game.vm.all) {
-			event_prompt(`Remove all ${COLOR_NAMES[game.vm.cubes]} cube.`)
+			event_prompt(`Remove all ${COLOR_NAMES[game.vm.cubes]} cubes.`)
 		} else {
-			event_prompt(`Remove ${game.vm.count} ${COLOR_NAMES[game.vm.cubes]} cube`)
+			event_prompt(`Remove ${pluralize(game.vm.count, COLOR_NAMES[game.vm.cubes] + ' cube')}`)
 			if (game.vm.limit)
 				view.prompt += `, no more than ${game.vm.limit} per state`
 			view.prompt += '.'
