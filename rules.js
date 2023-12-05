@@ -3186,9 +3186,9 @@ function log_h3(msg) {
 function log_round(msg) {
 	log_br()
 	if (game.active === SUF)
-		log(".h3.suf " + game.round + " \u2013 " + msg)
+		log(".h3.suf " + game.round + " - " + msg)
 	else
-		log(".h3.opp " + game.round + " \u2013 " + msg)
+		log(".h3.opp " + game.round + " - " + msg)
 	log_br()
 }
 
