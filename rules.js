@@ -972,8 +972,9 @@ function can_play_event(c) {
 	if ([39, 100].includes(c))
 		cost += 4
 
-	// Suffragist must pay 1 button to play event during 1918 Pandemic or A Threat to the Ideal of Womanhood
-	if (has_extra_event_cost())
+	// Suffragist must pay 1 button to play event card during 1918 Pandemic or A Threat to the Ideal of Womanhood
+	// Only for Event cards, not for Strategy / States cards
+	if ((is_support_card(c) || is_opposition_card(c)) && has_extra_event_cost())
 		cost += 1
 
 	if (player_buttons() < cost)
@@ -3035,7 +3036,7 @@ states.vm_place_any_on_top_of_draw = {
 			game.vm.play_one = game.selected_cards.shift()
 		log(`${game.active} selected ${pluralize(game.selected_cards.length, 'card')} to put on top of their Draw Deck.`)
 
-		// XXX does this order make sense? first selected card goes on top.
+		// first selected card goes on top.
 		for (let c of game.selected_cards.reverse()) {
 			player_deck().push(c)
 			array_remove_item(game.vm.draw, c)
@@ -3071,7 +3072,7 @@ states.vm_opponent_discard_2_random_draw_2 = {
 			discard_card_from_hand(c)
 			log(`Discarded C${c}.`)
 		}
-		// XXX if we could discard less than two, should we also draw less than two?
+		// if we could discard less than two, we also draw less than two.
 		for (let i = 0; i < game.selected_cards.length; ++i) {
 			let card = draw_card(player_deck())
 			player_hand().push(card)
