@@ -382,7 +382,7 @@ function build_user_interface() {
 	for (let c = 1; c <= 6; ++c) {
 		elt = ui.congress[c] = create("div", {
 			className: "piece congress",
-			style: `left:${15 + (c-1) * 42}px;top:-6px;`,
+			style: `left:${15 + (c-1) * 41.7}px;top:-6px;`,
 		})
 		elt.addEventListener("mousedown", on_click_congress)
 	}
