@@ -1403,8 +1403,8 @@ states.final_voting_roll = {
 	next() {
 		// allow opponent to re-roll if they can
 		next_player()
-		if (!can_reroll())
-			finalize_vote()
+		// if (!can_reroll())
+		//	finalize_vote()
 	},
 	pass() {
 		// only loser can pass
