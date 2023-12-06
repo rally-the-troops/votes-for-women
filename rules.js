@@ -2726,6 +2726,8 @@ states.vm_replace = {
 			goto_vm_add_cubes()
 		} else {
 			reject_nineteenth_amendment(s)
+			if (check_victory())
+				return
 			vm_next()
 		}
 	},
@@ -2739,6 +2741,8 @@ states.vm_replace = {
 			goto_vm_add_cubes()
 		} else {
 			ratify_nineteenth_amendment(s)
+			if (check_victory())
+				return
 			vm_next()
 		}
 	}
