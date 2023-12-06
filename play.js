@@ -401,7 +401,7 @@ function build_user_interface() {
 
     for (let c = 1; c <= card_count; ++c) {
 		elt = ui.cards[c] = create("div", {
-			className: `card card_${c}`,
+			className: `card card_${c} ${CARDS[c].type}`,
 			my_card: c,
 		})
 		// TODO use onmousedown and figure out why it didn't work on mobile

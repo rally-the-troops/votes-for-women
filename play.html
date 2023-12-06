@@ -33,20 +33,31 @@
 
 :root {
 	--back-strategy: hsl(36, 71%, 66%);
-	--back-states: #99b778;
-	--back-suf: #754d8d;
-	--back-opp: #da6642;
+	--back-states: hsl(89, 30%, 50%);
+	--back-suf: hsl(278, 29%, 43%);
+	--back-opp: hsl(14, 67%, 56%);
+
+	--action-suf: hsl(278, 29%, 43%);
+	--action-opp: hsl(14, 67%, 56%);
+	--action-strategy: hsl(36, 71%, 70%);
+	--action-states: hsl(89, 30%, 70%);
 
 	--states-25: hsl(88, 100%, 20%);
 	--strategy-25: hsl(36, 100%, 20%);
 
 	--suf-25: hsl(273, 80%, 25%);
+	--suf-50: hsl(273, 80%, 50%);
 	--suf-75: hsl(273, 39%, 75%);
 	--suf-85: hsl(273, 39%, 85%);
+	--suf-90: hsl(273, 39%, 90%);
+	--suf-95: hsl(273, 39%, 95%);
 
 	--opp-25: hsl(16, 100%, 25%);
+	--opp-50: hsl(16, 90%, 50%);
 	--opp-75: hsl(16, 85%, 75%);
 	--opp-85: hsl(16, 85%, 85%);
+	--opp-90: hsl(16, 85%, 90%);
+	--opp-95: hsl(16, 85%, 95%);
 }
 
 main {
@@ -291,11 +302,13 @@ body.Opposition #set_aside_header { background-color: var(--opp-85); }
 	box-shadow: 0px 8px 16px 0px #0004;
 }
 
-body.Suffragist .popup { background-color: var(--suf-85) }
+.popup li span { display: inline-block; width: 24px; }
+
+body.Suffragist .popup { background-color: var(--suf-95) }
 body.Suffragist .popup li.title { color: black; background-color: var(--suf-75) }
 body.Suffragist .popup li.action:hover { background-color: var(--suf-25) }
 
-body.Opposition .popup { background-color: var(--opp-85) }
+body.Opposition .popup { background-color: var(--opp-95) }
 body.Opposition .popup li.title { color: black; background-color: var(--opp-75) }
 body.Opposition .popup li.action:hover { background-color: var(--opp-25) }
 
@@ -343,13 +356,14 @@ div.state.action.northeast { background-color: #4169e1b3 }
 div.state.action.atlantic { background-color: #008000b3 }
 
 path.state.selected {
-	stroke: yellow;
+	stroke: black;
 	stroke-width: 12;
 }
 
 path.state.tip {
-	stroke: red;
+	stroke: white;
 	stroke-width: 12;
+	stroke-dasharray: 24 12;
 }
 
 div.state {
@@ -393,11 +407,11 @@ div.label.claimable {
 }
 
 div.state.selected {
-	border-color: yellow;
+	border-color: black;
 }
 
 div.state.tip {
-	border-color: red;
+	border: 4px dashed white;
 }
 
 div.region {
@@ -411,11 +425,11 @@ div.region {
 }
 
 div.region.action {
-	border-color: yellow;
+	border-color: white;
 }
 
 div.region.tip {
-	border-color: red;
+	border: 4px dashed white;
 }
 
 div.persistent_box {
@@ -572,16 +586,28 @@ div.button_box .button {
 	box-shadow: 0 0 0 1px #222, 1px 2px 4px #0004;
 }
 
-.card.action {
-	box-shadow: 0 0 0 3px white;
+.card.support.action {
+	box-shadow: 0 0 0 1px black, 0 0 0 4px var(--suf-75);
+}
+
+.card.opposition.action {
+	box-shadow: 0 0 0 1px black, 0 0 0 4px var(--opp-75);
+}
+
+.card.states {
+	box-shadow: 0 0 0 1px black, 0 0 0 4px var(--action-states);
+}
+
+.card.strategy {
+	box-shadow: 0 0 0 1px black, 0 0 0 4px var(--action-strategy);
 }
 
 .card.selected {
-	box-shadow: 0 0 0 3px yellow;
+	box-shadow: 0 0 0 1px black, 0 0 0 4px yellow;
 }
 
 .card.played {
-	box-shadow: 0 0 0 3px blue;
+	box-shadow: 0 0 0 3px black;
 }
 
 #tooltip {
@@ -746,16 +772,16 @@ div.button_box .button {
 <menu id="popup" class="popup">
 	<li class="title">TITLE
 	<li class="separator">
-	<li data-action="card_event"> &#x1f3b4; &nbsp; Event
-	<li data-action="card_campaigning"> &#x1F4E3; &nbsp; Campaigning Action
-	<li data-action="card_organizing"> &#x2B50; &nbsp; Organizing Action
-	<li data-action="card_lobbying"> &#x1F3DB; &nbsp; Lobbying Action
+	<li data-action="card_event"><span>&#x1f3b4;</span> Event
+	<li data-action="card_campaigning"><span>&#x1F4E3;</span> Campaigning Action
+	<li data-action="card_organizing"><span>&#x2B50;</span> Organizing Action
+	<li data-action="card_lobbying"><span>&#x1F3DB;</span> Lobbying Action
 </menu>
 
 <menu id="popup_select_card" class="popup">
 	<li class="title">TITLE
 	<li class="separator">
-	<li data-action="card_select"> &#x1f3b4; &nbsp; Select Card
+	<li data-action="card_select"><span>&#x1f3b4;</span> Select Card
 </menu>
 
 <header>
