@@ -1362,12 +1362,13 @@ states.final_voting_roll = {
 			let support_total = game.support_roll + game.support_drm
 			let opposition_total = game.opposition_roll + game.opposition_drm
 
-			view.prompt += `Suffragist rolled ${game.support_roll}`
+			view.prompt += `${game.support_roll}`
 			if (game.support_drm)
 				view.prompt += ` (+${game.support_drm}) = ${support_total}`
-			view.prompt += `, Opposition rolled ${game.opposition_roll}`
+			view.prompt += ` Yea, ${game.opposition_roll}`
 			if (game.opposition_drm)
 				view.prompt += ` (+${game.opposition_drm}) = ${opposition_total}`
+			view.prompt += " Nay"
 			if (support_total === opposition_total)
 				view.prompt += `. ${game.tie_winner} leads on tie.`
 			else
@@ -1421,11 +1422,20 @@ function finalize_vote() {
 	let opposition_total = game.opposition_roll + game.opposition_drm
 
 	log_br()
-	log(`${game.support_roll} (+${game.support_drm}) = ${support_total} vs. ${game.opposition_roll} (+${game.opposition_drm}) = ${opposition_total}`)
+	let result = `${game.support_roll}`
+	if (game.support_drm)
+		result += ` (+${game.support_drm}) = ${support_total}`
+	result += ` Yea vs. ${game.opposition_roll}`
+	if (game.opposition_drm)
+		result += ` (+${game.opposition_drm}) = ${opposition_total}`
+	result += " Nay."
+	log(result)
+	// log(`${game.support_roll} (+${game.support_drm}) = ${support_total} Yea vs. ${game.opposition_roll} (+${game.opposition_drm}) = ${opposition_total} Nay`)
+
 	if (support_total === opposition_total)
-		log(`${game.tie_winner} wins on tie.`)
+		log(`${game.tie_winner} won on tie.`)
 	else
-		log(`${game.voting_winner} wins.`)
+		log(`${game.voting_winner} won.`)
 
 	if (game.voting_winner === SUF)
 		ratify_nineteenth_amendment(game.selected_us_state)
