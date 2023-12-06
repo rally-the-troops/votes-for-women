@@ -1252,10 +1252,14 @@ function us_states_to_win() {
 	return (game.active === SUF) ? GREEN_CHECK_VICTORY - count_green_checks() : RED_X_VICTORY - count_red_xs()
 }
 
+function us_states_to_lose() {
+	return (game.active === OPP) ? GREEN_CHECK_VICTORY - count_green_checks() : RED_X_VICTORY - count_red_xs()
+}
+
 states.final_voting_select_state = {
 	inactive: "do Final Voting.",
 	prompt() {
-		view.prompt = `Final Voting: Select a State. You need ${pluralize(us_states_to_win(), 'more State')} for victory.`
+		view.prompt = `Final Voting: Select a State. ${pluralize(us_states_to_win(), 'more State')} to win, ${us_states_to_lose()} to lose.`
 
 		let us_states = ANYWHERE.slice()
 		set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
@@ -1344,7 +1348,7 @@ function update_final_voting_result() {
 states.final_voting_roll = {
 	inactive: "do Final Voting.",
 	prompt() {
-		view.prompt = `Final Voting for ${us_state_name(game.selected_us_state)}: `
+		view.prompt = `${us_state_name(game.selected_us_state)}: `
 
 		if (!game.voting_winner) {
 			if (game.support_drm)
