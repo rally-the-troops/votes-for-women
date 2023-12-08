@@ -83,5 +83,4 @@ def_us_state("RI", "Rhode Island", NORTHEAST)
 def_us_state("VT", "Vermont", NORTHEAST)
 
 console.log("const us_state_count =", US_STATES.length)
-
-fs.writeFileSync("data.js", "const US_STATES = " + JSON.stringify(US_STATES, 0, 0) + "\nif (typeof module !== 'undefined') module.exports = { US_STATES }\n")
+console.log("const US_STATES = " + JSON.stringify(US_STATES, 0, 8))
