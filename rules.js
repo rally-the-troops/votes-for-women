@@ -2689,7 +2689,10 @@ states.vm_remove_cubes = {
 	inactive: "remove a cube.",
 	prompt() {
 		if (game.vm.all) {
-			event_prompt(`Remove all ${COLOR_NAMES[game.vm.cubes]} cubes.`)
+			if (game.vm.cubes === PURPLE_OR_YELLOW)
+				event_prompt(`Remove all Purple and Yellow cubes.`)
+			else
+				event_prompt(`Remove all ${COLOR_NAMES[game.vm.cubes]} cubes.`)
 		} else {
 			event_prompt(`Remove ${pluralize(game.vm.count, COLOR_NAMES[game.vm.cubes] + ' cube')}`)
 			if (game.vm.limit)
@@ -2697,14 +2700,24 @@ states.vm_remove_cubes = {
 			view.prompt += '.'
 		}
 
+		let can_remove = false
 		for (let s of game.vm.us_states) {
-			if ((game.vm.cubes === PURPLE || game.vm.cubes === PURPLE_OR_YELLOW) && purple_cubes(s))
+			if ((game.vm.cubes === PURPLE || game.vm.cubes === PURPLE_OR_YELLOW) && purple_cubes(s)) {
 				gen_action_purple_cube(s)
-			if ((game.vm.cubes === YELLOW || game.vm.cubes === PURPLE_OR_YELLOW) && yellow_cubes(s))
+				can_remove = true
+			}
+			if ((game.vm.cubes === YELLOW || game.vm.cubes === PURPLE_OR_YELLOW) && yellow_cubes(s)) {
 				gen_action_yellow_cube(s)
-			if (game.vm.cubes === RED && red_cubes(s))
+				can_remove = true
+			}
+			if (game.vm.cubes === RED && red_cubes(s)) {
 				gen_action_red_cube(s)
+				can_remove = true
+			}
 		}
+
+		if (!can_remove)
+			gen_action("next")
 	},
 	purple_cube(s) {
 		push_undo()
@@ -2720,6 +2733,9 @@ states.vm_remove_cubes = {
 		push_undo()
 		remove_cube(RED, s)
 		after_vm_remove_cube(s)
+	},
+	next() {
+		vm_next()
 	}
 }
 
