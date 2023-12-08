@@ -595,7 +595,7 @@ function setup_game() {
 
 	game.states_draw.splice(-3) // 3 states card aren't used
 	game.states_draw.sort()
-	log_h2("States Cards")
+	log_h2("State Cards")
 	for (let c of game.states_draw)
 		log(`C${c}`)
 
@@ -973,7 +973,7 @@ function can_play_event(c) {
 		cost += 4
 
 	// Suffragist must pay 1 button to play event card during 1918 Pandemic or A Threat to the Ideal of Womanhood
-	// Only for Event cards, not for Strategy / States cards
+	// Only for Event cards, not for Strategy / State cards
 	if ((is_support_card(c) || is_opposition_card(c)) && has_extra_event_cost())
 		cost += 1
 
@@ -1692,9 +1692,9 @@ function goto_claim_states_card(us_state) {
 }
 
 states.claim_state_card = {
-	inactive: "claim States Card.",
+	inactive: "claim State Card.",
 	prompt() {
-		view.prompt = `Claim the "${us_state_name(game.selected_us_state)}" States Card.`
+		view.prompt = `Claim the "${us_state_name(game.selected_us_state)}" State Card.`
 
 		for (let c of game.states_draw) {
 			if (US_STATES[game.selected_us_state].name === CARDS[c].name) {
