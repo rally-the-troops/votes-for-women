@@ -847,6 +847,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 
     action_button("draw", "Draw")
 	action_button("next", "Next")
+	action_button("buttons", "Buttons")
 	action_button("move", "Move")
 	action_button("purple", "Purple")
 	action_button("yellow", "Yellow")

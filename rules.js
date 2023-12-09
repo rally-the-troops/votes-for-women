@@ -1802,9 +1802,9 @@ states.organizing = {
 	inactive: "receive buttons.",
 	prompt() {
 		view.prompt = `Organizing: Receive ${pluralize(game.count, 'button')}`
-		gen_action("next")
+		gen_action("buttons")
 	},
-	next() {
+	buttons() {
 		push_undo()
 		if (game.count)
 			increase_player_buttons(game.count)
@@ -2484,9 +2484,9 @@ states.vm_receive_buttons = {
 	inactive: "receive buttons.",
 	prompt() {
 		event_prompt(`Receive ${pluralize(game.vm.count, 'button')}`)
-		gen_action("next")
+		gen_action("buttons")
 	},
-	next() {
+	buttons() {
 		push_undo()
 		increase_player_buttons(game.vm.count)
 		vm_next()
@@ -2497,9 +2497,9 @@ states.vm_spend_buttons = {
 	inactive: "spend buttons.",
 	prompt() {
 		event_prompt(`Spend ${pluralize(game.vm.count, 'button')}`)
-		gen_action("next")
+		gen_action("buttons")
 	},
-	next() {
+	buttons() {
 		push_undo()
 		decrease_player_buttons(game.vm.count)
 		vm_next()
@@ -2510,9 +2510,9 @@ states.vm_opponent_loses_buttons = {
 	inactive: "make you lose buttons.",
 	prompt() {
 		event_prompt(`Opponent loses ${pluralize(game.vm.count, 'button')}`)
-		gen_action("next")
+		gen_action("buttons")
 	},
-	next() {
+	buttons() {
 		push_undo()
 		decrease_opponent_buttons(game.vm.count)
 		vm_next()
