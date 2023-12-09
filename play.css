@@ -435,7 +435,7 @@ body.shift .persistent_box .card:hover {
 	z-index: 100;
 }
 
-div.congress_box {
+div.congress_box, div.congress_hall {
 	position: absolute;
 	box-sizing: border-box;
 }

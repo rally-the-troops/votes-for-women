@@ -80,6 +80,7 @@ let ui = {
 	favicon: document.getElementById("favicon"),
 	status: document.getElementById("status"),
 	turn: document.getElementById("turn"),
+	congress_hall: document.getElementById("congress_hall"),
 	congress_box: document.getElementById("congress_box"),
 	congress: [ null ],
 	nineteenth_amendment_score: document.getElementById("nineteenth_amendment_score"),
@@ -431,6 +432,7 @@ function build_user_interface() {
 			REGIONS_LAYOUT.push(LAYOUT[r.replaceAll(' & ', '')])
 	}
 
+	ui.congress_hall.addEventListener("mousedown", on_click_congress)
 	ui.congress_box.addEventListener("mousedown", on_click_congress)
 	for (let c = 1; c <= 6; ++c) {
 		elt = ui.congress[c] = create("div", {
@@ -691,8 +693,9 @@ function on_update() { // eslint-disable-line no-unused-vars
 
 	ui.turn.style.left = 806 + (42 * (view.turn - 1)) + "px"
 
+	ui.congress_hall.classList.toggle("action", is_action("congress"))
 	ui.congress_box.replaceChildren()
-	ui.congress_box.classList.toggle("action", !view.congress && is_action("congress"))
+	ui.congress_box.classList.toggle("action", view.active === SUF_NAME && is_action("congress"))
 	for (let c = 1; c <= view.congress; ++c) {
 		ui.congress_box.appendChild(ui.congress[c])
 		ui.congress[c].classList.toggle("action", is_action("congress"))
