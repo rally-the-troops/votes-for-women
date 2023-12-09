@@ -827,13 +827,10 @@ function start_turn() {
 	log_h1("Turn " + game.turn)
 
 	log_h2("Planning")
-
-	if (game.turn === 1)
-		game.state = "planning_phase"
-	else
-		end_planning_phase()
+	end_planning_phase()
 }
 
+// XXX Deprecated on 2023-12-09, keep `states.planning_phase` for current games.
 states.planning_phase = {
 	inactive: "do Planning.",
 	prompt() {
