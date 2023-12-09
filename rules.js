@@ -826,12 +826,12 @@ function start_turn() {
 	game.turn += 1
 	log_h1("Turn " + game.turn)
 
-	goto_planning_phase()
-}
-
-function goto_planning_phase() {
 	log_h2("Planning")
-	game.state = "planning_phase"
+
+	if (game.turn === 1)
+		game.state = "planning_phase"
+	else
+		end_planning_phase()
 }
 
 states.planning_phase = {
@@ -841,19 +841,19 @@ states.planning_phase = {
 		gen_action("draw")
 	},
 	draw() {
-		for (let n = 0; n < 6; ++n) {
-			game.support_hand.push(draw_card(game.support_deck))
-			game.opposition_hand.push(draw_card(game.opposition_deck))
-		}
-
-		log("Suffragist drew 6 cards.")
-		log("Opposition drew 6 cards.")
-
 		end_planning_phase()
 	}
 }
 
 function end_planning_phase() {
+	for (let n = 0; n < 6; ++n) {
+		game.support_hand.push(draw_card(game.support_deck))
+		game.opposition_hand.push(draw_card(game.opposition_deck))
+	}
+
+	log("Suffragist drew 6 cards.")
+	log("Opposition drew 6 cards.")
+
 	if (game.support_hand.length !== 7)
 		throw Error("ASSERT game.support_hand.length === 7")
 	if (game.opposition_hand.length !== 7)
