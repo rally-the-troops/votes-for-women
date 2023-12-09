@@ -846,8 +846,8 @@ states.planning_phase = {
 			game.opposition_hand.push(draw_card(game.opposition_deck))
 		}
 
-		log("Suffragist drew 7 cards.")
-		log("Opposition drew 7 cards.")
+		log("Suffragist drew 6 cards.")
+		log("Opposition drew 6 cards.")
 
 		end_planning_phase()
 	}
