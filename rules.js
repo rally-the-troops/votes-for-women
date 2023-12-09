@@ -2751,7 +2751,7 @@ function after_vm_remove_cube(us_state) {
 		if (!color_cubes(game.vm.cubes, us_state)) {
 			set_delete(game.vm.us_states, us_state)
 
-			if (game.vm.limit && map_key_count(game.vm.removed) === game.vm.limit)
+			if (game.vm.limit && map_key_count(game.vm.removed) === game.vm.limit && !game.vm.us_states.length)
 				return vm_next()
 		}
 	} else {
