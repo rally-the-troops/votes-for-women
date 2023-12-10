@@ -52,8 +52,6 @@ main {
 #role_Opposition { background-color: var(--opp-85); }
 .role.active .role_name span { text-decoration: underline; }
 
-.role_vp { float: right; height: 24px; color: #000c; }
-
 body.Suffragist header.your_turn { background-color: var(--suf-75); }
 body.Opposition header.your_turn { background-color: var(--opp-75); }
 
