@@ -1439,7 +1439,7 @@ states.final_voting_roll = {
 				gen_action("reroll")
 
 			if (game.active === game.voting_winner)
-				gen_action("next")
+				gen_action("accept")
 			else
 				gen_action("pass")
 		}
@@ -1465,7 +1465,7 @@ states.final_voting_roll = {
 
 		update_final_voting_result()
 	},
-	next() {
+	accept() {
 		// allow opponent to re-roll if they can
 		next_player()
 		// if (!can_reroll())
@@ -1559,7 +1559,7 @@ states.campaigning = {
 			view.prompt = `Campaigning: You rolled ${game.roll.join(", ")}.`
 			if (player_buttons() > 0)
 				gen_action("reroll")
-			gen_action("next")
+			gen_action("accept")
 		}
 	},
 	roll() {
@@ -1569,7 +1569,7 @@ states.campaigning = {
 		decrease_player_buttons(1)
 		game.roll = roll_ndx_list(game.count, game.dice, "Re-rolled")
 	},
-	next() {
+	accept() {
 		goto_campaigning_assign()
 	}
 }
@@ -1849,7 +1849,7 @@ states.lobbying = {
 
 			if (player_buttons() > 0 && game.roll < game.count)
 				gen_action("reroll")
-			gen_action("next")
+			gen_action("accept")
 		}
 	},
 	roll() {
@@ -1859,7 +1859,7 @@ states.lobbying = {
 		decrease_player_buttons(1)
 		game.roll = roll_ndx_count_success(game.count, game.dice, "Re-rolled")
 	},
-	next() {
+	accept() {
 		if (game.roll > 0) {
 			game.count = game.roll
 			if (game.active === SUF) {
@@ -2945,7 +2945,7 @@ states.vm_roll = {
 		} else {
 			if (player_buttons() > 0 && (!game.vm.for_success || game.vm.roll < 3))
 				gen_action("reroll")
-			gen_action("next")
+			gen_action("accept")
 		}
 	},
 	roll() {
@@ -2961,7 +2961,7 @@ states.vm_roll = {
 		else
 			game.vm.roll = roll_ndx(game.vm.count, game.vm.d, "Re-rolled")
 	},
-	next() {
+	accept() {
 		push_undo()
 		vm_next()
 	}
