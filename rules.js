@@ -2451,30 +2451,11 @@ function vm_counter_strat() {
 	game.state = "vm_counter_strat"
 }
 
-function start_vm_draw() {
-	if (game.vm.draw) {
-		if (!game.vm.save_draw)
-			game.vm.save_draw = []
-		game.vm.save_draw.push(game.vm.draw)
-	}
-	game.vm.draw = []
-}
-
-function end_vm_draw() {
-	if (game.vm.save_draw) {
-		game.vm.draw = game.vm.save_draw.pop()
-		if (game.vm.save_draw.length === 0)
-			delete game.vm.save_draw
-	} else {
-		delete game.vm.draw
-	}
-}
-
 function vm_draw_2_play_1_event() {
 	vm_assert_argcount(0)
 	clear_undo()
 
-	start_vm_draw()
+	game.vm.draw = []
 	for (let i = 0; i < 2; ++i) {
 		let card = draw_card(player_deck())
 		game.vm.draw.push(card)
@@ -3139,7 +3120,7 @@ states.vm_draw_2_play_1_event = {
 		let other = game.vm.draw.find(x => x !== c)
 		log(`Discarded C${other}.`)
 
-		end_vm_draw()
+		delete game.vm.draw
 
 		// move to hand to play
 		player_hand().push(c)
@@ -3149,14 +3130,14 @@ states.vm_draw_2_play_1_event = {
 		log("None of the cards could be played for their event.")
 		for (let c of game.vm.draw)
 			log(`Discarded C${c}.`)
-		end_vm_draw()
+		delete game.vm.draw
 		vm_next()
 	}
 }
 
 function goto_vm_place_any_on_top_of_draw() {
 	clear_undo()
-	start_vm_draw()
+	game.vm.draw = []
 	game.vm.on_top = []
 	game.vm.on_bottom = []
 	let draw_count = Math.min(player_deck().length, 6)
@@ -3267,7 +3248,7 @@ function end_vm_place_any_on_top_of_draw() {
 		player_deck().push(game.vm.on_top.pop())
 	for (let c of game.vm.on_bottom)
 		player_deck().unshift(c)
-	end_vm_draw()
+	delete game.vm.draw
 
 	if (game.vm.play_one >= 0) {
 		end_play_card(game.played_card)
