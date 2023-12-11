@@ -726,6 +726,8 @@ exports.VIEW_SCHEMA = {
 		hand: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		set_aside: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
 		selected_cards: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		drawn: {type: "array", items: {type: "integer", minimum: 1, maximum: 128}},
+		deck: {type: "array", items: {type: "integer", minimum: 1, maximum: 128 + 4}},
 
     },
     required: [
