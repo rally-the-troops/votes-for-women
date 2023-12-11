@@ -174,15 +174,21 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 
 /* PANELS */
 
-section > * {
-	margin: 24px auto;
-}
+#support_claimed_header { background-color: var(--back-suf); color: white; }
+#opposition_claimed_header { background-color: var(--back-opp); color: white; }
+#strategy_draw_header { background-color: var(--back-strategy); }
+#states_draw_header { background-color: var(--back-states); }
 
-.row {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	align-items: start;
+body.Suffragist #hand_header { background-color: var(--suf-75); }
+body.Opposition #hand_header { background-color: var(--opp-75); }
+
+body.Suffragist #set_aside_header { background-color: var(--suf-85); }
+body.Opposition #set_aside_header { background-color: var(--opp-85); }
+
+section {
+	margin-top: 24px;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
 	gap: 24px;
 }
 
@@ -191,8 +197,10 @@ section > * {
 	font-family: TiffanyGothicCC;
 	background-color: hsl(43, 52%, 88%);
 	box-shadow: 1px 2px 4px #0004;
-	min-width: fit-content;
-	max-width: fit-content;
+	width: fit-content;
+	height: fit-content;
+	margin: 0 auto;
+	grid-column: span 2;
 }
 
 .panel_header {
@@ -213,59 +221,30 @@ section > * {
 	min-width: 250px;
 }
 
-#support_claimed_panel { grid-column: 2; }
-#opposition_claimed_panel { grid-column: 3; }
+#hand { grid-template-columns: repeat(4, 250px); grid-template-rows: repeat(2, 350px); }
+#set_aside { grid-template-columns: repeat(4, 250px) }
+#support_claimed { grid-template-columns: repeat(3, 250px) }
+#opposition_claimed { grid-template-columns: repeat(3, 250px) }
+#strategy_draw { grid-template-columns: repeat(3, 250px) }
+#states_draw { grid-template-columns: repeat(3, 250px) }
 
-#support_claimed_header { background-color: var(--back-suf); color: white; }
-#opposition_claimed_header { background-color: var(--back-opp); color: white; }
-#strategy_draw_header { background-color: var(--back-strategy); }
-#states_draw_header { background-color: var(--back-states); }
-
-body.Suffragist #hand_header { background-color: var(--suf-75); }
-body.Opposition #hand_header { background-color: var(--opp-75); }
-
-body.Suffragist #set_aside_header { background-color: var(--suf-85); }
-body.Opposition #set_aside_header { background-color: var(--opp-85); }
-
-#support_claimed, #opposition_claimed { grid-template-columns: 250px; }
-#strategy_draw { grid-template-columns: repeat(3, 250px); }
-
-#states_draw {
-	grid-template-columns: repeat(3, 250px);
-	grid-template-rows: repeat(3, 350px);
+@media (min-width: 1360px) {
+	#support_claimed { grid-template-columns: repeat(2, 250px) }
+	#opposition_claimed { grid-template-columns: repeat(2, 250px) }
+	#support_claimed_panel { margin-right: 0; grid-column: span 1; }
+	#opposition_claimed_panel { margin-left: 0; grid-column: span 1; }
 }
 
-@media (min-width: 1320px) {
-	#states_draw {
-		grid-template-columns: repeat(4, 250px);
-		grid-template-rows: repeat(3, 350px);
-	}
-}
-
-@media (min-width: 1590px) {
-	#states_draw {
-		grid-template-columns: repeat(5, 250px);
-		grid-template-rows: repeat(2, 350px);
-	}
-}
-
-@media (min-width: 1840px) {
-	#states_draw {
-		grid-template-columns: repeat(6, 250px);
-		grid-template-rows: repeat(2, 350px);
-	}
-}
-
-#hand, #set_aside {
-	grid-template-columns: repeat(4, 250px);
-	grid-template-rows: repeat(2, 350px);
-}
+@media (min-width: 1590px) { #set_aside { grid-template-columns: repeat(5, 250px) } }
+@media (min-width: 1840px) { #set_aside { grid-template-columns: repeat(6, 250px) } }
 
 @media (min-width: 2120px) {
-	#hand, #set_aside {
-		grid-template-columns: repeat(7, 250px);
-		grid-template-rows: repeat(1, 350px);
-	}
+	#hand { grid-template-columns: repeat(7, 250px); grid-template-rows: repeat(1, 350px); }
+	#set_aside { grid-template-columns: repeat(7, 250px); }
+	#support_claimed { grid-template-columns: repeat(3, 250px) }
+	#opposition_claimed { grid-template-columns: repeat(3, 250px) }
+	#strategy_draw_panel { margin-right: 0; grid-column: span 1; }
+	#states_draw_panel { margin-left: 0; grid-column: span 1; }
 }
 
 @media (max-width: 800px) {
