@@ -2208,7 +2208,13 @@ function vm_replace() {
 	game.vm.us_states = ANYWHERE.slice()
 	set_filter(game.vm.us_states, s => is_green_check(s) || is_red_x(s))
 
-	if (!game.nineteenth_amendment || (game.vm.what === GREEN_CHECK && !count_green_checks()) || game.vm.what === RED_X && !count_red_xs()) {
+	// If Civil War is in effect the Suffragist cannot play Reconsideration in Atlantic & Appalachia and South regions
+	if (game.active === SUF && game.persistent_turn.includes(THE_CIVIL_WAR)) {
+		let excluded = region_us_states(ATLANTIC_APPALACHIA, SOUTH)
+		set_filter(game.vm.us_states, s => !set_has(excluded, s))
+	}
+
+	if (!game.nineteenth_amendment || !game.vm.us_states.length || (game.vm.what === GREEN_CHECK && !count_green_checks()) || game.vm.what === RED_X && !count_red_xs()) {
 		vm_next()
 	} else {
 		goto_vm_replace()
