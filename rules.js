@@ -1329,7 +1329,7 @@ function auto_select_state() {
 	let most = -1, where = -1
 	for (let s of ANYWHERE) {
 		if (!(is_green_check(s) || is_red_x(s))) {
-			let n = player_cubes(s)
+			let n = player_cubes(s) - opponent_cubes(s)
 			if (n > most) {
 				most = n
 				where = s
