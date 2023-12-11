@@ -889,7 +889,7 @@ states.strategy_phase = {
 			if (game.support_buttons > 0) {
 				gen_action("commit_1_button")
 			}
-			gen_action("done")
+			gen_action("commit")
 		} else {
 			view.prompt = `Strategy: Suffragist committed ${pluralize(game.support_committed, 'button')}.`
 			view.actions.defer = 0
@@ -915,7 +915,7 @@ states.strategy_phase = {
 		game.support_committed += 1
 
 	},
-	done() {
+	commit() {
 		clear_undo()
 		log(`Suffragist committed ${game.support_committed} BM`)
 		game.active = OPP

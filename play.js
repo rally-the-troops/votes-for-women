@@ -880,6 +880,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 	action_button("yellow", "Yellow")
 	action_button("roll", "Roll")
 	action_button("reroll", "Re-roll")
+	action_button("commit", "Commit")
 	action_button("next", "Next")
 	action_button("end_event", "End Event")
 	action_button("next_turn", "Next Turn")
