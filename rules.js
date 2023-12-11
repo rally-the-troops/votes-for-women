@@ -905,6 +905,7 @@ states.strategy_phase = {
 
 	},
 	done() {
+		clear_undo()
 		log(`Suffragist committed ${game.support_committed} BM`)
 		game.active = OPP
 	},
