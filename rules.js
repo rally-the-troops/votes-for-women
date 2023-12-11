@@ -1950,10 +1950,12 @@ states.lobbying_add_congress = {
 		gen_action("congress")
 	},
 	congress() {
-		increase_congress(game.count)
+		increase_congress(1)
+		game.count--
 		if (game.congress >= 6 && trigger_nineteenth_amendment())
 			return
-		end_play_card(game.played_card)
+		if (game.count === 0 || game.congress === 6 || game.nineteenth_amendment)
+			end_play_card(game.played_card)
 	}
 }
 
@@ -1964,8 +1966,10 @@ states.lobbying_remove_congress = {
 		gen_action("congress")
 	},
 	congress() {
-		decrease_congress(game.count)
-		end_play_card(game.played_card)
+		decrease_congress(1)
+		game.count--
+		if (game.count === 0 || game.congress === 0)
+			end_play_card(game.played_card)
 	}
 }
 
@@ -2862,10 +2866,12 @@ states.vm_add_congress = {
 		gen_action("congress")
 	},
 	congress() {
-		increase_congress(game.vm.count)
+		increase_congress(1)
+		game.vm.count--
 		if (game.congress >= 6 && trigger_nineteenth_amendment())
 			return
-		vm_next()
+		if (game.vm.count === 0 || game.congress === 6 || game.nineteenth_amendment)
+			vm_next()
 	}
 }
 
@@ -2876,8 +2882,10 @@ states.vm_remove_congress = {
 		gen_action("congress")
 	},
 	congress() {
-		decrease_congress(game.vm.count)
-		vm_next()
+		decrease_congress(1)
+		game.vm.count--
+		if (game.vm.count === 0 || game.congress === 0)
+			vm_next()
 	}
 }
 
