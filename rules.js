@@ -17,12 +17,18 @@ const first_strategy_card = 105
 const last_strategy_card = 116
 const first_states_card = 117
 const last_states_card = 128
+const last_card = last_states_card
 
 const MAX_SUPPORT_BUTTONS = 12
 const MAX_OPPOSITION_BUTTONS = 6
 
 const GREEN_CHECK_VICTORY = 36
 const RED_X_VICTORY = 13
+
+const SUF_CARD_BACK = last_card + 1
+const OPP_CARD_BACK = last_card + 2
+const STRATEGY_CARD_BACK = last_card + 3
+const STATE_CARD_BACK = last_card + 4
 
 const WEST = 1
 const PLAINS = 2
@@ -781,6 +787,9 @@ exports.view = function(state, player) {
 		view.green_checks = count_green_checks()
 		view.red_xs = count_red_xs()
 	}
+
+	if (player === game.active && game.vm && game.vm.draw)
+		view.drawn = game.vm.draw
 
 	if (player === SUF) {
 		view.hand = game.support_hand
@@ -2373,14 +2382,33 @@ function vm_counter_strat() {
 	game.state = "vm_counter_strat"
 }
 
+function start_vm_draw() {
+	if (game.vm.draw) {
+		if (!game.vm.save_draw)
+			game.vm.save_draw = []
+		game.vm.save_draw.push(game.vm.draw)
+	}
+	game.vm.draw = []
+}
+
+function end_vm_draw() {
+	if (game.vm.save_draw) {
+		game.vm.draw = game.vm.save_draw.pop()
+		if (game.vm.save_draw.length === 0)
+			delete game.vm.save_draw
+	} else {
+		delete game.vm.draw
+	}
+}
+
 function vm_draw_2_play_1_event() {
 	vm_assert_argcount(0)
 	clear_undo()
-	game.vm.draw = []
+
+	start_vm_draw()
 	for (let i = 0; i < 2; ++i) {
 		let card = draw_card(player_deck())
 		game.vm.draw.push(card)
-		player_hand().push(card)
 	}
 
 	log(`${game.active} drew 2 cards.`)
@@ -3034,104 +3062,145 @@ states.vm_draw_2_play_1_event = {
 	card(c) {
 		push_undo()
 		end_play_card(game.played_card)
+
 		let other = game.vm.draw.find(x => x !== c)
-		discard_card_from_hand(other)
 		log(`Discarded C${other}.`)
-		delete game.vm.draw
+
+		end_vm_draw()
+
+		// move to hand to play
+		player_hand().push(c)
 		play_card_event(c)
 	},
 	skip() {
 		log("None of the cards could be played for their event.")
-		for (let c of game.vm.draw) {
-			discard_card_from_hand(c)
-		}
-		delete game.vm.draw
+		for (let c of game.vm.draw)
+			log(`Discarded C${c}.`)
+		end_vm_draw()
 		vm_next()
 	}
 }
 
 function goto_vm_place_any_on_top_of_draw() {
 	clear_undo()
-	game.vm.draw = []
-	game.selected_cards = []
+	start_vm_draw()
+	game.vm.on_top = []
+	game.vm.on_bottom = []
 	let draw_count = Math.min(player_deck().length, 6)
 	for (let i = 0; i < draw_count; ++i) {
 		let card = draw_card(player_deck())
 		game.vm.draw.push(card)
-		player_hand().push(card)
 	}
 
 	log(`${game.active} drew ${draw_count} cards.`)
-	game.state = "vm_place_any_on_top_of_draw"
+	if (game.vm.play_one < 0)
+		game.state = "vm_place_any_on_top_of_draw_play"
+	else
+		game.state = "vm_place_any_on_top_of_draw"
 }
 
-states.vm_place_any_on_top_of_draw = {
-	inactive: "choose which cards to put on top of their Draw Deck.",
+states.vm_place_any_on_top_of_draw_play = {
+	inactive: "choose which card to play for its event.",
 	prompt() {
 		let can_play = false
-		if (game.vm.play_one && !game.selected_cards.length) {
-			event_prompt("Select which card to play as Event.")
-			for (let c of game.vm.draw) {
-				if (can_play_event(c)) {
-					gen_action_card(c)
-					can_play = true
-				}
-			}
-		} else {
-			event_prompt("Select which cards to put on top of your Draw Deck. The rest go to the bottom.")
-			if (game.vm.play_one) {
-				let event_card_name = CARDS[game.selected_cards[0]].name
-				view.prompt += ` Will play "${event_card_name}" for its event.`
-			}
-			for (let c of game.vm.draw) {
-				if (!game.selected_cards.includes(c))
-					gen_action_card(c)
+		event_prompt("Select which card to play as Event.")
+		for (let c of game.vm.draw) {
+			if (can_play_event(c)) {
+				gen_action_card(c)
+				can_play = true
 			}
 		}
-
-
-		if (!game.vm.play_one || game.selected_cards.length) {
-			gen_action("done")
-		} else if (!can_play) {
+		if (!can_play) {
 			gen_action("skip")
 		}
 	},
 	card(c) {
 		push_undo()
-		game.selected_cards.push(c)
+		array_remove_item(game.vm.draw, c)
+		player_hand().push(c)
+		game.vm.play_one = c
+		game.state = "vm_place_any_on_top_of_draw"
 	},
 	skip() {
 		log("None of the drawn cards could be played for their Event.")
-		delete game.vm.play_one
+		game.vm.play_one = -1
+		game.state = "vm_place_any_on_top_of_draw"
+	},
+}
+
+states.vm_place_any_on_top_of_draw = {
+	inactive: "choose which cards to place on top of their Draw Deck.",
+	prompt() {
+		event_prompt("Select which cards to place on TOP of your Draw Deck.")
+		if (game.vm.play_one >= 0)
+			view.prompt += ` Will play "${CARDS[game.vm.play_one].name}" for its event.`
+
+		// show cards going on top
+		if (game.active === OPP)
+			view.deck = [ ...game.vm.on_top, OPP_CARD_BACK ]
+		else
+			view.deck = [ ...game.vm.on_top, SUF_CARD_BACK ]
+
+		for (let c of game.vm.draw)
+			gen_action_card(c)
+
+		gen_action("next")
+	},
+	card(c) {
+		push_undo()
+		array_remove_item(game.vm.draw, c)
+		game.vm.on_top.unshift(c)
+	},
+	next() {
+		if (game.vm.draw.length > 0)
+			game.state = "vm_place_any_on_bottom_of_draw"
+		else
+			end_vm_place_any_on_top_of_draw()
+	},
+}
+
+states.vm_place_any_on_bottom_of_draw = {
+	inactive: "choose which cards to place at the bottom of their Draw Deck.",
+	prompt() {
+		event_prompt("Place the remaining cards at the BOTTOM of your Draw Deck.")
+		if (game.vm.play_one >= 0)
+			view.prompt += ` Will play "${CARDS[game.vm.play_one].name}" for its event.`
+
+		// show cards going at the bottom
+		if (game.active === OPP)
+			view.deck = [ ...game.vm.on_top, OPP_CARD_BACK, ...game.vm.on_bottom ]
+		else
+			view.deck = [ ...game.vm.on_top, SUF_CARD_BACK, ...game.vm.on_bottom ]
+
+		for (let c of game.vm.draw)
+			gen_action_card(c)
+
+		if (game.vm.draw.length === 0)
+			gen_action("done")
+	},
+	card(c) {
+		push_undo()
+		array_remove_item(game.vm.draw, c)
+		game.vm.on_bottom.push(c)
 	},
 	done() {
-		// first selected card is the to be played event card
-		if (game.vm.play_one)
-			game.vm.play_one = game.selected_cards.shift()
-		log(`${game.active} selected ${pluralize(game.selected_cards.length, 'card')} to put on top of their Draw Deck.`)
+		end_vm_place_any_on_top_of_draw()
+	},
+}
 
-		// first selected card goes on top.
-		for (let c of game.selected_cards.reverse()) {
-			player_deck().push(c)
-			array_remove_item(game.vm.draw, c)
-			array_remove_item(player_hand(), c)
-		}
-		// rest goes to the bottom, except for the to be played event card
-		for (let c of game.vm.draw) {
-			if (c !== game.vm.play_one) {
-				player_deck().unshift(c)
-				array_remove_item(player_hand(), c)
-			}
-		}
+function end_vm_place_any_on_top_of_draw() {
+	log(`${game.active} placed ${pluralize(game.vm.on_top.length, 'card')} on top and ${pluralize(game.vm.on_bottom.length, 'card')} at the bottom of their Draw Deck.`)
+	while (game.vm.on_top.length > 0)
+		player_deck().push(game.vm.on_top.pop())
+	for (let c of game.vm.on_bottom)
+		player_deck().unshift(c)
+	end_vm_draw()
 
-		delete game.vm.draw
-		game.selected_cards = []
-		if (game.vm.play_one) {
-			end_play_card(game.played_card)
-			play_card_event(game.vm.play_one)
-		} else {
-			vm_next()
-		}
+	if (game.vm.play_one >= 0) {
+		end_play_card(game.played_card)
+		play_card_event(game.vm.play_one)
+	} else {
+		vm_next()
 	}
 }
 

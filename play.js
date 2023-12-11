@@ -72,9 +72,14 @@ const US_STATES = [
 
 const region_count = 6
 const us_states_count = region_count * 8
-const card_count = 128
+const last_card = 128
 const green_check_count = 36
 const red_x_count = 13
+
+const SUF_CARD_BACK = last_card + 1
+const OPP_CARD_BACK = last_card + 2
+const STRATEGY_CARD_BACK = last_card + 3
+const STATE_CARD_BACK = last_card + 4
 
 let ui = {
 	favicon: document.getElementById("favicon"),
@@ -454,7 +459,7 @@ function build_user_interface() {
 		})
 	}
 
-    for (let c = 1; c <= card_count; ++c) {
+    for (let c = 1; c <= last_card; ++c) {
 		elt = ui.cards[c] = create("div", {
 			className: `card card_${c} ${CARDS[c].type}`,
 			my_card: c,
@@ -462,6 +467,11 @@ function build_user_interface() {
 		// TODO use onmousedown and figure out why it didn't work on mobile
 		elt.addEventListener("click", on_click_card)
 	}
+
+	ui.cards[SUF_CARD_BACK] = create("div", { className: "card card_support_back" })
+	ui.cards[OPP_CARD_BACK] = create("div", { className: "card card_opposition_back" })
+	ui.cards[STRATEGY_CARD_BACK] = create("div", { className: "card card_strategy_back" })
+	ui.cards[STATE_CARD_BACK] = create("div", { className: "card card_states_back" })
 
 	for (let r = 1; r <= region_count; ++r) {
 		let region_name_css = REGION_NAMES[r].replaceAll(' & ', '')
@@ -718,6 +728,8 @@ function on_update() { // eslint-disable-line no-unused-vars
 	}
 
 	document.getElementById("hand").replaceChildren()
+	document.getElementById("deck").replaceChildren()
+	document.getElementById("drawn").replaceChildren()
 	document.getElementById("set_aside").replaceChildren()
 	document.getElementById("support_claimed").replaceChildren()
 	document.getElementById("opposition_claimed").replaceChildren()
@@ -730,6 +742,22 @@ function on_update() { // eslint-disable-line no-unused-vars
 			document.getElementById("hand").appendChild(ui.cards[c])
 	} else {
 		document.getElementById("hand_panel").classList.add("hide")
+	}
+
+	if (view.drawn) {
+		document.getElementById("drawn_panel").classList.remove("hide")
+		for (let c of view.drawn)
+			document.getElementById("drawn").appendChild(ui.cards[c])
+	} else {
+		document.getElementById("drawn_panel").classList.add("hide")
+	}
+
+	if (view.deck) {
+		document.getElementById("deck_panel").classList.remove("hide")
+		for (let c of view.deck)
+			document.getElementById("deck").appendChild(ui.cards[c])
+	} else {
+		document.getElementById("deck_panel").classList.add("hide")
 	}
 
 	if (view.set_aside.length) {

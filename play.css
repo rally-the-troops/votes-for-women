@@ -181,9 +181,10 @@ body.Opposition header.your_turn { background-color: var(--opp-75); }
 
 body.Suffragist #hand_header { background-color: var(--suf-75); }
 body.Opposition #hand_header { background-color: var(--opp-75); }
-
-body.Suffragist #set_aside_header { background-color: var(--suf-85); }
-body.Opposition #set_aside_header { background-color: var(--opp-85); }
+body.Suffragist #drawn_header { background-color: var(--suf-85); }
+body.Opposition #drawn_header { background-color: var(--opp-85); }
+body.Suffragist #deck_header { background-color: var(--suf-85); }
+body.Opposition #deck_header { background-color: var(--opp-85); }
 
 section {
 	margin-top: 24px;
@@ -194,7 +195,7 @@ section {
 
 .panel {
 	padding: 3px;
-	font-family: TiffanyGothicCC;
+	font-family: TiffanyGothicCC, "Source Sans";
 	background-color: hsl(43, 52%, 88%);
 	box-shadow: 1px 2px 4px #0004;
 	width: fit-content;
@@ -222,6 +223,8 @@ section {
 }
 
 #hand { grid-template-columns: repeat(4, 250px); grid-template-rows: repeat(2, 350px); }
+#deck { grid-template-columns: repeat(4, 250px) }
+#drawn { grid-template-columns: repeat(4, 250px) }
 #set_aside { grid-template-columns: repeat(4, 250px) }
 #support_claimed { grid-template-columns: repeat(3, 250px) }
 #opposition_claimed { grid-template-columns: repeat(3, 250px) }
@@ -235,11 +238,13 @@ section {
 	#opposition_claimed_panel { margin-left: 0; grid-column: span 1; }
 }
 
-@media (min-width: 1590px) { #set_aside { grid-template-columns: repeat(5, 250px) } }
-@media (min-width: 1840px) { #set_aside { grid-template-columns: repeat(6, 250px) } }
+@media (min-width: 1590px) { #deck, #drawn, #set_aside { grid-template-columns: repeat(5, 250px) } }
+@media (min-width: 1840px) { #deck, #drawn, #set_aside { grid-template-columns: repeat(6, 250px) } }
 
 @media (min-width: 2120px) {
 	#hand { grid-template-columns: repeat(7, 250px); grid-template-rows: repeat(1, 350px); }
+	#deck { grid-template-columns: repeat(7, 250px); }
+	#drawn { grid-template-columns: repeat(7, 250px); }
 	#set_aside { grid-template-columns: repeat(7, 250px); }
 	#support_claimed { grid-template-columns: repeat(3, 250px) }
 	#opposition_claimed { grid-template-columns: repeat(3, 250px) }
@@ -571,6 +576,8 @@ div.button_box .button {
 
 .card_support_back{background-image:url(cards.1x/support_01.jpg)}
 .card_opposition_back{background-image:url(cards.1x/opposition_01.jpg)}
+.card_strategy_back{background-image:url(cards.1x/strategy_01.jpg)}
+.card_states_back{background-image:url(cards.1x/states_01.jpg)}
 .card_1{background-image:url(cards.1x/support_02.jpg)}
 .card_2{background-image:url(cards.1x/support_03.jpg)}
 .card_3{background-image:url(cards.1x/support_04.jpg)}
@@ -703,6 +710,8 @@ div.button_box .button {
 @media (min-resolution: 97dpi) {
 .card_support_back{background-image:url(cards.2x/support_01.jpg)}
 .card_opposition_back{background-image:url(cards.2x/opposition_01.jpg)}
+.card_strategy_back{background-image:url(cards.2x/strategy_01.jpg)}
+.card_states_back{background-image:url(cards.2x/states_01.jpg)}
 .card_1{background-image:url(cards.2x/support_02.jpg)}
 .card_2{background-image:url(cards.2x/support_03.jpg)}
 .card_3{background-image:url(cards.2x/support_04.jpg)}
