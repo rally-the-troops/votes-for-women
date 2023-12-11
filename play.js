@@ -873,6 +873,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 	action_button("match", "Match")
 	action_button("supersede", "Supersede")
 
+	action_button("auto_resolve", "Auto-resolve")
 	action_button("draw", "Draw")
 	action_button("buttons", "Buttons")
 	action_button("move", "Move")

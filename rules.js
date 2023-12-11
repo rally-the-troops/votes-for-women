@@ -808,7 +808,10 @@ exports.view = function(state, player) {
 	} else if (player === "Observer" || (game.active !== player && game.active !== "Both")) {
 		if (states[game.state]) {
 			let inactive = states[game.state].inactive
-			view.prompt = `Waiting for ${game.active} to ${inactive}...`
+			if (typeof inactive === "function")
+				view.prompt = `Waiting for ${game.active} ${inactive()}`
+			else
+				view.prompt = `Waiting for ${game.active} to ${inactive}`
 		} else {
 			view.prompt = "Unknown state: " + game.state
 		}
@@ -1316,25 +1319,54 @@ function us_states_to_lose() {
 	return (game.active === OPP) ? GREEN_CHECK_VICTORY - count_green_checks() : RED_X_VICTORY - count_red_xs()
 }
 
+function goto_final_voting_select_state() {
+	game.state = "final_voting_select_state"
+	if (game.auto_resolve === game.active)
+		auto_select_state()
+}
+
+function auto_select_state() {
+	let most = -1, where = -1
+	for (let s of ANYWHERE) {
+		if (!(is_green_check(s) || is_red_x(s))) {
+			let n = player_cubes(s)
+			if (n > most) {
+				most = n
+				where = s
+			}
+		}
+	}
+	if (where >= 0)
+		final_voting_do_us_state(where)
+}
+
 states.final_voting_select_state = {
-	inactive: "do Final Voting.",
+	inactive: "select a state for Final Voting.",
 	prompt() {
 		view.prompt = `Final Voting: Select a State. ${pluralize(us_states_to_win(), 'more State')} to win, ${us_states_to_lose()} to lose.`
 
-		let us_states = ANYWHERE.slice()
-		set_filter(us_states, s => !(is_green_check(s) || is_red_x(s)))
+		for (let s of ANYWHERE)
+			if (!(is_green_check(s) || is_red_x(s)))
+				gen_action_us_state(s)
 
-		for (let s of us_states) {
-			gen_action_us_state(s)
-		}
+		if (!player_buttons() && !game.auto_resolve)
+			gen_action("auto_resolve")
+	},
+	auto_resolve() {
+		game.auto_resolve = game.active
+		goto_final_voting_select_state()
 	},
 	us_state(s) {
 		push_undo()
-		game.selected_us_state = s
-		game.state_selector = game.active
-		log_h2(`Final Voting for S${game.selected_us_state}`)
-		goto_final_voting_roll()
+		final_voting_do_us_state(s)
 	}
+}
+
+function final_voting_do_us_state(s) {
+	game.selected_us_state = s
+	game.state_selector = game.active
+	log_h2(`Final Voting for S${game.selected_us_state}`)
+	goto_final_voting_roll()
 }
 
 function goto_final_voting_roll() {
@@ -1350,6 +1382,7 @@ function goto_final_voting_roll() {
 		log(`Opposition gets +${game.opposition_drm}.`)
 
 	game.state = "final_voting_roll"
+	final_voting_do_roll()
 }
 
 function can_reroll() {
@@ -1403,10 +1436,43 @@ function update_final_voting_result() {
 		game.voting_winner = OPP
 	else
 		game.voting_winner = game.tie_winner
+
+	if (game.voting_winner === game.active || !can_reroll())
+		final_voting_do_next()
+}
+
+function format_final_voting_prompt() {
+	let support_total = game.support_roll + game.support_drm
+	let opposition_total = game.opposition_roll + game.opposition_drm
+
+	let suf_txt, opp_txt
+	if (game.support_drm)
+		suf_txt = `${game.support_roll} (+${game.support_drm}) = ${support_total}`
+	else
+		suf_txt = `${game.support_roll}`
+	if (game.opposition_drm)
+		opp_txt = `${game.opposition_roll} (+${game.opposition_drm}) = ${opposition_total}`
+	else
+		opp_txt = `${game.opposition_roll}`
+
+	if (support_total === opposition_total) {
+		if (game.tie_winner === SUF)
+			return `${game.tie_winner} leads on tie ${suf_txt} vs ${opp_txt}.`
+		else
+			return `${game.tie_winner} leads on tie ${opp_txt} vs ${suf_txt}.`
+	}
+	if (game.voting_winner === SUF)
+		return `${game.voting_winner} leads ${suf_txt} vs ${opp_txt}.`
+	else
+		return `${game.voting_winner} leads ${opp_txt} vs ${suf_txt}.`
 }
 
 states.final_voting_roll = {
-	inactive: "do Final Voting.",
+	inactive() {
+		if (!game.voting_winner)
+			return "to select a state for Final Voting."
+		return `\u2014 ${us_state_name(game.selected_us_state)}: ${format_final_voting_prompt()}`
+	},
 	prompt() {
 		view.prompt = `${us_state_name(game.selected_us_state)}: `
 
@@ -1417,44 +1483,23 @@ states.final_voting_roll = {
 				view.prompt += `Opposition gets +${game.opposition_drm}. `
 			view.prompt += `${game.tie_winner} wins on ties. `
 			view.prompt += "Roll dice."
-			gen_action("roll")
-		} else {
-			let support_total = game.support_roll + game.support_drm
-			let opposition_total = game.opposition_roll + game.opposition_drm
 
-			view.prompt += `${game.support_roll}`
-			if (game.support_drm)
-				view.prompt += ` (+${game.support_drm}) = ${support_total}`
-			view.prompt += ` Yea, ${game.opposition_roll}`
-			if (game.opposition_drm)
-				view.prompt += ` (+${game.opposition_drm}) = ${opposition_total}`
-			view.prompt += " Nay"
-			if (support_total === opposition_total)
-				view.prompt += `. ${game.tie_winner} leads on tie.`
-			else
-				view.prompt += `. ${game.voting_winner} leads.`
+			view.actions.roll = 1
+			view.actions.pass = 0
+		} else {
+			view.prompt += format_final_voting_prompt()
 
 			// only reroll when you can and when you are on the losing side
 			if (game.active !== game.voting_winner && can_reroll())
-				gen_action("reroll")
-
-			if (game.active === game.voting_winner)
-				gen_action("accept")
+				view.actions.reroll = 1
 			else
-				gen_action("pass")
+				view.actions.reroll = 0
+
+			view.actions.pass = 1
 		}
 	},
 	roll() {
-		// roll based on order
-		if (game.active === SUF) {
-			game.support_roll = roll_ndx(1, game.support_dice, `Suffragist rolled`)
-			game.opposition_roll = roll_ndx(1, game.opposition_dice, `Opposition rolled`)
-		} else {
-			game.opposition_roll = roll_ndx(1, game.opposition_dice, `Opposition rolled`)
-			game.support_roll = roll_ndx(1, game.support_dice, `Suffragist rolled`)
-		}
-
-		update_final_voting_result()
+		final_voting_do_roll()
 	},
 	reroll() {
 		decrease_player_buttons(1)
@@ -1462,17 +1507,32 @@ states.final_voting_roll = {
 			game.support_roll = roll_ndx(1, game.support_dice, `Suffragist re-rolled`)
 		else
 			game.opposition_roll = roll_ndx(1, game.opposition_dice, `Opposition re-rolled`)
-
 		update_final_voting_result()
 	},
-	accept() {
-		// allow opponent to re-roll if they can
-		next_player()
-		// if (!can_reroll())
-		//	finalize_vote()
-	},
 	pass() {
-		// only loser can pass
+		final_voting_do_next()
+	}
+}
+
+function final_voting_do_roll() {
+	// roll based on order
+	if (game.active === SUF) {
+		game.support_roll = roll_ndx(1, game.support_dice, `Suffragist rolled`)
+		game.opposition_roll = roll_ndx(1, game.opposition_dice, `Opposition rolled`)
+	} else {
+		game.opposition_roll = roll_ndx(1, game.opposition_dice, `Opposition rolled`)
+		game.support_roll = roll_ndx(1, game.support_dice, `Suffragist rolled`)
+	}
+	update_final_voting_result()
+}
+
+function final_voting_do_next() {
+	// allow opponent to re-roll if they can
+	if (game.active === game.voting_winner) {
+		next_player()
+		if (!can_reroll())
+			finalize_vote()
+	} else {
 		finalize_vote()
 	}
 }
@@ -1510,7 +1570,7 @@ function finalize_vote() {
 
 	delete game.selected_us_state
 	game.voting_winner = null
-	game.state = "final_voting_select_state"
+	goto_final_voting_select_state()
 }
 
 // #endregion
@@ -1911,6 +1971,7 @@ function trigger_nineteenth_amendment() {
 				return goto_game_over(OPP, "Opposition wins the game.")
 		}
 	}
+
 	return false
 }
 
