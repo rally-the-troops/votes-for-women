@@ -3054,7 +3054,7 @@ states.vm_draw_2_play_1_event = {
 		let can_play = false
 		for (let c of game.vm.draw) {
 			if (can_play_event(c)) {
-				gen_action_card(c)
+				gen_action("card_select", c)
 				can_play = true
 			}
 		}
@@ -3063,7 +3063,7 @@ states.vm_draw_2_play_1_event = {
 			gen_action("skip")
 
 	},
-	card(c) {
+	card_select(c) {
 		push_undo()
 		end_play_card(game.played_card)
 
@@ -3110,7 +3110,7 @@ states.vm_place_any_on_top_of_draw_play = {
 		event_prompt("Select which card to play as Event.")
 		for (let c of game.vm.draw) {
 			if (can_play_event(c)) {
-				gen_action_card(c)
+				gen_action("card_select", c)
 				can_play = true
 			}
 		}
@@ -3118,7 +3118,7 @@ states.vm_place_any_on_top_of_draw_play = {
 			gen_action("skip")
 		}
 	},
-	card(c) {
+	card_select(c) {
 		push_undo()
 		array_remove_item(game.vm.draw, c)
 		player_hand().push(c)
