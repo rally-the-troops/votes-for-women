@@ -502,7 +502,7 @@ div.button_box .button { margin: 0 0 -10px 0; }
 div.button_box.h .button { margin: 0 0 0 -10px; }
 
 div.button_box.h {
-	flex-direction: row;
+	flex-direction: row-reverse;
 }
 
 div.button_box .button {
