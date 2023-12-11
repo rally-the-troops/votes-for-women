@@ -576,7 +576,8 @@ CARD 110 - Superior Lobbying
 
 CARD 111 - The Winning Plan
 # Draw 6 cards from your Draw Deck. Play 1 card for its event immediately. Place any number of the remaining 5 cards on the top of your Draw Deck and the rest at the bottom of your Draw Deck.
-    draw_6_play_1_place_any_on_top_of_draw
+    draw_6_play_1
+    place_any_on_top_of_draw
 
 CARD 112 - Regional Focus
 # Add 1 :purple_or_yellow_cube or 1 :red_cube per state in any one region.

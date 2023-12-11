@@ -2051,12 +2051,21 @@ function end_event() {
 }
 
 function goto_vm(proc) {
+	let old_vm = game.vm
+
 	game.state = "vm"
 	game.vm = {
 		prompt: 0,
 		fp: proc,
 		ip: 0,
 	}
+
+	// HACK: function call stack
+	// should only be triggered by The Winning Plan
+	if (old_vm) {
+		game.vm.return_vm = old_vm
+	}
+
 	vm_exec()
 }
 
@@ -2112,8 +2121,15 @@ function vm_log() {
 }
 
 function vm_return() {
-	// game.state = "vm_return"
+	let return_vm = game.vm.return_vm
+
 	end_event()
+
+	// HACK: function call stack
+	if (return_vm) {
+		game.vm = return_vm
+		vm_next()
+	}
 }
 
 states.vm_return = {
@@ -2467,13 +2483,19 @@ function vm_draw_2_play_1_event() {
 
 function vm_draw_6_place_any_on_top_of_draw() {
 	vm_assert_argcount(0)
-	goto_vm_place_any_on_top_of_draw()
+	init_vm_place_any_on_top_of_draw()
+	game.state = "vm_place_any_on_top_of_draw"
 }
 
-function vm_draw_6_play_1_place_any_on_top_of_draw() {
+function vm_draw_6_play_1() {
 	vm_assert_argcount(0)
-	game.vm.play_one = -1
-	goto_vm_place_any_on_top_of_draw()
+	init_vm_place_any_on_top_of_draw()
+	game.state = "vm_draw_6_play_1"
+}
+
+function vm_place_any_on_top_of_draw() {
+	vm_assert_argcount(0)
+	game.state = "vm_place_any_on_top_of_draw"
 }
 
 function vm_opponent_discard_2_random_draw_2() {
@@ -3135,7 +3157,7 @@ states.vm_draw_2_play_1_event = {
 	}
 }
 
-function goto_vm_place_any_on_top_of_draw() {
+function init_vm_place_any_on_top_of_draw() {
 	clear_undo()
 	game.vm.draw = []
 	game.vm.on_top = []
@@ -3145,15 +3167,10 @@ function goto_vm_place_any_on_top_of_draw() {
 		let card = draw_card(player_deck())
 		game.vm.draw.push(card)
 	}
-
 	log(`${game.active} drew ${draw_count} cards.`)
-	if (game.vm.play_one < 0)
-		game.state = "vm_place_any_on_top_of_draw_play"
-	else
-		game.state = "vm_place_any_on_top_of_draw"
 }
 
-states.vm_place_any_on_top_of_draw_play = {
+states.vm_draw_6_play_1 = {
 	inactive: "choose which card to play for its event.",
 	prompt() {
 		let can_play = false
@@ -3172,13 +3189,14 @@ states.vm_place_any_on_top_of_draw_play = {
 		push_undo()
 		array_remove_item(game.vm.draw, c)
 		player_hand().push(c)
-		game.vm.play_one = c
-		game.state = "vm_place_any_on_top_of_draw"
+		end_play_card(game.played_card)
+
+		// HACK: nested event call (because we didn't call end_event/vm_return yet!)
+		play_card_event(c)
 	},
 	skip() {
 		log("None of the drawn cards could be played for their Event.")
-		game.vm.play_one = -1
-		game.state = "vm_place_any_on_top_of_draw"
+		vm_next()
 	},
 }
 
@@ -3186,8 +3204,6 @@ states.vm_place_any_on_top_of_draw = {
 	inactive: "choose which cards to place on top of their Draw Deck.",
 	prompt() {
 		event_prompt("Select which cards to place on TOP of your Draw Deck.")
-		if (game.vm.play_one >= 0)
-			view.prompt += ` Will play "${CARDS[game.vm.play_one].name}" for its event.`
 
 		// show cards going on top
 		if (game.active === OPP)
@@ -3217,8 +3233,6 @@ states.vm_place_any_on_bottom_of_draw = {
 	inactive: "choose which cards to place at the bottom of their Draw Deck.",
 	prompt() {
 		event_prompt("Place the remaining cards at the BOTTOM of your Draw Deck.")
-		if (game.vm.play_one >= 0)
-			view.prompt += ` Will play "${CARDS[game.vm.play_one].name}" for its event.`
 
 		// show cards going at the bottom
 		if (game.active === OPP)
@@ -3230,14 +3244,14 @@ states.vm_place_any_on_bottom_of_draw = {
 			gen_action_card(c)
 
 		if (game.vm.draw.length === 0)
-			gen_action("done")
+			gen_action("next")
 	},
 	card(c) {
 		push_undo()
 		array_remove_item(game.vm.draw, c)
 		game.vm.on_bottom.push(c)
 	},
-	done() {
+	next() {
 		end_vm_place_any_on_top_of_draw()
 	},
 }
@@ -3249,13 +3263,7 @@ function end_vm_place_any_on_top_of_draw() {
 	for (let c of game.vm.on_bottom)
 		player_deck().unshift(c)
 	delete game.vm.draw
-
-	if (game.vm.play_one >= 0) {
-		end_play_card(game.played_card)
-		play_card_event(game.vm.play_one)
-	} else {
-		vm_next()
-	}
+	vm_next()
 }
 
 states.vm_opponent_discard_2_random_draw_2 = {
@@ -4385,7 +4393,8 @@ CODE[110] = [ // Superior Lobbying
 ]
 
 CODE[111] = [ // The Winning Plan
-	[ vm_draw_6_play_1_place_any_on_top_of_draw ],
+	[ vm_draw_6_play_1 ],
+	[ vm_place_any_on_top_of_draw ],
 	[ vm_return ],
 ]
 
