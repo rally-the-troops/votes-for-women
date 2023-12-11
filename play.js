@@ -8,15 +8,14 @@ const SUF_NAME = "Suffragist"
 const OPP_NAME = "Opposition"
 
 const REGION_NAMES = [
-    null,
-    "West",
-    "Plains",
-    "South",
-    "Midwest",
-    "Atlantic & Appalachia",
-    "Northeast"
+	null,
+	"West",
+	"Plains",
+	"South",
+	"Midwest",
+	"Atlantic & Appalachia",
+	"Northeast"
 ]
-
 
 const US_STATES = [
 	null,
@@ -459,7 +458,7 @@ function build_user_interface() {
 		})
 	}
 
-    for (let c = 1; c <= last_card; ++c) {
+	for (let c = 1; c <= last_card; ++c) {
 		elt = ui.cards[c] = create("div", {
 			className: `card card_${c} ${CARDS[c].type}`,
 			my_card: c,
@@ -688,8 +687,6 @@ function layout_cubes(list, xorig, yorig) {
 }
 
 function on_update() { // eslint-disable-line no-unused-vars
-    console.log("VIEW", view)
-
 	switch (player) {
 	case SUF_NAME: ui.favicon.href = "images/badge1.png"; break
 	case OPP_NAME: ui.favicon.href = "images/badge5.png"; break
@@ -736,7 +733,7 @@ function on_update() { // eslint-disable-line no-unused-vars
 	document.getElementById("states_draw").replaceChildren()
 	document.getElementById("strategy_draw").replaceChildren()
 
-    if (view.hand.length) {
+	if (view.hand.length) {
 		document.getElementById("hand_panel").classList.remove("hide")
 		for (let c of view.hand)
 			document.getElementById("hand").appendChild(ui.cards[c])
@@ -876,19 +873,19 @@ function on_update() { // eslint-disable-line no-unused-vars
 	action_button("match", "Match")
 	action_button("supersede", "Supersede")
 
-    action_button("draw", "Draw")
-	action_button("next", "Next")
+	action_button("draw", "Draw")
 	action_button("buttons", "Buttons")
 	action_button("move", "Move")
 	action_button("purple", "Purple")
 	action_button("yellow", "Yellow")
 	action_button("roll", "Roll")
 	action_button("reroll", "Re-roll")
+	action_button("next", "Next")
 	action_button("end_event", "End Event")
 	action_button("next_turn", "Next Turn")
 	action_button("final_voting", "Final Voting")
 
-    action_button("skip", "Skip")
+	action_button("skip", "Skip")
 	action_button("pass", "Pass")
 	action_button("done", "Done")
 	action_button("undo", "Undo")
