@@ -1570,6 +1570,7 @@ states.campaigning = {
 		game.roll = roll_ndx_list(game.count, game.dice, "Re-rolled")
 	},
 	accept() {
+		push_undo()
 		goto_campaigning_assign()
 	}
 }
@@ -1860,6 +1861,7 @@ states.lobbying = {
 		game.roll = roll_ndx_count_success(game.count, game.dice, "Re-rolled")
 	},
 	accept() {
+		push_undo()
 		if (game.roll > 0) {
 			game.count = game.roll
 			if (game.active === SUF) {
