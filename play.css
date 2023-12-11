@@ -189,8 +189,6 @@ section > * {
 .panel {
 	padding: 3px;
 	font-family: TiffanyGothicCC;
-	x-font-variant: small-caps;
-	font-feature-settings: 'smcp';
 	background-color: hsl(43, 52%, 88%);
 	box-shadow: 1px 2px 4px #0004;
 	min-width: fit-content;
@@ -298,8 +296,6 @@ body.Opposition .popup li.action:hover { background-color: var(--opp-25) }
 #mapwrap {
 	width: 1100px;
 	height: 850px;
-	x-border: 1px solid #222;
-	x-margin-top: -1px;
 	box-shadow: 1px 2px 4px #0004;
 }
 
@@ -309,15 +305,6 @@ body.Opposition .popup li.action:hover { background-color: var(--opp-25) }
 	background-color: #f0e7d0;
 	background-image: url(map.webp);
 	background-size: 1100px 850px;
-}
-
-#map-texture {
-	position: absolute;
-	width: 1100px;
-	height: 850px;
-	background-image: url(map-texture.jpg);
-	background-size: 1100px 850px;
-	mix-blend-mode: multiply;
 }
 
 svg {
@@ -496,14 +483,6 @@ div.nineteenth_amendment_score:not(.hide) {
 .piece.red.cube { background-image: url(pieces/iso_red_cube.svg); }
 .piece.yellow.cube { background-image: url(pieces/iso_yellow_cube.svg); }
 .piece.purple.cube { background-image: url(pieces/iso_purple_cube.svg); }
-
-/* 2D CUBES */
-/*
-.piece.cube { width: 14px; height: 14px; border: 1px solid black; }
-.piece.purple.cube { background-color: #6d5798; }
-.piece.yellow.cube { background-color: #fec36d; }
-.piece.red.cube { background-color: #e06136; }
-*/
 
 .piece.turn {
 	width: 30px;
