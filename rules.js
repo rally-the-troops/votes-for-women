@@ -889,7 +889,7 @@ states.strategy_phase = {
 	prompt() {
 		if (game.active ===  SUF) {
 			view.prompt = `Strategy: ${pluralize(game.support_committed, 'button')} committed.`
-			if (game.support_buttons > 0) {
+			if (game.support_buttons > 0 && game.support_committed < game.opposition_buttons + 1) {
 				gen_action("commit_1_button")
 			}
 			gen_action("commit")
@@ -900,16 +900,22 @@ states.strategy_phase = {
 			view.actions.supersede = 0
 			if (game.support_committed > 0) {
 				view.actions.defer = 1
-				view.prompt += ` Defer with 0 buttons.`
+				view.prompt += " Spend 0 to defer"
 			}
 			if (game.opposition_buttons >= game.support_committed) {
 				view.actions.match = 1
-				view.prompt += ` Match with ${pluralize(game.support_committed, 'button')}.`
+				if (view.actions.defer) {
+					view.prompt += ","
+				} else {
+					view.prompt += " Spend"
+				}
+				view.prompt += ` ${game.support_committed} to match`
 			}
 			if (game.opposition_buttons > game.support_committed) {
 				view.actions.supersede = 1
-				view.prompt += ` Supersede with ${pluralize(game.support_committed + 1, 'button')}.`
+				view.prompt += `, ${game.support_committed + 1} to supersede`
 			}
+			view.prompt += '.'
 		}
 	},
 	commit_1_button() {
@@ -922,6 +928,11 @@ states.strategy_phase = {
 		clear_undo()
 		log(`Suffragist committed ${game.support_committed} BM`)
 		game.active = OPP
+		if (!game.support_committed && !game.opposition_buttons) {
+			this.match()
+		} else if (game.support_committed > game.opposition_buttons) {
+			this.defer()
+		}
 	},
 	defer() {
 		log(`Opposition deferred.`)
