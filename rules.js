@@ -2483,12 +2483,13 @@ function vm_draw_2_play_1_event() {
 	clear_undo()
 
 	game.vm.draw = []
-	for (let i = 0; i < 2; ++i) {
+	let draw_count = Math.min(2, player_deck().length)
+	for (let i = 0; i < draw_count; ++i) {
 		let card = draw_card(player_deck())
 		game.vm.draw.push(card)
 	}
 
-	log(`${game.active} drew 2 cards.`)
+	log(`${game.active} drew ${pluralize(draw_count, 'card')}.`)
 	game.state = "vm_draw_2_play_1_event"
 }
 
@@ -3151,7 +3152,8 @@ states.vm_draw_2_play_1_event = {
 		end_play_card(game.played_card)
 
 		let other = game.vm.draw.find(x => x !== c)
-		log(`Discarded C${other}.`)
+		if (other !== undefined)
+			log(`Discarded C${other}.`)
 
 		delete game.vm.draw
 
@@ -3178,7 +3180,7 @@ function init_vm_place_any_on_top_of_draw() {
 		let card = draw_card(player_deck())
 		game.vm.draw.push(card)
 	}
-	log(`${game.active} drew ${draw_count} cards.`)
+	log(`${game.active} drew ${pluralize(draw_count, 'card')}.`)
 }
 
 states.vm_draw_6_play_1 = {
@@ -3289,11 +3291,12 @@ states.vm_opponent_discard_2_random_draw_2 = {
 			log(`Discarded C${c}.`)
 		}
 		// if we could discard less than two, we also draw less than two.
-		for (let i = 0; i < game.selected_cards.length; ++i) {
+		let draw_count = Math.min(game.selected_cards.length, player_deck().length)
+		for (let i = 0; i < draw_count; ++i) {
 			let card = draw_card(player_deck())
 			player_hand().push(card)
 		}
-		log(`${game.active} drew ${pluralize(game.selected_cards.length, 'card')}.`)
+		log(`${game.active} drew ${pluralize(draw_count, 'card')}.`)
 		game.selected_cards = []
 		next_player()
 		vm_next()
@@ -3324,8 +3327,10 @@ states.vm_show_opponents_hand_discard_1_draw_1 = {
 		restore_player_hand()
 		log(`Discarded C${c}.`)
 		array_remove_item(opponent_hand(), c)
-		opponent_hand().push(draw_card(opponent_deck()))
-		log(`${opponent_name()} drew 1 card.`)
+		if (opponent_deck().length) {
+			opponent_hand().push(draw_card(opponent_deck()))
+			log(`${opponent_name()} drew 1 card.`)
+		}
 		vm_next()
 	},
 	skip() {
