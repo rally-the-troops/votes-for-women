@@ -560,17 +560,6 @@ exports.action = function (state, player, action, arg) {
 	return game
 }
 
-exports.resign = function (state, player) {
-	game = state
-	if (game.state !== "game_over") {
-		if (player === SUF)
-			goto_game_over(OPP, "Suffragist resigned.")
-		if (player === OPP)
-			goto_game_over(SUF, "Opposition resigned.")
-	}
-	return game
-}
-
 function goto_game_over(result, victory) {
 	game.state = "game_over"
 	game.active = "None"
