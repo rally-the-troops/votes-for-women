@@ -3224,6 +3224,7 @@ states.vm_place_any_on_top_of_draw = {
 		game.vm.on_top.unshift(c)
 	},
 	next() {
+		push_undo()
 		if (game.vm.draw.length > 0)
 			game.state = "vm_place_any_on_bottom_of_draw"
 		else
