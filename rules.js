@@ -1192,7 +1192,7 @@ function play_card_event(c) {
 	else
 		log_round("Event")
 	log("C" + c)
-	if (has_extra_event_cost())
+	if ((is_support_card(c) || is_opposition_card(c)) && has_extra_event_cost())
 		decrease_player_buttons(1)
 	log_br()
 	goto_event(c)
