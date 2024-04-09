@@ -2464,7 +2464,11 @@ function vm_campaigning_action() {
 
 function vm_counter_strat() {
 	vm_assert_argcount(0)
-	game.state = "vm_counter_strat"
+	if (game.persistent_turn.length) {
+		game.state = "vm_counter_strat"
+	} else {
+		vm_next()
+	}
 }
 
 function vm_draw_2_play_1_event() {
