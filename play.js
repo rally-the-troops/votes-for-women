@@ -503,13 +503,6 @@ function build_user_interface() {
 		create_campaigner('red2', 6),
 	]
 
-	for (let i = 0; i < 190; ++i) {
-		elt = ui.cubes[i] = create("div", {
-			className: `piece cube`,
-			onmousedown: on_click_cube,
-		})
-	}
-
 	for (let i = 0; i < green_check_count; ++i) {
 		elt = ui.green_checks[i] = create("div", {
 			className: `piece yes`,
@@ -826,6 +819,12 @@ function on_update() { // eslint-disable-line no-unused-vars
 	function place_cubes(state_cubes, us_state, count, color) {
 		let others = colors.filter(c => c !== color)
 		for (let c = 0; c < count; ++c) {
+			if (cube_idx >= ui.cubes.length) {
+				ui.cubes[cube_idx] = create("div", {
+					className: `piece cube`,
+					onmousedown: on_click_cube,
+				})
+			}
 			e = ui.cubes[cube_idx++]
 			e.my_us_state = us_state
 			e.my_cube_color = color
